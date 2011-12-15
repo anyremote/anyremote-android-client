@@ -826,6 +826,11 @@ public final class Connection implements Runnable {
 	public Bitmap receiveImage() throws IOException {
 
 		int sz = dis.readInt();
+		anyRemote._log("Connection", "receiveImage size="+sz);
+		if (sz <= 0) {
+			return null;
+		}
+		
 		btoRead -= 4;
 
 		byte[] rgbArray = new byte[sz];

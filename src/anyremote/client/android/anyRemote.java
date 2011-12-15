@@ -456,6 +456,10 @@ public class anyRemote extends Activity {
 
 	public static Bitmap getIconBitmap(Resources resources, String icon) {
 		
+		if (icon.equals("none")) {	
+			return null;
+		}
+		
 		if (iconMap.containsKey(icon)) {
 			return (Bitmap) iconMap.get(icon);
 		}

@@ -92,8 +92,11 @@ public class arActivity extends Activity
 
 	void addMenu(Vector from, Vector to) {   	
 		for (int idx=2;idx<from.size();idx++) {
-			if (to != null) to.add((String) from.elementAt(idx));
-			menuItems.add((String) from.elementAt(idx));
+			String item = (String) from.elementAt(idx);
+			if (item.length() > 0) {
+				if (to != null) to.add((String) from.elementAt(idx));
+				menuItems.add((String) from.elementAt(idx));
+			}
 		}
 	}
 

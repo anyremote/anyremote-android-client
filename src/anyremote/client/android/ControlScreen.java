@@ -91,8 +91,6 @@ public class ControlScreen extends arActivity
    
     static final int NUM_ICONS     = 12;
     static final int NUM_ICONS_BTM = 7;
-
-    int skin = SK_DEFAULT;
     
     boolean fullscreen  = false;
     boolean useJoystick = false;
@@ -208,7 +206,16 @@ public class ControlScreen extends arActivity
     	}
     	
     	int id = (Integer) vR.elementAt(0);
-    
+    	
+	    if (id == Dispatcher.CMD_CLOSE) {
+	    	doFinish("close");
+		 	return;
+	    }
+	    
+	   	if (vR.size() < 2) {
+    		return;
+    	}
+ 
 		switch (id) {
 		
 		    case Dispatcher.CMD_SKIN:
@@ -276,10 +283,6 @@ public class ControlScreen extends arActivity
 				anyRemote.protocol.cfCover = (Bitmap) vR.elementAt(1); 
 			    setCover();
 				break;
-				
-			case Dispatcher.CMD_CLOSE:
-				doFinish("close");
-				break;
 		}
     }
     
@@ -287,7 +290,7 @@ public class ControlScreen extends arActivity
     	//log("setTitleField "+anyRemote.protocol.cfTitle);
     	
     	int id = R.id.cf_title;
-        if (skin == SK_BOTTOMLINE) {
+        if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 	        id = R.id.cf_btitle;
         } 
 	    TextView title = (TextView) findViewById(id);
@@ -301,7 +304,7 @@ public class ControlScreen extends arActivity
     	//log("setStatusField "+anyRemote.protocol.cfStatus);
     	
     	int id = R.id.cf_status;
-        if (skin == SK_BOTTOMLINE) {
+        if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
         	id = R.id.cf_bstatus;
         } 
         TextView status = (TextView) findViewById(id);
@@ -321,7 +324,7 @@ public class ControlScreen extends arActivity
 			setTitle(anyRemote.protocol.cfCaption);
         }
 		
-		int maxIcon = (skin == SK_BOTTOMLINE ?  NUM_ICONS_BTM : NUM_ICONS);
+		int maxIcon = (anyRemote.protocol.cfSkin == SK_BOTTOMLINE ?  NUM_ICONS_BTM : NUM_ICONS);
 		
         for (int idx=2;idx<data.size()-1;idx+=2) {
          	try {
@@ -400,15 +403,15 @@ public class ControlScreen extends arActivity
             i++;
         }
         
-	    int newSkin = skin;
+	    int newSkin = anyRemote.protocol.cfSkin;
 	    if (name.equals("default")) {
         	newSkin = SK_DEFAULT;
         } else if (name.equals("bottomline")) {
         	newSkin = SK_BOTTOMLINE;
          }
 
-	    if (skin  != newSkin) {
-            skin  = newSkin;
+	    if (anyRemote.protocol.cfSkin  != newSkin) {
+            anyRemote.protocol.cfSkin = newSkin;
             setSkin();
  	    }
     }
@@ -418,7 +421,7 @@ public class ControlScreen extends arActivity
 		Display display = getWindowManager().getDefaultDisplay(); 
 		int sz = (display.getWidth() > display.getHeight() ? display.getHeight() : display.getWidth());
 
-		if (skin == SK_BOTTOMLINE) {
+		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 			
 			//log("setSkin SK_BOTTOMLINE");
 			
@@ -486,7 +489,13 @@ public class ControlScreen extends arActivity
 			buttons[11] = (ImageButton) findViewById(R.id.b11);
 			
 			for (int i=0;i<NUM_ICONS;i++) {
-				buttons[i].setImageBitmap(anyRemote.getIconBitmap(getResources(), anyRemote.protocol.cfIcons[i]));
+				
+				Bitmap ic = anyRemote.getIconBitmap(getResources(), anyRemote.protocol.cfIcons[i]);
+				if (ic == null) { // no to squeze
+					ic = anyRemote.getIconBitmap(getResources(), "transparent"); 
+				}
+				
+				buttons[i].setImageBitmap(ic);
 								
 				buttons[i].setVisibility(View.VISIBLE);
 				buttons[i].setOnClickListener(this);
@@ -512,7 +521,7 @@ public class ControlScreen extends arActivity
 		
 		int id = R.id.skin_default;
 		int maxIcon = NUM_ICONS;
-		if (skin == SK_BOTTOMLINE) {
+		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 	        id = R.id.skin_bottomline;
 	        maxIcon = NUM_ICONS_BTM;
 	        
@@ -538,7 +547,7 @@ public class ControlScreen extends arActivity
 		
 		int t = R.id.cf_title;
 		int s = R.id.cf_status;
-		if (skin == SK_BOTTOMLINE) {
+		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 	       t = R.id.cf_btitle;
 	       s = R.id.cf_bstatus;
 		} 		
@@ -551,7 +560,7 @@ public class ControlScreen extends arActivity
 	
 	private void setCover() {
 		
-		if (skin == SK_BOTTOMLINE && anyRemote.protocol.cfCover != null) {
+		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE && anyRemote.protocol.cfCover != null) {
 			ImageView cover  = (ImageView) findViewById(R.id.cover);
 			cover.setImageBitmap(anyRemote.protocol.cfCover);
 		}
@@ -608,7 +617,7 @@ public class ControlScreen extends arActivity
        	
 		int t = R.id.cf_title;
 		int s = R.id.cf_status;
-		if (skin == SK_BOTTOMLINE) {
+		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 	       t = R.id.cf_btitle;
 	       s = R.id.cf_bstatus;
 		} 		
@@ -716,7 +725,7 @@ public class ControlScreen extends arActivity
 			  break;
 			  
 		  case R.id.b3: 
-		  case R.id.bb3: 
+		  case R.id.bb3: skin
 	    	  //key = STR_NUM3;	
 			  btnIdx = 2;
 			  break;
@@ -805,9 +814,11 @@ public class ControlScreen extends arActivity
 			case KeyEvent.KEYCODE_VOLUME_UP:   return "VOL+";
 			case KeyEvent.KEYCODE_VOLUME_DOWN: return "VOL-";
 			case KeyEvent.KEYCODE_DPAD_UP:     
-				    return (useJoystick || skin == SK_BOTTOMLINE ? "UP"   : "");   // do not process them if joystick_only param was set
+				    return (useJoystick || 
+				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? "UP"   : "");   // do not process them if joystick_only param was set
 			case KeyEvent.KEYCODE_DPAD_DOWN:   
-				    return (useJoystick || skin == SK_BOTTOMLINE ? "DOWN" : "");
+				    return (useJoystick || 
+				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? "DOWN" : "");
 			case KeyEvent.KEYCODE_DPAD_LEFT:   
 				    return (useJoystick ? "LEFT" : "");   // do not process them if joystick_only param was set 
 			case KeyEvent.KEYCODE_DPAD_RIGHT:  

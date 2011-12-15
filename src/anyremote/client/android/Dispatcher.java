@@ -114,6 +114,7 @@ public class Dispatcher implements IConnectionListener {
 	// Control Screen stuff
 	Vector<String> cfMenu = new Vector<String>();
 	ControlScreenHandler cfHandler;
+	int    cfSkin;
 	String cfTitle;
 	String cfStatus;
 	String cfCaption;
@@ -171,6 +172,7 @@ public class Dispatcher implements IConnectionListener {
 		for (int i=0;i<ControlScreen.NUM_ICONS;i++) {
 			cfIcons[i] = "default";
 		}
+		cfSkin = ControlScreen.SK_DEFAULT;
 		cfFrgr = anyRemote.parseColor("255","255","255");
 		cfBkgr = anyRemote.parseColor("0",  "0",  "0");		
 		cfTitle   = "";
@@ -520,13 +522,19 @@ public class Dispatcher implements IConnectionListener {
 
 		case CMD_GETICON:
 			String size = (String) cmdTokens.elementAt(1);
-			String icon = (String) cmdTokens.elementAt(2);
-
-			File dir = Environment.getExternalStorageDirectory();
-			File iFile = new File(dir, "Android/data/anyremote.client.android/files/"+icon+".png");
-
-			boolean isExists = iFile.canRead();
-
+			String icon = (String) cmdTokens.elementAt(2);		
+			
+			int iconId = anyRemote.icon2int(icon);
+			
+			boolean isExists = false;
+			if (iconId == R.drawable.icon) {	// no such icon
+				File dir = Environment.getExternalStorageDirectory();
+				File iFile = new File(dir, "Android/data/anyremote.client.android/files/"+icon+".png");
+				isExists = iFile.canRead();
+			} else {
+				isExists = true;
+		    }
+			
 			String resp;
 			if (isExists) {
 				resp = "IconExists("+size+","+icon+")";
