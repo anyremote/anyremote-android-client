@@ -1,0 +1,9 @@
+* Tue Dec 13 2011 Mikhail Fedotov <anyremote at mail.ru> - 0.9.6
+- Fixed performance issues and icon uploading. A lots of 
+  improvements.
+
+* Tue Oct 18 2011 Mikhail Fedotov <anyremote at mail.ru> - 0.9.5
+- Some menu-related fixes. Added Clean Log menu item.
+
+* Tue Sep 20 2011 Mikhail Fedotov <anyremote at mail.ru> - 0.9.4
+- First public vesrsion

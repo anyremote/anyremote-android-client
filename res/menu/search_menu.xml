@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/connect_item" 		android:title="@string/connect_item">	</item>
+	<item android:id="@+id/search_item" 		android:title="@string/search_item">	</item>
+	<item android:id="@+id/autoconnect_item" 	android:title="@string/autoconnect_item"></item>
+	<item android:id="@+id/cancel_search_item" 	android:title="@string/cancel_search_item"></item>
+	<item android:id="@+id/enter_ip_item" 		android:title="@string/enter_ip_item">	</item>
+	<item android:id="@+id/enter_bt_item" 		android:title="@string/enter_bt_item">	</item>
+	<item android:id="@+id/enter_item_name" 	android:title="@string/enter_item_name">	</item>
+	<item android:id="@+id/enter_item_pass"     android:title="@string/enter_item_pass">	</item>
+	<item android:id="@+id/clean_item"   		android:title="@string/clean_item" >	</item>
+	<item android:id="@+id/exit_item"   		android:title="@string/exit_item" android:icon="@drawable/no">	</item>
+	<item android:id="@+id/log_item"   		android:title="@string/log_item">	</item>
+
+</menu>
