@@ -918,8 +918,8 @@ public final class Connection implements Runnable {
 			return Dispatcher.CMD_VIBRATE;
 		} else if (header.equals("Set(volume")) {
 			return Dispatcher.CMD_VOLUME;
-		} else if (header.equals("Set(wait")) {
-			return Dispatcher.CMD_WAIT;
+		} else if (header.equals("Set(popup")) {
+			return Dispatcher.CMD_POPUP;
 		} else if (header.equals("Get(screen_size")) {
 			return Dispatcher.CMD_GETSCRSIZE;
 		} else if (header.equals("Get(model")) {

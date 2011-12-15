@@ -293,24 +293,42 @@ public class arActivity extends Activity
 			anyRemote.protocol.setFullscreen((String) tokens.elementAt(1), this);
 			processed = true;
 			
-		} else if (id == Dispatcher.CMD_WAIT) {
+		} else if (id == Dispatcher.CMD_POPUP) {
 				
-		    showWaitIndicator((String) tokens.elementAt(1));
+		    showPopup(tokens);
 			processed = true;
 		}
 		
 		return processed;
 	}
 	
-	public void showWaitIndicator(String what) {
-		boolean show = false;
-		if (what.equals("yes")) { 
-			show = true;
-		}
-		showWaitIndicator(show);
+	public void dismissPopup() {
+		anyRemote.protocol.popupState = false;
+		anyRemote.protocol.popupMsg.delete(0, anyRemote.protocol.popupMsg.length());
 	}
 	
-	public void showWaitIndicator(boolean show) {
-		anyRemote.waitIndicator(this, show);
+	public void showPopup(Vector tokens) {
+		
+		String op = (String) tokens.elementAt(1);
+		
+		dismissPopup();
+		
+		if (op.equals("show")) { 
+
+			anyRemote.protocol.popupState = true;
+			
+			for (int i=2;i<tokens.size();i++) {
+				if (i != 2) {
+					anyRemote.protocol.popupMsg.append(", ");
+				}
+				anyRemote.protocol.popupMsg.append((String) tokens.elementAt(i));
+			}
+		}
+		
+		popup();
+	}
+	
+	public void popup() {
+		anyRemote.popup(this, anyRemote.protocol.popupState, anyRemote.protocol.popupMsg.toString());
 	}
 }

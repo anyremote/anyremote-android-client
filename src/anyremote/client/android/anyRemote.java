@@ -516,15 +516,15 @@ public class anyRemote extends Activity {
 		return currForm;
 	}
 	
-	public static void waitIndicator(Activity cxt, boolean show) {
-		_log("waitIndicator " + show);
+	public static void popup(Activity cxt, boolean show, String msg) {
+		_log("popup " + show);
 		
 		//cxt.setProgressBarIndeterminateVisibility(show);
 		
 		if (show) {
 			if (waiting == null) {
 				waiting = new ProgressDialog(cxt, ProgressDialog.STYLE_HORIZONTAL);
-				waiting.setMessage("Please wait");
+				waiting.setMessage(msg);
 			}
 			waiting.show();
 		} else {

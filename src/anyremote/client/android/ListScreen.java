@@ -99,15 +99,16 @@ KeyEvent.Callback {
 
 		//list.setBackgroundColor(Color.rgb(0,0,0));
 		
-		showWaitIndicator(anyRemote.protocol.waitState);
+		popup();
 	}
 	
 	@Override
 	protected void onPause() {
 		log("onPause");
-		if (anyRemote.protocol.waitState) { 
-		    showWaitIndicator("no");
-		}
+		
+		dismissPopup();
+		popup();
+		
 		//MainLoop.disable();
 	    super.onPause();	
 	}

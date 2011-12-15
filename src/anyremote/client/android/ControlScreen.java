@@ -135,7 +135,7 @@ public class ControlScreen extends arActivity
 		anyRemote.protocol.setControlScreenHandler(evHandler);
 		anyRemote.protocol.setFullscreen(this);
 		
-		showWaitIndicator(anyRemote.protocol.waitState);
+		popup();
 	}
 	
 	@Override
@@ -146,10 +146,11 @@ public class ControlScreen extends arActivity
 	
 	@Override
 	protected void onPause() {
-		log("onPause");		
-		if (anyRemote.protocol.waitState) { 
-		    showWaitIndicator("no");
-		}
+		log("onPause");	
+		
+		dismissPopup();
+		popup();
+		
 		//MainLoop.disable();
 	    super.onPause();	
 	}

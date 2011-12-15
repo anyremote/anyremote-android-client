@@ -75,7 +75,7 @@ public class Dispatcher implements IConnectionListener {
 	static final int CMD_VIBRATE    = 18;
 	static final int CMD_VOLUME     = 19;
 	static final int CMD_COVER      = 20;
-	static final int CMD_WAIT       = 21;
+	static final int CMD_POPUP      = 21;
 	
 	static final int CMD_GETSCRSIZE = 51;
 	static final int CMD_GETPLTF    = 52;
@@ -143,9 +143,10 @@ public class Dispatcher implements IConnectionListener {
 	// telephony handler
 	PhoneManager phoneManager;
 	
-	// wait state flag
-	boolean waitState = false;
-
+	// Popup stuff
+	boolean popupState     = false;
+    StringBuilder popupMsg = new StringBuilder(16);
+	
 	boolean connectBT = false;
 
 	public Dispatcher(anyRemote ctx) {
@@ -401,13 +402,7 @@ public class Dispatcher implements IConnectionListener {
 			}
 			break; 
 
-		case CMD_WAIT:
-			
-			boolean state = false;
-			if (((String) cmdTokens.elementAt(1)).equals("show")) {
-				state = true;
-			}
-			waitState = state;
+		case CMD_POPUP:
 			
 			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
 				sendToControlScreen(id,cmdTokens,stage);

@@ -90,14 +90,15 @@ public class TextScreen extends arActivity  {
 		callMenuUpdate();
 		setTitle(anyRemote.protocol.textTitle);
 
-		showWaitIndicator(anyRemote.protocol.waitState);
+		popup();
 	}
 	
 	@Override
 	protected void onPause() {
-		if (anyRemote.protocol.waitState) { 
-		    showWaitIndicator("no");
-		}
+		
+		dismissPopup();
+		popup();
+		
 		//MainLoop.disable();
 	    super.onPause();	
 	}
