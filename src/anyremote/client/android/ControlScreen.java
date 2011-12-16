@@ -450,7 +450,6 @@ public class ControlScreen extends arActivity
 					buttons[i].setVisibility(View.GONE);
 				} else {
 					buttons[i].setVisibility(View.VISIBLE);
-				    buttons[i].setAdjustViewBounds(true);
 				    realCnt++;
 				}
 				//buttons[i].setOnTouchListener(this);
@@ -463,10 +462,8 @@ public class ControlScreen extends arActivity
 			}
 			
 			ImageView cover = (ImageView) findViewById(R.id.cover);
-			cover.setAdjustViewBounds(true);
 			cover.setMaxHeight((2*sz)/3);    	
 			cover.setMaxWidth ((2*sz)/3);
-			cover.setScaleType(ScaleType.CENTER_INSIDE);
 			cover.setBackgroundColor(anyRemote.protocol.cfBkgr);
 
 		} else {
@@ -499,7 +496,6 @@ public class ControlScreen extends arActivity
 								
 				buttons[i].setVisibility(View.VISIBLE);
 				buttons[i].setOnClickListener(this);
-				buttons[i].setAdjustViewBounds(true);
 				
 				buttons[i].setMaxHeight(sz/4);    	
 				buttons[i].setMaxWidth (sz/4);

@@ -41,6 +41,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside"
+		        android:adjustViewBounds="true"
 				android:nextFocusRight="@+id/b2"
 				android:nextFocusDown="@+id/b4">
 			</ImageButton>
@@ -49,6 +50,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside"
+		        android:adjustViewBounds="true"
 				android:nextFocusLeft="@+id/b1"
 				android:nextFocusRight="@+id/b3"
 				android:nextFocusDown="@+id/b5">
@@ -58,6 +60,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside" 
+		        android:adjustViewBounds="true"
 				android:nextFocusLeft="@+id/b2"
 				android:nextFocusDown="@+id/b6">
 			</ImageButton>
@@ -73,6 +76,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside" 
+		        android:adjustViewBounds="true"
 				android:nextFocusRight="@+id/b5"
 				android:nextFocusDown="@+id/b7"
 				android:nextFocusUp="@+id/b1"
@@ -82,6 +86,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside" 
+		        android:adjustViewBounds="true"
 				android:nextFocusLeft="@+id/b4"
 				android:nextFocusRight="@+id/b6"
 				android:nextFocusDown="@+id/b8"
@@ -92,6 +97,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside" 
+		        android:adjustViewBounds="true"
 				android:nextFocusLeft="@+id/b5"
 				android:nextFocusDown="@+id/b9"
 				android:nextFocusUp="@+id/b3"
@@ -108,6 +114,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside" 
+		        android:adjustViewBounds="true"
 				android:nextFocusRight="@+id/b8"
 				android:nextFocusDown="@+id/b10"
 				android:nextFocusUp="@+id/b4"
@@ -117,6 +124,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside" 
+		        android:adjustViewBounds="true"
 				android:nextFocusLeft="@+id/b7"
 				android:nextFocusRight="@+id/b9"
 				android:nextFocusDown="@+id/b0"
@@ -127,6 +135,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside" 
+		        android:adjustViewBounds="true"
 				android:nextFocusLeft="@+id/b8"
 				android:nextFocusDown="@+id/b11"
 				android:nextFocusUp="@+id/b6"
@@ -143,6 +152,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside" 
+		        android:adjustViewBounds="true"
 				android:nextFocusRight="@+id/b0"
 				android:nextFocusUp="@+id/b7"
 				></ImageButton>
@@ -151,6 +161,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside" 
+		        android:adjustViewBounds="true"
 				android:nextFocusLeft="@+id/b10"
 				android:nextFocusRight="@+id/b11"
 				android:nextFocusUp="@+id/b8"
@@ -160,6 +171,7 @@
 				android:layout_height="wrap_content" 
 				android:background="@drawable/btn_selector"
 				android:scaleType="centerInside" 
+		        android:adjustViewBounds="true"
 				android:nextFocusLeft="@+id/b0"
 				android:nextFocusUp="@+id/b9"
 				></ImageButton>

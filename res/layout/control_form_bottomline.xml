@@ -3,27 +3,71 @@
 	android:id="@+id/skin_bottomline" android:layout_width="fill_parent"
 	android:layout_height="fill_parent">
 
-	<TextView android:layout_width="fill_parent" android:id="@+id/cf_btitle"
-		android:layout_height="wrap_content" android:ellipsize="marquee"
-		android:editable="false" android:singleLine="true" android:gravity="center_horizontal"
-		android:layout_gravity="center_horizontal|top"
-		android:layout_alignParentTop="true" style="?android:attr/textAppearanceMedium"></TextView>
-
-	<ImageButton android:id="@+id/cover" android:layout_width="fill_parent"
-	    android:gravity="center_horizontal"
+	<TextView android:layout_width="fill_parent" 
+	    android:id="@+id/cf_bdummy_up"
 		android:layout_height="wrap_content" 
-		android:layout_below="@id/cf_btitle"></ImageButton>
+		android:editable="false"
+		android:gravity="center_horizontal" 
+		android:layout_alignParentTop="true"
+		android:singleLine="true" 
+		android:text=""
+		></TextView>
+
+	<TextView android:layout_width="fill_parent" 
+	    android:id="@+id/cf_btitle"
+		android:layout_height="wrap_content" 
+		android:ellipsize="marquee"
+		android:editable="false" 
+		android:singleLine="true" 
+		android:gravity="center_horizontal"
+		android:layout_below="@+id/cf_bdummy_up"
+		style="?android:attr/textAppearanceMedium"
+		></TextView>
+
+	<ImageButton android:id="@+id/cover" 
+	    android:layout_width="fill_parent"
+	    android:gravity="center_horizontal"
+		android:layout_height="wrap_content"
+		android:scaleType="centerInside"
+		android:adjustViewBounds="true"
+		android:layout_centerInParent="true"
+		android:layout_below="@+id/cf_btitle"
+		android:layout_above="@+id/cf_bstatus"
+		></ImageButton>
+
+	<TextView android:layout_width="fill_parent" 
+	    android:id="@+id/cf_bstatus"
+		android:layout_height="wrap_content" 
+		android:ellipsize="marquee"
+		android:gravity="center_horizontal" 
+		android:layout_gravity="center_horizontal"
+		android:layout_above="@+id/cf_bdummy_dn" 
+        style="?android:attr/textAppearanceMedium"
+		></TextView>
+		
+	<TextView android:layout_width="fill_parent" 
+	    android:id="@+id/cf_bdummy_dn"
+		android:layout_height="wrap_content" 
+		android:editable="false"
+		android:gravity="center_horizontal" 
+		android:layout_above="@+id/bicons" 
+		android:singleLine="true" 
+		android:text=""
+		></TextView>
 
 	<LinearLayout android:id="@+id/bicons"
-		android:layout_height="wrap_content" android:orientation="horizontal"
+		android:layout_height="wrap_content" 
+		android:orientation="horizontal"
 		android:layout_gravity="center_horizontal"
-		android:layout_width="fill_parent" android:layout_alignParentBottom="true">
+		android:layout_width="fill_parent" 
+		android:layout_alignParentBottom="true">
 
 		<ImageButton android:id="@+id/bb1" 
 		    android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:background="@drawable/btn_selector"
 			android:scaleType="centerInside"
+			android:adjustViewBounds="true"			
 			android:nextFocusRight="@+id/bb2"
 			></ImageButton>
 		<ImageButton android:id="@+id/bb2" 
@@ -31,6 +75,7 @@
 			android:layout_height="wrap_content"
 			android:background="@drawable/btn_selector"
 			android:scaleType="centerInside"
+		    android:adjustViewBounds="true"
 			android:nextFocusLeft="@+id/bb1"
 			android:nextFocusRight="@+id/bb3"
 			></ImageButton>
@@ -39,6 +84,7 @@
 			android:layout_height="wrap_content"
 			android:background="@drawable/btn_selector"
 			android:scaleType="centerInside"
+		    android:adjustViewBounds="true"
 			android:nextFocusLeft="@+id/bb2"
 			android:nextFocusRight="@+id/bb4"
 			></ImageButton>
@@ -47,6 +93,7 @@
 			android:layout_height="wrap_content"
 			android:background="@drawable/btn_selector"
 			android:scaleType="centerInside"
+		    android:adjustViewBounds="true"
 			android:nextFocusLeft="@+id/bb3"
 			android:nextFocusRight="@+id/bb5"
 			></ImageButton>
@@ -54,6 +101,7 @@
 			android:layout_height="wrap_content"
 			android:background="@drawable/btn_selector"
 			android:scaleType="centerInside"
+		    android:adjustViewBounds="true"
 			android:nextFocusLeft="@+id/bb4"
 			android:nextFocusRight="@+id/bb6"
 			></ImageButton>
@@ -61,19 +109,17 @@
 			android:layout_height="wrap_content"
 			android:background="@drawable/btn_selector"
 			android:scaleType="centerInside"
+		    android:adjustViewBounds="true"
 			android:nextFocusLeft="@+id/bb5"
 			android:nextFocusRight="@+id/bb7"
 			></ImageButton>
 		<ImageButton android:id="@+id/bb7" android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:background="@drawable/btn_selector"
+		    android:adjustViewBounds="true"
 			android:scaleType="centerInside"
 			android:nextFocusLeft="@+id/bb6"
 			></ImageButton>
 	</LinearLayout>
-	<TextView android:layout_width="fill_parent" android:id="@+id/cf_bstatus"
-		android:layout_height="wrap_content" android:ellipsize="marquee"
-		android:gravity="center_horizontal" android:layout_gravity="center_horizontal"
-		android:layout_above="@id/bicons" style="?android:attr/textAppearanceMedium"></TextView>
-
+	
 </RelativeLayout>
