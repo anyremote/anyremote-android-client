@@ -158,6 +158,11 @@ public class ControlScreen extends arActivity
 		log("onResume");		
 		//MainLoop.enable();
 		super.onResume();
+		
+        if (anyRemote.status == anyRemote.DISCONNECTED) {
+        	log("onResume no connection");	
+        	doFinish("");
+        }
 	}
 	
 	@Override

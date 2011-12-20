@@ -76,7 +76,7 @@ public class anyRemote extends Activity {
 
 	int         prevForm;
 	private static int  currForm;
-	int         status;
+	static int         status;
 	static Dispatcher  protocol;
 	Vector<Address>   addressesA;		
 	
@@ -184,41 +184,43 @@ public class anyRemote extends Activity {
 
 		if (currForm == which) {
 			_log("setCurrentView TRY TO SWITCH TO THE SAME FORM ???");
-			return;
 		}
 
-		// finish current form
-		switch (currForm) { 
-		case SEARCH_FORM:
-			_log("[AR] setCurrentView mess SEARCH_FORM with some other");
+		if (currForm != which) {
+			
+			// finish current form
+			switch (currForm) { 
+			case SEARCH_FORM:
+				_log("[AR] setCurrentView mess SEARCH_FORM with some other");
+				break;
+	
+			case CONTROL_FORM:
+				//if (which!=LOG_FORM) {  // already closed if switching to log-form
+				Vector ctokens = new Vector();
+				ctokens.add(Dispatcher.CMD_CLOSE);
+				protocol.sendToControlScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
+				//}
 			break;
-
-		case CONTROL_FORM:
-			//if (which!=LOG_FORM) {  // already closed if switching to log-form
-			Vector ctokens = new Vector();
-			ctokens.add(Dispatcher.CMD_CLOSE);
-			protocol.sendToControlScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
-			//}
-		break;
-
-		case LIST_FORM:
-			Vector ltokens = new Vector();
-			ltokens.add(Dispatcher.CMD_LIST);
-			ltokens.add("close");      	    	
-			protocol.sendToListScreen(Dispatcher.CMD_LIST,ltokens,ProtocolMessage.FULL);
-			break;
-
-		case TEXT_FORM:
-			Vector ttokens = new Vector();
-			ttokens.add(Dispatcher.CMD_TEXT);
-			ttokens.add("close");      	    	
-			protocol.sendToTextScreen(Dispatcher.CMD_TEXT,ttokens,ProtocolMessage.FULL);
-			break;
-
-		case LOG_FORM:
-		case DUMMY_FORM:
-			break;
-
+	
+			case LIST_FORM:
+				Vector ltokens = new Vector();
+				ltokens.add(Dispatcher.CMD_LIST);
+				ltokens.add("close");      	    	
+				protocol.sendToListScreen(Dispatcher.CMD_LIST,ltokens,ProtocolMessage.FULL);
+				break;
+	
+			case TEXT_FORM:
+				Vector ttokens = new Vector();
+				ttokens.add(Dispatcher.CMD_TEXT);
+				ttokens.add("close");      	    	
+				protocol.sendToTextScreen(Dispatcher.CMD_TEXT,ttokens,ProtocolMessage.FULL);
+				break;
+	
+			case LOG_FORM:
+			case DUMMY_FORM:
+				break;
+	
+			}
 		}
 
 		prevForm = currForm;
@@ -226,28 +228,33 @@ public class anyRemote extends Activity {
 
 		switch (which) { 
 		case SEARCH_FORM:
+			_log("setCurrentView start SearchForm");
 			final Intent doSearch = new Intent(getBaseContext(), SearchForm.class);
 			startActivityForResult(doSearch, which); 
 			break;
 
 		case CONTROL_FORM:
+			_log("setCurrentView start ControlScreen");
 			final Intent control = new Intent(getBaseContext(), ControlScreen.class);
 			startActivityForResult(control, which); 
 			break;
 
 		case LIST_FORM:
+			_log("setCurrentView start ListScreen");
 			final Intent showList = new Intent(getBaseContext(), ListScreen.class);
 			showList.putExtra("SUBID", subCommand);
 			startActivityForResult(showList, which); 
 			break;
 
 		case TEXT_FORM:
+			_log("setCurrentView start TextScreen");
 			final Intent showText = new Intent(getBaseContext(), TextScreen.class);
 			showText.putExtra("SUBID", subCommand);
 			startActivityForResult(showText, which); 
 			break;
 
 		case LOG_FORM:
+			_log("setCurrentView start TextScreen (LOG)");
 			final Intent showLog = new Intent(getBaseContext(), TextScreen.class);
 			showLog.putExtra("SUBID", "__LOG__");
 			startActivityForResult(showLog, which); 
@@ -409,7 +416,7 @@ public class anyRemote extends Activity {
 			protocol.closeCurrentScreen(currForm);
 			
 			if (currForm != NO_FORM) {   // this happens on exit
-			    currForm = CONTROL_FORM;  // trick
+			    currForm = DUMMY_FORM;  // trick
 			}
 			setCurrentView(SEARCH_FORM,"");
 			break;

@@ -117,7 +117,12 @@ KeyEvent.Callback {
 	protected void onResume() {
 		log("onResume");
 		//MainLoop.enable();
-		super.onResume();				
+		super.onResume();	
+		
+        if (anyRemote.status == anyRemote.DISCONNECTED) {
+        	log("onResume no connection");	
+        	doFinish("");
+        }
 	}
 
 	@Override
@@ -174,6 +179,7 @@ KeyEvent.Callback {
 		intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);
 
 		setResult(RESULT_OK, intent);
+		log("doFinish finish");
 		finish();  	
 	}
 

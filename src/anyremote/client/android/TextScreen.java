@@ -95,6 +95,7 @@ public class TextScreen extends arActivity  {
 	
 	@Override
 	protected void onPause() {
+		log("onPause");
 		
 		dismissPopup();
 		popup();
@@ -107,7 +108,12 @@ public class TextScreen extends arActivity  {
 	protected void onResume() {
 		log("onResume");
 		//MainLoop.enable();
-		super.onResume();				
+		super.onResume();
+		
+        if (anyRemote.status == anyRemote.DISCONNECTED) {
+        	log("onResume no connection");
+        	doFinish("");
+        }
 	}
 
 	// Handle long-click
@@ -145,6 +151,9 @@ public class TextScreen extends arActivity  {
 		}
 
 		setResult(RESULT_OK, intent);
+		if (!isLog) {
+			log("doFinish finish");
+		}
 		finish();  	
 	}
 
