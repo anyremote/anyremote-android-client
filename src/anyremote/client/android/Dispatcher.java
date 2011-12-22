@@ -119,6 +119,9 @@ public class Dispatcher implements IConnectionListener {
 	String cfStatus;
 	String cfCaption;
 	String [] cfIcons;
+	String cfUpEvent;
+	String cfDownEvent;
+	int    cfInitFocus;
 	int    cfFrgr;
 	int    cfBkgr;
 	Bitmap cfCover;
@@ -173,6 +176,9 @@ public class Dispatcher implements IConnectionListener {
 			cfIcons[i] = "default";
 		}
 		cfSkin = ControlScreen.SK_DEFAULT;
+		cfUpEvent   = "UP";
+		cfDownEvent = "DOWN";
+		cfInitFocus = 5;
 		cfFrgr = anyRemote.parseColor("255","255","255");
 		cfBkgr = anyRemote.parseColor("0",  "0",  "0");		
 		cfTitle   = "";

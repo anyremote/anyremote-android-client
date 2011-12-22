@@ -353,7 +353,10 @@ public class ControlScreen extends arActivity
         //boolean newVolume = false;
     	//int     newSize   = icSize;
         
-        useJoystick = true;
+        useJoystick = false;
+        anyRemote.protocol.cfUpEvent   = "UP";
+        anyRemote.protocol.cfDownEvent = "DOWN";
+        anyRemote.protocol.cfInitFocus = 5;
 
         boolean oneMore = false;
         
@@ -363,8 +366,9 @@ public class ControlScreen extends arActivity
                 
     		if (oneMore) {
         		try {
-        			//newCur = btn2int(oneParam);
+        			anyRemote.protocol.cfInitFocus = btn2int(oneParam);
                 } catch (NumberFormatException e) {
+                	anyRemote.protocol.cfInitFocus = -1;
  	            }
                 	
                 oneMore = false;
@@ -393,16 +397,16 @@ public class ControlScreen extends arActivity
     		} else if (oneParam.equals("split")) {
 	            //newSplit = true;
     		} else if (oneParam.equals("choose")) {
-		        //oneMore = true;
+		        oneMore = true;
     		} else if (oneParam.equals("up")) {
                 i++;
                 if (i<vR.size()) {
-                    //upEvent = (String) vR.elementAt(i);
+                    anyRemote.protocol.cfUpEvent = (String) vR.elementAt(i);
                 }
     		} else if (oneParam.equals("down")) {
                 i++;
                 if (i<vR.size()) {
-                	//downEvent = (String) vR.elementAt(i);
+                	anyRemote.protocol.cfDownEvent = (String) vR.elementAt(i);
                 }
     		} 
             i++;
@@ -470,7 +474,11 @@ public class ControlScreen extends arActivity
 			cover.setMaxHeight((2*sz)/3);    	
 			cover.setMaxWidth ((2*sz)/3);
 			cover.setBackgroundColor(anyRemote.protocol.cfBkgr);
-
+			
+			if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
+				buttons[anyRemote.protocol.cfInitFocus-1].requestFocus();
+				buttons[anyRemote.protocol.cfInitFocus-1].requestFocusFromTouch();
+			}
 		} else {
 			
 			//log("setSkin SK_DEFAULT");
@@ -504,6 +512,10 @@ public class ControlScreen extends arActivity
 				
 				buttons[i].setMaxHeight(sz/4);    	
 				buttons[i].setMaxWidth (sz/4);
+			}
+			if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
+				buttons[anyRemote.protocol.cfInitFocus-1].requestFocus();
+				buttons[anyRemote.protocol.cfInitFocus-1].requestFocusFromTouch();
 			}
 		}
 	}
@@ -816,10 +828,12 @@ public class ControlScreen extends arActivity
 			case KeyEvent.KEYCODE_VOLUME_DOWN: return "VOL-";
 			case KeyEvent.KEYCODE_DPAD_UP:     
 				    return (useJoystick || 
-				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? "UP"   : "");   // do not process them if joystick_only param was set
+				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? 
+				    				 anyRemote.protocol.cfUpEvent : "");   // do not process them if joystick_only param was set
 			case KeyEvent.KEYCODE_DPAD_DOWN:   
 				    return (useJoystick || 
-				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? "DOWN" : "");
+				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? 
+				    				anyRemote.protocol.cfDownEvent : "");
 			case KeyEvent.KEYCODE_DPAD_LEFT:   
 				    return (useJoystick ? "LEFT" : "");   // do not process them if joystick_only param was set 
 			case KeyEvent.KEYCODE_DPAD_RIGHT:  
