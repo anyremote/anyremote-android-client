@@ -79,8 +79,7 @@ KeyEvent.Callback {
 
 		defMenu.add("Back");
 
-		evHandler = new ListHandler(this);
-		anyRemote.protocol.setListHandler(evHandler);
+		anyRemote.protocol.listHandler = new ListHandler(this);
 		anyRemote.protocol.setFullscreen(this);
 
 		setContentView(R.layout.list_form);
@@ -169,11 +168,12 @@ KeyEvent.Callback {
 		return super.onContextItemSelected(item);
 	}
 
-	private void doFinish(String action) {
+	@Override
+	protected void doFinish(String action) {
 
 		log("doFinish");
 
-		anyRemote.protocol.setListHandler(null);
+		anyRemote.protocol.listHandler = null;
 
 		final Intent intent = new Intent();  
 		intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);
@@ -255,7 +255,7 @@ KeyEvent.Callback {
 	public void handleEvent(ProtocolMessage data) {
 
 		log("handleEvent "+" "+data.stage+" "+ data.tokens);
-		
+	
 		if (data.tokens.size() == 0) {
 			return;
 		}

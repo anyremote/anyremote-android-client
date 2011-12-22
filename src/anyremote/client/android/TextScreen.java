@@ -43,7 +43,6 @@ public class TextScreen extends arActivity  {
 
 	String      title;
 	TextView    text;
-	TextHandler evHandler; 	
 	boolean isLog = false;
 
 	Vector<String> defMenu = new Vector<String>();
@@ -72,8 +71,7 @@ public class TextScreen extends arActivity  {
 			prefix = "Log"; // log stuff
 			isLog = true;
 		} else {
-			evHandler = new TextHandler(this);
-			anyRemote.protocol.setTextHandler(evHandler);
+			anyRemote.protocol.textHandler = new TextHandler(this);
 			anyRemote.protocol.setFullscreen(this);
 
 			registerForContextMenu(text);
@@ -135,13 +133,15 @@ public class TextScreen extends arActivity  {
 	public boolean onContextItemSelected(MenuItem item) {
 		commandAction(item.getTitle().toString());  	
 		return super.onContextItemSelected(item);
-	}
-
-	private void doFinish(String action) {
+	}	
+	
+	
+	@Override
+	protected void doFinish(String action) {
 
 		final Intent intent = new Intent();  
 		intent.putExtra(anyRemote.ACTION, action);	    
-		anyRemote.protocol.setTextHandler(null);
+		anyRemote.protocol.textHandler = null;
 
 		if (isLog) {
 			intent.putExtra(anyRemote.SWITCHTO, anyRemote.NO_FORM);		

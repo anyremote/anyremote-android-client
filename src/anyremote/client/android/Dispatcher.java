@@ -113,7 +113,7 @@ public class Dispatcher implements IConnectionListener {
 
 	// Control Screen stuff
 	Vector<String> cfMenu = new Vector<String>();
-	ControlScreenHandler cfHandler;
+	ControlScreenHandler cfHandler = null;
 	int    cfSkin;
 	String cfTitle;
 	String cfStatus;
@@ -137,7 +137,7 @@ public class Dispatcher implements IConnectionListener {
 	// Text Screen stuff
 	String textTitle;
 	Vector<String> textMenu = new Vector<String>();
-	TextHandler textHandler;
+	TextHandler textHandler = null;
 	String      textContent;
 	int         textFrgr;
 	int         textBkgr;
@@ -383,6 +383,15 @@ public class Dispatcher implements IConnectionListener {
 
 			// Create activity with (possibly) empty list
 			if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
+				
+				if (((String) cmdTokens.elementAt(1)).equals("close")) { 
+					if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
+						listContent.clear();
+					}
+					context.setCurrentView(anyRemote.CONTROL_FORM, "");
+					return;
+				}
+
 				sendToListScreen(id,cmdTokens,stage);
 			} else {
 				if (((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
@@ -436,6 +445,15 @@ public class Dispatcher implements IConnectionListener {
 
 			// Create activity with (possibly) empty list
 			if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
+				if (((String) cmdTokens.elementAt(1)).equals("close")) { 
+					if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
+						listContent.clear();
+					}
+					
+					context.setCurrentView(anyRemote.CONTROL_FORM, "");
+					return;
+				}
+
 				sendToTextScreen(id,cmdTokens,stage);
 			} else {
 				if (((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
@@ -568,7 +586,7 @@ public class Dispatcher implements IConnectionListener {
 		//log("sendToControlScreen "+id);
 		int num = 0;
 		while (cfHandler == null) {
-			log("sendToControlScreen handler not set");
+			log("sendToControlScreen handler not set "+cmdTokens);
 
 			// do not close closed control form
 			if (cmdTokens.size() > 0 && ((Integer) cmdTokens.elementAt(0)) == CMD_CLOSE) {  // skip
@@ -580,7 +598,10 @@ public class Dispatcher implements IConnectionListener {
 			} catch(Exception e) {
 				Thread.yield();
 			}
-			if (num>8) return;
+			if (num>8) {
+				log("sendToControlScreen SKIP EVENT");
+				return;
+			}
 			num++;
 		}
 		ProtocolMessage pm = new ProtocolMessage();
@@ -595,7 +616,7 @@ public class Dispatcher implements IConnectionListener {
 		//log("sendToListScreen "+id);
 		int num = 0;
 		while (listHandler == null) {
-			log("sendToListScreen handler not set");
+			log("sendToListScreen handler not set "+cmdTokens);
 
 			// do not close closed list
 			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
@@ -610,7 +631,10 @@ public class Dispatcher implements IConnectionListener {
 			} catch(Exception e) {
 				Thread.yield();
 			}
-			if (num>8) return;
+			if (num>8) {
+				log("sendToListScreen SKIP EVENT");
+				return;
+			}
 			num++;
 		}
 		ProtocolMessage pm = new ProtocolMessage();
@@ -625,7 +649,7 @@ public class Dispatcher implements IConnectionListener {
 		//log("sendToTextScreen "+id);
 		int num = 0;
 		while (textHandler == null) {
-			log("sendToTextScreen handler not set");
+			log("sendToTextScreen handler not set "+cmdTokens);
 			// do not close closed test
 			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
 				if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
@@ -639,7 +663,10 @@ public class Dispatcher implements IConnectionListener {
 			} catch(Exception e) {
 				Thread.yield();
 			}
-			if (num>8) return;
+			if (num>8) {
+				log("sendToTextScreen SKIP EVENT");
+				return;
+			}
 			num++;
 		}
 		ProtocolMessage pm = new ProtocolMessage();
@@ -792,21 +819,6 @@ public class Dispatcher implements IConnectionListener {
 
 	public void clearHandlers(){
 		handlers.clear();
-	}
-
-	public void setListHandler(ListHandler evHandler) {
-		//log("setListHandler "+(evHandler==null?"reset":"set"));
-		listHandler = evHandler; 	
-	}
-
-	public void setTextHandler(TextHandler evHandler) {
-		//log("setTextHandler "+(evHandler==null?"reset":"set"));
-		textHandler = evHandler; 	
-	}
-
-	public void setControlScreenHandler(ControlScreenHandler evHandler) {
-		//log("setControlScreenHandler "+(evHandler==null?"reset":"set"));
-		cfHandler = evHandler; 	
 	}
 
 	public void setFullscreen(String option, arActivity act) {

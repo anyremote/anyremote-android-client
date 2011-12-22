@@ -273,7 +273,13 @@ public class arActivity extends Activity
 		
 		boolean processed = false;
 		
-		if (id == Dispatcher.CMD_MENU) {
+        if (id == Dispatcher.CMD_CLOSE) {
+        	
+        	log("handleCommonCommand CMD_CLOSE");
+  			doFinish("close");
+  			processed = true;
+  			
+  		} if (id == Dispatcher.CMD_MENU) {
 			
 			processMenu(tokens);
 			processed = true;
@@ -303,6 +309,10 @@ public class arActivity extends Activity
 		}
 		
 		return processed;
+	}
+
+	protected void doFinish(String reason) {
+		log("doFinish "+reason);	
 	}
 	
 	public void dismissPopup() {

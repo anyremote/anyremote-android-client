@@ -83,8 +83,6 @@ public class ControlScreen extends arActivity
 	static final String STR_NUM0  = "0";
 	static final String STR_POUND = "#";
 	static final String STR_UNKNOWN = "";
-
-	ControlScreenHandler evHandler; 
 	
 	static final int SK_DEFAULT    = 0;
     static final int SK_BOTTOMLINE = 1;
@@ -129,8 +127,7 @@ public class ControlScreen extends arActivity
 	    //TextView title2 = (TextView) findViewById(R.id.cf_btitle);
 	    //title2.setMovementMethod(new ScrollingMovementMethod());
 
-		evHandler = new ControlScreenHandler(this);
-		anyRemote.protocol.setControlScreenHandler(evHandler);
+	    anyRemote.protocol.cfHandler = new ControlScreenHandler(this);
 		anyRemote.protocol.setFullscreen(this);
 		
 		popup();
@@ -196,11 +193,7 @@ public class ControlScreen extends arActivity
 			return;
 		}
 	    
-        if (id == Dispatcher.CMD_CLOSE) {
-  			doFinish("close");
-  		} else {
-			processData(data.tokens);
-		}
+        processData(data.tokens);
     }
 
     public void processData(Vector vR) {
@@ -933,11 +926,12 @@ public class ControlScreen extends arActivity
         }
     }
 	
-   private void doFinish(String action) {
+	@Override
+	protected void doFinish(String action) {
     	
     	log("doFinish "+action);
  
-    	anyRemote.protocol.setControlScreenHandler(null);
+    	anyRemote.protocol.cfHandler = null;
     	
 	    final Intent intent = new Intent();  
 	    intent.putExtra(anyRemote.ACTION, action);

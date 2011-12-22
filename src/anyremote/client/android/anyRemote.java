@@ -188,6 +188,8 @@ public class anyRemote extends Activity {
 
 		if (currForm != which) {
 			
+			Vector ctokens;
+			
 			// finish current form
 			switch (currForm) { 
 			case SEARCH_FORM:
@@ -195,25 +197,21 @@ public class anyRemote extends Activity {
 				break;
 	
 			case CONTROL_FORM:
-				//if (which!=LOG_FORM) {  // already closed if switching to log-form
-				Vector ctokens = new Vector();
+				ctokens = new Vector();
 				ctokens.add(Dispatcher.CMD_CLOSE);
 				protocol.sendToControlScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
-				//}
 			break;
 	
 			case LIST_FORM:
-				Vector ltokens = new Vector();
-				ltokens.add(Dispatcher.CMD_LIST);
-				ltokens.add("close");      	    	
-				protocol.sendToListScreen(Dispatcher.CMD_LIST,ltokens,ProtocolMessage.FULL);
+				ctokens = new Vector();
+				ctokens.add(Dispatcher.CMD_CLOSE);
+				protocol.sendToListScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
 				break;
 	
 			case TEXT_FORM:
-				Vector ttokens = new Vector();
-				ttokens.add(Dispatcher.CMD_TEXT);
-				ttokens.add("close");      	    	
-				protocol.sendToTextScreen(Dispatcher.CMD_TEXT,ttokens,ProtocolMessage.FULL);
+				ctokens = new Vector();
+				ctokens.add(Dispatcher.CMD_CLOSE);
+				protocol.sendToTextScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
 				break;
 	
 			case LOG_FORM:
