@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import anyremote.client.android.R;
 
 public class arActivity extends Activity 
@@ -51,7 +52,23 @@ public class arActivity extends Activity
 		anyRemote._log(prefix,msg);
 	}
 
-	Vector<String> getMenu() {
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+     	menu.clear();
+    	return true;
+    }
+	 
+    @Override
+	public boolean onPrepareOptionsMenu(Menu menu) { 
+    	menu.clear();
+			      
+	    for(int i = 0;i<menuItems.size();i++) {
+		    menu.add(menuItems.elementAt(i));
+	    }
+  		return true;
+	}
+
+    Vector<String> getMenu() {
 		return menuItems;
 	}
 
@@ -268,6 +285,7 @@ public class arActivity extends Activity
 	//	Get(pass)
 	//  Set(fullscreen,...)
 	//  Set(wait,...)
+	//  Set(*,close)
 	//
 	public boolean handleCommonCommand(int id, Vector tokens) {
 		

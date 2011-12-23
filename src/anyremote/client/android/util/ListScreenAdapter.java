@@ -45,6 +45,7 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 	private boolean customBackColor = false;	
 	private int textColor = -1; //Color.rgb(255,255,255);
 	private int backColor = -1; //Color.rgb(0,0,0);
+	private float fSize   = -1;
 		
 	public ListScreenAdapter(Context context, int textViewResourceId, ArrayList<ListItem> items) {
 		super(context, textViewResourceId, items);
@@ -54,6 +55,7 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 	
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+ 
       	final View v;
     	if (convertView == null) {
     		LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -87,7 +89,10 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 
     	
     	txt.setText(items.get(position).text);
-    	if (customTextColor && customBackColor) {
+    	if (fSize > 0) {
+ 	        txt.setTextSize(fSize);
+	    }
+      	if (customTextColor && customBackColor) {
     	    txt.setBackgroundColor(bColor);
             txt.setTextColor(tColor);
     	}
@@ -95,8 +100,8 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
     	return v;
     }
     
-    public void setFont(int size) {
-	    
+    public void setFont(float size) {
+    	fSize = size;
 	}
    
     public void setSelectedPosition(int position) {

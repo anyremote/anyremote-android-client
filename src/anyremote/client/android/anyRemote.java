@@ -78,7 +78,8 @@ public class anyRemote extends Activity {
 	private static int  currForm;
 	static int         status;
 	static Dispatcher  protocol;
-	Vector<Address>   addressesA;		
+	Vector<Address>    addressesA;
+	public static boolean  finishFlag = false;
 	
 	private static TreeMap iconMap = new TreeMap(); //String.CASE_INSENSITIVE_ORDER);
 
@@ -119,15 +120,18 @@ public class anyRemote extends Activity {
 		protocol.addHandler(viewHandler);
 
 		MainLoop.enable();
-
+		
+		currForm = DUMMY_FORM;
 		status = DISCONNECTED;
-		setCurrentView(SEARCH_FORM,"");
 	}          
 
 	@Override
 	protected void onStart() {
 		_log("onStart "+currForm);		
 		super.onStart();
+		
+		finishFlag = false;
+		setCurrentView(SEARCH_FORM,"");
 	}
 	
 	@Override
@@ -156,7 +160,8 @@ public class anyRemote extends Activity {
 		_log("onDestroy");
 
 		super.onDestroy();
-
+		
+		finishFlag = true;
 		setCurrentView(NO_FORM,"");
 		status = DISCONNECTED;
 		protocol.disconnect(true);
@@ -178,37 +183,46 @@ public class anyRemote extends Activity {
 	//}
 
 	public void setCurrentView(int which, String subCommand) {
-		_log("setCurrentView " + which + " (was " + currForm + ") sc="+subCommand);
+		_log("setCurrentView " + which + " (was " + currForm + ") finish="+finishFlag);
 
-		if (currForm == NO_FORM) return; // on destroy
+		if (finishFlag == true) return; // on destroy
 
 		if (currForm == which) {
 			_log("setCurrentView TRY TO SWITCH TO THE SAME FORM ???");
+			if (currForm == SEARCH_FORM) {
+				return;
+			}
 		}
+		
+		prevForm = currForm;
+		currForm = which;
 
-		if (currForm != which) {
+		if (currForm != prevForm) {
 			
 			Vector ctokens;
 			
 			// finish current form
-			switch (currForm) { 
+			switch (prevForm) { 
 			case SEARCH_FORM:
 				_log("[AR] setCurrentView mess SEARCH_FORM with some other");
 				break;
 	
 			case CONTROL_FORM:
+				_log("setCurrentView stop ControlScreen");
 				ctokens = new Vector();
 				ctokens.add(Dispatcher.CMD_CLOSE);
 				protocol.sendToControlScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
 			break;
 	
 			case LIST_FORM:
+				_log("setCurrentView stop ListScreen");
 				ctokens = new Vector();
 				ctokens.add(Dispatcher.CMD_CLOSE);
 				protocol.sendToListScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
 				break;
 	
 			case TEXT_FORM:
+				_log("setCurrentView stop TextScreen");
 				ctokens = new Vector();
 				ctokens.add(Dispatcher.CMD_CLOSE);
 				protocol.sendToTextScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
@@ -221,10 +235,7 @@ public class anyRemote extends Activity {
 			}
 		}
 
-		prevForm = currForm;
-		currForm = which;
-
-		switch (which) { 
+		switch (currForm) { 
 		case SEARCH_FORM:
 			_log("setCurrentView start SearchForm");
 			final Intent doSearch = new Intent(getBaseContext(), SearchForm.class);
@@ -240,7 +251,6 @@ public class anyRemote extends Activity {
 		case LIST_FORM:
 			_log("setCurrentView start ListScreen");
 			final Intent showList = new Intent(getBaseContext(), ListScreen.class);
-			showList.putExtra("SUBID", subCommand);
 			startActivityForResult(showList, which); 
 			break;
 
@@ -381,6 +391,7 @@ public class anyRemote extends Activity {
 			return true;
 
 		case R.id.exit_main:
+			finishFlag = true;
 			setCurrentView(NO_FORM,"");
 			protocol.disconnect(true);
 			finish();
@@ -411,9 +422,9 @@ public class anyRemote extends Activity {
 		case DISCONNECTED:
 			_log("handleEvent: Connection lost");
 			status = DISCONNECTED;
-			protocol.closeCurrentScreen(currForm);
+			//protocol.closeCurrentScreen(currForm);
 			
-			if (currForm != NO_FORM) {   // this happens on exit
+			if (!finishFlag) {   // this happens on exit
 			    currForm = DUMMY_FORM;  // trick
 			}
 			setCurrentView(SEARCH_FORM,"");
@@ -516,6 +527,7 @@ public class anyRemote extends Activity {
 	void doExit() {
 		// how to do exit ?
 		_log("doExit");
+		finishFlag = true;
 		setCurrentView(NO_FORM, "");
 		protocol.disconnect(true);
 		super.onBackPressed();

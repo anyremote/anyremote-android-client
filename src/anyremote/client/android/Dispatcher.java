@@ -96,9 +96,9 @@ public class Dispatcher implements IConnectionListener {
 
 	static final int  CMD_CLOSE  = 110;
 
-	static final int SIZE_SMALL    = 10;
-	static final int SIZE_MEDIUM   = 15;
-	static final int SIZE_LARGE    = 25;
+	static final int SIZE_SMALL    = 12;
+	static final int SIZE_MEDIUM   = 22;
+	static final int SIZE_LARGE    = 36;
 
 	ArrayList<Handler> handlers;
 
@@ -113,7 +113,7 @@ public class Dispatcher implements IConnectionListener {
 
 	// Control Screen stuff
 	Vector<String> cfMenu = new Vector<String>();
-	ControlScreenHandler cfHandler = null;
+	ArrayList<ControlScreenHandler> cfHandlers = new ArrayList<ControlScreenHandler>();	
 	int    cfSkin;
 	String cfTitle;
 	String cfStatus;
@@ -130,14 +130,21 @@ public class Dispatcher implements IConnectionListener {
 
 	// List Screen stuff
 	String listTitle;
+	int    listSelectPos = -1;
 	Vector<String> listMenu = new Vector<String>();
-	ListHandler listHandler = null;
+	ArrayList<ListHandler> listHandlers = new ArrayList<ListHandler>();
 	ArrayList<ListItem> listContent = null;
+	boolean listCustomBackColor = false;
+	boolean listCustomTextColor = false;
+	int     listText;
+	int     listBkgr;
+	float   listFSize;
+	StringBuilder  listBufferedItem;
 
 	// Text Screen stuff
 	String textTitle;
 	Vector<String> textMenu = new Vector<String>();
-	TextHandler textHandler = null;
+	ArrayList<TextHandler> textHandlers = new ArrayList<TextHandler>();
 	String      textContent;
 	int         textFrgr;
 	int         textBkgr;
@@ -162,6 +169,7 @@ public class Dispatcher implements IConnectionListener {
 
 		listContent = new ArrayList<ListItem>();
 		cfIcons     = new String[ControlScreen.NUM_ICONS];
+		listBufferedItem = new StringBuilder();
 		
 		setDefValues();
 		
@@ -187,12 +195,23 @@ public class Dispatcher implements IConnectionListener {
 		cfCover = null;
 		cfFSize = SIZE_MEDIUM;
 		cfTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
+		cfMenu.clear();
+		
+		listTitle     = "";
+		listSelectPos = -1;
+		listCustomBackColor = false;
+		listCustomTextColor = false;
+		listContent.clear(); 
+		listFSize = -1;
+		listMenu.clear();
+		listBufferedItem.delete(0, listBufferedItem.length());
 
 		textFrgr = anyRemote.parseColor("255","255","255");
 		textBkgr = anyRemote.parseColor("0",  "0",  "0");
 		textContent = "";
 		textFSize = SIZE_MEDIUM;
 		textTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
+		textMenu.clear();
 		
 		autoPass  = false;
 	}
@@ -380,30 +399,32 @@ public class Dispatcher implements IConnectionListener {
 
 		case CMD_ICONLIST:
 		case CMD_LIST:
-
+            
+			// setup List Screen activity persistent data			
+			if (anyRemote.getCurScreen() != anyRemote.LIST_FORM) {
+				// by default do not change system colors
+				listCustomBackColor = false;
+				listCustomTextColor = false;
+			}
+			
+			boolean needUpdateDataSource = listDataProcess(cmdTokens, stage); 
+			
+			if (((String) cmdTokens.elementAt(1)).equals("close")) { 
+				// Close List Activity (even it was not started ;-)) and open ControlForm
+				context.setCurrentView(anyRemote.CONTROL_FORM, "");
+				return;
+			}
+		
 			// Create activity with (possibly) empty list
-			if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-				
-				if (((String) cmdTokens.elementAt(1)).equals("close")) { 
-					if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-						listContent.clear();
-					}
-					context.setCurrentView(anyRemote.CONTROL_FORM, "");
-					return;
-				}
-
-				sendToListScreen(id,cmdTokens,stage);
-			} else {
-				if (((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
-					if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-						listContent.clear();
-					}
-					return;
-				}
-				// Start list screen activity and transfer data
-				context.setCurrentView(anyRemote.LIST_FORM, (String) cmdTokens.get(1));
-				sendToListScreen(id,cmdTokens,stage);
-			}			
+			if (anyRemote.getCurScreen() != anyRemote.LIST_FORM) {
+				context.setCurrentView(anyRemote.LIST_FORM, "");
+			}
+			
+			Vector data = new Vector();
+			data.add(id);
+			data.add(needUpdateDataSource);
+			
+			sendToListScreen(id,data,stage);		
 			break;  
 
 		case CMD_MENU:
@@ -573,19 +594,21 @@ public class Dispatcher implements IConnectionListener {
 		}
 	}
 
-	void closeCurrentScreen(int screen) {
+	/*void closeCurrentScreen(int screen) {
 		if (screen == anyRemote.LIST_FORM) {
 			Vector tokens = new Vector();
 			tokens.add(screen);
 			tokens.add("close");
 			sendToListScreen(CMD_LIST,tokens,ProtocolMessage.FULL);
 		}
-	}
+	}*/
 
 	public void sendToControlScreen(int id, Vector cmdTokens, int stage) {
 		//log("sendToControlScreen "+id);
 		int num = 0;
-		while (cfHandler == null) {
+		
+		//while (cfHandler == null) {
+		while (cfHandlers.size() == 0) {
 			log("sendToControlScreen handler not set "+cmdTokens);
 
 			// do not close closed control form
@@ -607,24 +630,29 @@ public class Dispatcher implements IConnectionListener {
 		ProtocolMessage pm = new ProtocolMessage();
 		pm.tokens = cmdTokens;
 		pm.stage  = stage;
-		Message msg = cfHandler.obtainMessage(id, pm);
-		//log("sendToControlScreen SEND");
-		msg.sendToTarget();
+		
+		final Iterator<ControlScreenHandler> itr = cfHandlers.iterator();
+		while (itr.hasNext()) {
+			try {
+				final Handler handler = itr.next();
+				
+			    log("sendToControlScreen SEND "+handler);
+			    
+		     	Message msg = handler.obtainMessage(id, pm);
+			    msg.sendToTarget();
+			} catch (Exception e) {
+			}
+		}
 	}
 
 	public void sendToListScreen(int id, Vector cmdTokens, int stage) {
-		//log("sendToListScreen "+id);
+		
+		log("sendToListScreen "+id+" sz="+cmdTokens.size());
+		
+		
 		int num = 0;
-		while (listHandler == null) {
+		while (listHandlers.size() == 0) {
 			log("sendToListScreen handler not set "+cmdTokens);
-
-			// do not close closed list
-			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
-				if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-					listContent.clear();
-				}
-				return;
-			}
 
 			try {
 				Thread.sleep(1000);
@@ -637,18 +665,29 @@ public class Dispatcher implements IConnectionListener {
 			}
 			num++;
 		}
+		
 		ProtocolMessage pm = new ProtocolMessage();
 		pm.tokens = cmdTokens;
 		pm.stage  = stage;
-		Message msg = listHandler.obtainMessage(id, pm);
-		//log("sendToListScreen SEND");
-		msg.sendToTarget();
+
+		final Iterator<ListHandler> itr = listHandlers.iterator();
+		while (itr.hasNext()) {
+			try {
+				final Handler handler = itr.next();
+				
+			    log("sendToListScreen SEND "+handler);
+			    
+		     	Message msg = handler.obtainMessage(id, pm);
+			    msg.sendToTarget();
+			} catch (Exception e) {
+			}
+		}
 	}
 
 	public void sendToTextScreen(int id, Vector cmdTokens, int stage) {
 		//log("sendToTextScreen "+id);
 		int num = 0;
-		while (textHandler == null) {
+		while (textHandlers.size() == 0) {
 			log("sendToTextScreen handler not set "+cmdTokens);
 			// do not close closed test
 			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
@@ -672,9 +711,19 @@ public class Dispatcher implements IConnectionListener {
 		ProtocolMessage pm = new ProtocolMessage();
 		pm.tokens = cmdTokens;
 		pm.stage  = stage;
-		Message msg = textHandler.obtainMessage(id, pm);
-		//log("sendToTextScreen SEND");
-		msg.sendToTarget();
+		
+		final Iterator<TextHandler> itr = textHandlers.iterator();
+		while (itr.hasNext()) {
+			try {
+				final Handler handler = itr.next();
+				
+			    log("sendToTextScreen SEND "+handler);
+			    
+		     	Message msg = handler.obtainMessage(id, pm);
+			    msg.sendToTarget();
+			} catch (Exception e) {
+			}
+		}
 	}
 
 	public void handleEditFieldResult(int id, String button, String value) {
@@ -849,5 +898,184 @@ public class Dispatcher implements IConnectionListener {
 	public void log(String msg) {
 		anyRemote._log("Dispatcher",msg);
 	}
+	
+	public synchronized void addMessageHandlerCF(ControlScreenHandler handler) {
+		if (!cfHandlers.contains(handler)) {
+			cfHandlers.add(handler);
+		}
+	}
+	
+  	public synchronized void removeMessageHandlerCF(ControlScreenHandler handler) {
+		cfHandlers.remove(handler);
+	}
+  	
+	public synchronized void addMessageHandlerLF(ListHandler handler) {
+		if (!listHandlers.contains(handler)) {
+			listHandlers.add(handler);
+		}
+	}
+	
+  	public synchronized void removeMessageHandlerLF(ListHandler handler) {
+		listHandlers.remove(handler);
+	}
 
+  	public synchronized void addMessageHandlerTF(TextHandler handler) {
+		if (!textHandlers.contains(handler)) {
+			textHandlers.add(handler);
+		}
+	}
+	
+  	public synchronized void removeMessageHandlerTF(TextHandler handler) {
+		textHandlers.remove(handler);
+	}
+
+	//
+	// List Screen activity persistent data handling
+	//
+
+	//
+	// list|iconlist, add|replace|!close!|clear|!show![,Title,item1,...itemN]
+	// or 
+	// menu,item1,...itemN
+	// 
+	// Set(list,close) does NOT processed here !
+	//
+	public boolean listDataProcess(Vector vR, int stage) {	
+		log("listDataProcess "+vR); 
+
+		String oper  = (String) vR.elementAt(1); 
+		boolean needUpdataDataSource = true;
+
+		if (oper.equals("clear")) {
+
+			listClean();
+
+		} else if (oper.equals("close")) {
+            
+			// here processed only "clear" part of the command
+			if (vR.size() > 2 && ((String) vR.elementAt(2)).equals("clear")) {
+				listClean();
+			}
+			
+		} else if (oper.equals("fg")) {
+
+			int color = anyRemote.parseColor(
+					(String) vR.elementAt(2),
+					(String) vR.elementAt(3),
+					(String) vR.elementAt(4));
+			listText = color;
+			listCustomTextColor = true;
+			
+		} else if (oper.equals("bg")) {
+
+			int color = anyRemote.parseColor(
+					(String) vR.elementAt(2),
+					(String) vR.elementAt(3),
+					(String) vR.elementAt(4));
+			listBkgr = color;
+			listCustomBackColor = true;
+	
+		} else if (oper.equals("font")) {
+
+			listSetFont(vR);
+
+		} else if (oper.equals("select")) {
+
+			try { 
+				int i = Integer.parseInt((String) vR.elementAt(2))-1;
+				if (i>0) {
+					listSelectPos = i;
+				}
+			} catch(Exception z) { 
+				listSelectPos = -1;	
+			}
+
+		} else if (oper.equals("add") || oper.equals("replace")) {
+
+			String title = (String) vR.elementAt(2);
+
+			if (oper.equals("replace")) {
+				listClean();
+			}
+			if (!title.equals("SAME")) {
+				listTitle = title;
+			}
+			listAdd(vR, 3, (stage == ProtocolMessage.FULL));
+			
+			
+		} else if (oper.equals("show")) {
+			// nothing to do
+			needUpdataDataSource = false;
+		} else {
+	    	log("processList: ERROR improper command");
+		}
+		return needUpdataDataSource;
+	}
+
+	public void listAdd(Vector vR, int start, boolean fullCmd) {
+
+		//log("addToList "+vR); 
+
+		int end = vR.size();
+		if (!fullCmd) {
+			end -= 1;
+		}
+
+		for (int idx=start;idx<end;idx++) {
+
+			String item = (String) vR.elementAt(idx);
+			if (start == 0 && idx == 0) {
+				item = listBufferedItem.toString() + item;
+				listBufferedItem.delete(0, listBufferedItem.length());
+			}
+			if (!item.equals("") && ! (item.length() == 1 && item.charAt(0) == '\n')) {
+				listAddWithIcon(item); 
+			}
+		}
+
+		if (!fullCmd) {
+			listBufferedItem.append((String) vR.elementAt(end));
+		}
+	}
+
+	public void listAddWithIcon(String content) {
+
+		ListItem item = new ListItem();
+
+		int idx = content.indexOf(":");
+		if (idx > 0) {
+			item.icon = content.substring(0,idx).trim();
+			item.text = content.substring(idx+1).trim().replace('\r', ',');
+		} else {
+			item.icon = null;
+			item.text = content;
+		}
+		anyRemote.protocol.listContent.add(item);
+	}	
+
+	public void listClean() {
+		listSelectPos = -1;	
+		anyRemote.protocol.listContent.clear();
+		anyRemote.protocol.listBufferedItem.delete(0, anyRemote.protocol.listBufferedItem.length());
+	}
+	
+	private void listSetFont(Vector defs) {
+
+		float size = Dispatcher.SIZE_MEDIUM; 
+
+		int start = 2;
+		while(start<defs.size()) {
+			String spec = (String) defs.elementAt(start);
+			if (spec.equals("small")) {
+				listFSize = Dispatcher.SIZE_SMALL;
+			} else if (spec.equals("medium")) {
+				listFSize = Dispatcher.SIZE_MEDIUM;
+			} else if (spec.equals("large")) {
+				listFSize = Dispatcher.SIZE_LARGE;
+			} else {
+				listFSize = -1;
+			}
+			start++;
+		}
+	}
 }

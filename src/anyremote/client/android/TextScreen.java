@@ -44,6 +44,8 @@ public class TextScreen extends arActivity  {
 	String      title;
 	TextView    text;
 	boolean isLog = false;
+	
+	TextHandler hdlLocalCopy;
 
 	Vector<String> defMenu = new Vector<String>();
 
@@ -71,7 +73,10 @@ public class TextScreen extends arActivity  {
 			prefix = "Log"; // log stuff
 			isLog = true;
 		} else {
-			anyRemote.protocol.textHandler = new TextHandler(this);
+			
+			hdlLocalCopy = new TextHandler(this);
+			anyRemote.protocol.addMessageHandlerTF(hdlLocalCopy);
+		    
 			anyRemote.protocol.setFullscreen(this);
 
 			registerForContextMenu(text);
@@ -141,7 +146,8 @@ public class TextScreen extends arActivity  {
 
 		final Intent intent = new Intent();  
 		intent.putExtra(anyRemote.ACTION, action);	    
-		anyRemote.protocol.textHandler = null;
+
+	   	anyRemote.protocol.removeMessageHandlerTF(hdlLocalCopy);
 
 		if (isLog) {
 			intent.putExtra(anyRemote.SWITCHTO, anyRemote.NO_FORM);		
@@ -160,22 +166,6 @@ public class TextScreen extends arActivity  {
 	@Override
 	public void onBackPressed() { 
 		commandAction("Back");
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		menu.clear();
-		return true;
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) { 
-		menu.clear();
-
-		for(int i = 0;i<menuItems.size();i++) {
-			menu.add(menuItems.elementAt(i));
-		}
-		return true;
 	}
 
 	@Override

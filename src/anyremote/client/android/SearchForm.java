@@ -614,7 +614,7 @@ AdapterView.OnItemSelectedListener {
 		connectPass = "";
 		connectOpts = "";
 		
-		//log("doRealConnect: finish");
+		log("SearchForm::doRealConnect: finish");
 		finish();
 	}
 

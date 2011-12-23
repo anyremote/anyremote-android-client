@@ -92,6 +92,7 @@ public class ControlScreen extends arActivity
     
     boolean fullscreen  = false;
     boolean useJoystick = false;
+    ControlScreenHandler hdlLocalCopy;
     
     ImageButton [] buttons;
     
@@ -126,8 +127,10 @@ public class ControlScreen extends arActivity
 	    
 	    //TextView title2 = (TextView) findViewById(R.id.cf_btitle);
 	    //title2.setMovementMethod(new ScrollingMovementMethod());
-
-	    anyRemote.protocol.cfHandler = new ControlScreenHandler(this);
+	    
+	    hdlLocalCopy = new ControlScreenHandler(this);
+	    anyRemote.protocol.addMessageHandlerCF(hdlLocalCopy);
+	    
 		anyRemote.protocol.setFullscreen(this);
 		
 		popup();
@@ -884,23 +887,7 @@ public class ControlScreen extends arActivity
 		anyRemote.protocol.queueCommand(key, true);
 		anyRemote.protocol.queueCommand(key, false);
  	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-     	menu.clear();
-    	return true;
-    }
-	 
-    @Override
-	public boolean onPrepareOptionsMenu(Menu menu) { 
-    	menu.clear();
-			      
-	    for(int i = 0;i<menuItems.size();i++) {
-		    menu.add(menuItems.elementAt(i));
-	    }
-  		return true;
-	}
-    
+	    
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    commandAction(item.getTitle().toString());
@@ -930,8 +917,8 @@ public class ControlScreen extends arActivity
 	protected void doFinish(String action) {
     	
     	log("doFinish "+action);
- 
-    	anyRemote.protocol.cfHandler = null;
+
+    	anyRemote.protocol.removeMessageHandlerCF(hdlLocalCopy);
     	
 	    final Intent intent = new Intent();  
 	    intent.putExtra(anyRemote.ACTION, action);
