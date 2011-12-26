@@ -425,6 +425,12 @@ public class anyRemote extends Activity {
 			//protocol.closeCurrentScreen(currForm);
 			
 			if (!finishFlag) {   // this happens on exit
+				
+				// send quit to all registered activity
+				Vector ctokens = new Vector();
+				ctokens.add(Dispatcher.CMD_CLOSE);
+				protocol.sendToAll(Dispatcher.CMD_CLOSE,ctokens);
+
 			    currForm = DUMMY_FORM;  // trick
 			}
 			setCurrentView(SEARCH_FORM,"");

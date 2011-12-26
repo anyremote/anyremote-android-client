@@ -725,6 +725,46 @@ public class Dispatcher implements IConnectionListener {
 			}
 		}
 	}
+	
+	public void sendToAll(int id, Vector cmdTokens) {
+
+		ProtocolMessage pm = new ProtocolMessage();
+		pm.tokens = cmdTokens;
+		pm.stage  = ProtocolMessage.FULL;
+
+		final Iterator<ControlScreenHandler> itrc = cfHandlers.iterator();
+		while (itrc.hasNext()) {
+			try {
+				final Handler handler = itrc.next();
+			    
+		     	Message msg = handler.obtainMessage(id, pm);
+			    msg.sendToTarget();
+			} catch (Exception e) {
+			}
+		}
+		
+		final Iterator<ListHandler> itrl = listHandlers.iterator();
+		while (itrl.hasNext()) {
+			try {
+				final Handler handler = itrl.next();
+			    
+		     	Message msg = handler.obtainMessage(id, pm);
+			    msg.sendToTarget();
+			} catch (Exception e) {
+			}
+		}
+		
+		final Iterator<TextHandler> itrt = textHandlers.iterator();
+		while (itrt.hasNext()) {
+			try {
+				final Handler handler = itrt.next();
+			    
+		     	Message msg = handler.obtainMessage(id, pm);
+			    msg.sendToTarget();
+			} catch (Exception e) {
+			}
+		}
+	}
 
 	public void handleEditFieldResult(int id, String button, String value) {
 		if (id == Dispatcher.CMD_GETPASS) {
