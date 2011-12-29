@@ -39,6 +39,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.view.Display;
+import android.view.Surface;
 import android.view.WindowManager;
 import anyremote.client.android.Connection.IConnectionListener;
 import anyremote.client.android.util.Address;
@@ -513,9 +514,12 @@ public class Dispatcher implements IConnectionListener {
 		case CMD_GETSCRSIZE:
 
 			Display display = context.getWindowManager().getDefaultDisplay(); 
-
-			sendMessage("SizeX("+display.getWidth() +",)");
-			sendMessage("SizeY("+display.getHeight()+",)");
+			boolean rotated = (display.getOrientation() == Surface.ROTATION_90 ||
+	                           display.getOrientation() == Surface.ROTATION_270);
+			String ori = (rotated ? "R" : "");
+	        
+			sendMessage("SizeX("+display.getWidth() +","+ori+")");
+			sendMessage("SizeY("+display.getHeight()+","+ori+")");
 			break;
 
 		case CMD_GETCVRSIZE:
@@ -528,7 +532,7 @@ public class Dispatcher implements IConnectionListener {
 			try {
 				ComponentName comp = new ComponentName(context, this.getClass());
 				PackageInfo pinfo = context.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
-				sendMessage("Version(,"+pinfo.versionName);
+				sendMessage("Version(,"+pinfo.versionName+")");
 			} catch (android.content.pm.PackageManager.NameNotFoundException e) {
 				sendMessage("Version(,unknown)");
 			}          
@@ -574,7 +578,7 @@ public class Dispatcher implements IConnectionListener {
 			break;
 
 		case CMD_GETPLTF:
-			sendMessage("Model("+android.os.Build.MODEL+"/Android-"+android.os.Build.VERSION.RELEASE);
+			sendMessage("Model("+android.os.Build.MODEL+"/Android-"+android.os.Build.VERSION.RELEASE+")");
 			break;
 
 		case CMD_GETICON:
@@ -843,7 +847,7 @@ public class Dispatcher implements IConnectionListener {
 	public void sendMessage(String command) {
 		if (connection != null && !connection.isClosed()) {
 			//log("sendMessage " + command);
-		    connection.send(command);
+		    connection.send(command+";\r");
 		}
 	}
 

@@ -44,6 +44,7 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.KeyEvent;
@@ -110,16 +111,6 @@ public class ControlScreen extends arActivity
 		defMenu.add("Log");	
 		
 		buttons = new ImageButton[NUM_ICONS];
-		setSkin();
-		
-		setTitle(anyRemote.protocol.cfCaption);
-		
-		setFont();
-		setTextColor();
-	    setBackground();
-		setTitleField();
-		setStatusField();
-		setCover();
 	    callMenuUpdate();
 	    
 	    //TextView title = (TextView) findViewById(R.id.cf_title);
@@ -129,9 +120,9 @@ public class ControlScreen extends arActivity
 	    //title2.setMovementMethod(new ScrollingMovementMethod());
 	    
 	    hdlLocalCopy = new ControlScreenHandler(this);
-	    anyRemote.protocol.addMessageHandlerCF(hdlLocalCopy);
-	    
-		anyRemote.protocol.setFullscreen(this);
+	    anyRemote.protocol.addMessageHandlerCF(hdlLocalCopy);	    
+		
+	    anyRemote.protocol.setFullscreen(this);
 		
 		popup();
 	}
@@ -140,6 +131,8 @@ public class ControlScreen extends arActivity
 	protected void onStart() {
 		log("onStart");		
 		super.onStart();
+		
+		setSkin();
 	}
 	
 	@Override
@@ -424,8 +417,13 @@ public class ControlScreen extends arActivity
 	
 	private void setSkinSimple() {
 		
-		Display display = getWindowManager().getDefaultDisplay(); 
-		int sz = (display.getWidth() > display.getHeight() ? display.getHeight() : display.getWidth());
+		Display display = getWindowManager().getDefaultDisplay();
+		
+		boolean rotated = (display.getOrientation() == Surface.ROTATION_90 ||
+		                   display.getOrientation() == Surface.ROTATION_270);
+		int h = (rotated ? display.getWidth()  : display.getHeight());
+		int w = (rotated ? display.getHeight() : display.getWidth());
+		//log("setSkin SCR "+rotated+" "+w+"x"+h);
 
 		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 			
@@ -463,10 +461,11 @@ public class ControlScreen extends arActivity
 			}
 			
 			for (int i=0;i<NUM_ICONS_BTM;i++) {
-				buttons[i].setMaxHeight(sz/realCnt);    	
-				buttons[i].setMaxWidth (sz/realCnt);
+				buttons[i].setMaxHeight(w/realCnt);    	
+				buttons[i].setMaxWidth (w/realCnt);
 			}
 			
+			int sz = (w > h ? h : w);
 			ImageView cover = (ImageView) findViewById(R.id.cover);
 			cover.setMaxHeight((2*sz)/3);    	
 			cover.setMaxWidth ((2*sz)/3);
@@ -495,6 +494,10 @@ public class ControlScreen extends arActivity
 			buttons[10] = (ImageButton) findViewById(R.id.b0);
 			buttons[11] = (ImageButton) findViewById(R.id.b11);
 			
+			h = h/7;   // 4 rows with icons and 2 line of text + gaps
+			w = w/3;   // 3 columns with icons
+			int sz = (w > h ? h : w);
+
 			for (int i=0;i<NUM_ICONS;i++) {
 				
 				Bitmap ic = anyRemote.getIconBitmap(getResources(), anyRemote.protocol.cfIcons[i]);
@@ -507,8 +510,8 @@ public class ControlScreen extends arActivity
 				buttons[i].setVisibility(View.VISIBLE);
 				buttons[i].setOnClickListener(this);
 				
-				buttons[i].setMaxHeight(sz/4);    	
-				buttons[i].setMaxWidth (sz/4);
+				buttons[i].setMaxHeight(sz);    	
+				buttons[i].setMaxWidth (sz);
 			}
 			if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
 				buttons[anyRemote.protocol.cfInitFocus-1].requestFocus();
@@ -518,6 +521,7 @@ public class ControlScreen extends arActivity
 	}
 	
 	private void setSkin() {
+		setTitle(anyRemote.protocol.cfCaption);
 	    setSkinSimple();
 		setFont();
 		setTextColor();

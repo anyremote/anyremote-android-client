@@ -58,6 +58,7 @@
 	<LinearLayout android:id="@+id/bicons"
 		android:layout_height="wrap_content" 
 		android:orientation="horizontal"
+		android:gravity="center_horizontal"
 		android:layout_gravity="center_horizontal"
 		android:layout_width="fill_parent" 
 		android:layout_alignParentBottom="true">
