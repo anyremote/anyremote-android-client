@@ -147,7 +147,7 @@ public class Dispatcher implements IConnectionListener {
 	String textTitle;
 	Vector<String> textMenu = new Vector<String>();
 	ArrayList<TextHandler> textHandlers = new ArrayList<TextHandler>();
-	String      textContent;
+	StringBuilder textContent;
 	int         textFrgr;
 	int         textBkgr;
 	float       textFSize;
@@ -176,6 +176,8 @@ public class Dispatcher implements IConnectionListener {
 		listContent = new ArrayList<ListItem>();
 		cfIcons     = new String[ControlScreen.NUM_ICONS];
 		listBufferedItem = new StringBuilder();
+		
+		textContent = new StringBuilder();
 		
 		setDefValues();
 		
@@ -214,7 +216,7 @@ public class Dispatcher implements IConnectionListener {
 
 		textFrgr = anyRemote.parseColor("255","255","255");
 		textBkgr = anyRemote.parseColor("0",  "0",  "0");
-		textContent = "";
+		textContent.delete(0, textContent.length());
 		textFSize = SIZE_MEDIUM;
 		textTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
 		textMenu.clear();
@@ -445,7 +447,7 @@ public class Dispatcher implements IConnectionListener {
 
 		case CMD_TEXT:	
 			
-			textDataProcess(cmdTokens); 
+			textDataProcess(cmdTokens, stage); 
 			
 			boolean doCloset = ((String) cmdTokens.elementAt(1)).equals("close");
 			
@@ -701,7 +703,7 @@ public class Dispatcher implements IConnectionListener {
 			// do not close closed test
 			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
 				if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-					textContent = "";
+					textContent.delete(0, textContent.length());
 				}
 				return;
 			}
@@ -1048,8 +1050,15 @@ public class Dispatcher implements IConnectionListener {
 	// Set(list,close) does NOT processed here !
 	//
 	public boolean listDataProcess(int id, Vector vR, int stage) {	
-		log("listDataProcess "+vR); 
+		log("listDataProcess "+id+" "+vR); 
 
+		if (stage == ProtocolMessage.INTERMED ||
+	        stage == ProtocolMessage.LAST) {
+			// get next portion of Set(list,add/replace ...)
+			listAdd(id, vR, 0, false);
+			return true;
+		}
+		
 		String oper  = (String) vR.elementAt(1); 
 		boolean needUpdataDataSource = true;
 
@@ -1113,7 +1122,7 @@ public class Dispatcher implements IConnectionListener {
 			// nothing to do
 			needUpdataDataSource = false;
 		} else {
-	    	log("processList: ERROR improper command");
+	    	log("processList: ERROR improper command >"+oper+"<");
 		}
 		return needUpdataDataSource;
 	}
@@ -1199,15 +1208,20 @@ public class Dispatcher implements IConnectionListener {
 	//
 	// Set(list,close) does NOT processed here !			2
 	//
-	public void textDataProcess(Vector vR) {   // message = add|replace|show|clear,title,long_text
+	public void textDataProcess(Vector vR, int stage) {   // message = add|replace|show|clear,title,long_text
 		
-		//if (textIsLog) return; // do not handle commands in this mode
+		if (stage == ProtocolMessage.INTERMED ||
+		    stage == ProtocolMessage.LAST) {
+			
+			    textContent.append((String) vR.elementAt(3));
+				return;
+		}
 
 		String oper = (String) vR.elementAt(1);
 
 		if (oper.equals("clear")) {
 
-			textContent = "";
+			textContent.delete(0, textContent.length());
 
 		} else if (oper.equals("add") || 
                   oper.equals("replace")) {
@@ -1217,9 +1231,9 @@ public class Dispatcher implements IConnectionListener {
 			}
 
 			if (oper.equals("replace")) {
-				textContent = "";
+				textContent.delete(0, textContent.length());
 			}
-			textContent = (String) vR.elementAt(3);
+			textContent.append((String) vR.elementAt(3));
 
 		} else if (oper.equals("fg")) {
 
@@ -1246,7 +1260,7 @@ public class Dispatcher implements IConnectionListener {
 		} else if (oper.equals("close")) {
 
 			if (vR.size() > 2 && ((String) vR.elementAt(2)).equals("clear")) {
-				textContent = "";
+				textContent.delete(0, textContent.length());
 			}
 
 		} else if (!oper.equals("show")) {
