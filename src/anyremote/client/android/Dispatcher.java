@@ -407,9 +407,18 @@ public class Dispatcher implements IConnectionListener {
 				listCustomTextColor = false;
 			}
 			
-			boolean needUpdateDataSource = listDataProcess(cmdTokens, stage); 
+			boolean needUpdateDataSource = listDataProcess(id, cmdTokens, stage); 
 			
-			if (((String) cmdTokens.elementAt(1)).equals("close")) { 
+			boolean doClose = ((String) cmdTokens.elementAt(1)).equals("close");
+			
+			if (anyRemote.logVisible()) {
+				if (doClose) {
+					context.setPrevView(anyRemote.CONTROL_FORM);
+				}
+				return;
+			}
+
+			if (doClose) { 
 				// Close List Activity (even it was not started ;-)) and open ControlForm
 				context.setCurrentView(anyRemote.CONTROL_FORM, "");
 				return;
@@ -462,31 +471,34 @@ public class Dispatcher implements IConnectionListener {
 			//screen.drawSync();
 			break;
 
-		case CMD_TEXT:
-
+		case CMD_TEXT:	
+			
+			textDataProcess(cmdTokens); 
+			
+			boolean doCloset = ((String) cmdTokens.elementAt(1)).equals("close");
+			
+			if (anyRemote.logVisible()) {
+				if (doCloset) {
+					context.setPrevView(anyRemote.CONTROL_FORM);
+				}
+				return;
+			}
+			
+			if (doCloset) { 
+				// Close Text Activity (even it was not started ;-)) and open ControlForm
+				context.setCurrentView(anyRemote.CONTROL_FORM, "");
+				return;
+			}
+		
 			// Create activity with (possibly) empty list
-			if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-				if (((String) cmdTokens.elementAt(1)).equals("close")) { 
-					if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-						listContent.clear();
-					}
-					
-					context.setCurrentView(anyRemote.CONTROL_FORM, "");
-					return;
-				}
-
-				sendToTextScreen(id,cmdTokens,stage);
-			} else {
-				if (((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
-					if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-						textContent = "";
-					}
-					return;
-				}
-				// Start list screen activity and transfer data
-				context.setCurrentView(anyRemote.TEXT_FORM, (String) cmdTokens.get(1));
-				sendToTextScreen(id,cmdTokens,stage);
-			}			
+			if (anyRemote.getCurScreen() != anyRemote.TEXT_FORM) {
+				context.setCurrentView(anyRemote.TEXT_FORM, "");
+			}
+			
+			Vector datat = new Vector();
+			datat.add(id);
+			
+			sendToTextScreen(id,datat,stage);		
 			break;       
 
 		case CMD_VIBRATE:
@@ -593,15 +605,6 @@ public class Dispatcher implements IConnectionListener {
 			log("notifyMessage: Command or handler unknown");
 		}
 	}
-
-	/*void closeCurrentScreen(int screen) {
-		if (screen == anyRemote.LIST_FORM) {
-			Vector tokens = new Vector();
-			tokens.add(screen);
-			tokens.add("close");
-			sendToListScreen(CMD_LIST,tokens,ProtocolMessage.FULL);
-		}
-	}*/
 
 	public void sendToControlScreen(int id, Vector cmdTokens, int stage) {
 		//log("sendToControlScreen "+id);
@@ -975,12 +978,10 @@ public class Dispatcher implements IConnectionListener {
 
 	//
 	// list|iconlist, add|replace|!close!|clear|!show![,Title,item1,...itemN]
-	// or 
-	// menu,item1,...itemN
 	// 
 	// Set(list,close) does NOT processed here !
 	//
-	public boolean listDataProcess(Vector vR, int stage) {	
+	public boolean listDataProcess(int id, Vector vR, int stage) {	
 		log("listDataProcess "+vR); 
 
 		String oper  = (String) vR.elementAt(1); 
@@ -1040,9 +1041,8 @@ public class Dispatcher implements IConnectionListener {
 			if (!title.equals("SAME")) {
 				listTitle = title;
 			}
-			listAdd(vR, 3, (stage == ProtocolMessage.FULL));
-			
-			
+			listAdd(id, vR, 3, (stage == ProtocolMessage.FULL));
+						
 		} else if (oper.equals("show")) {
 			// nothing to do
 			needUpdataDataSource = false;
@@ -1052,7 +1052,7 @@ public class Dispatcher implements IConnectionListener {
 		return needUpdataDataSource;
 	}
 
-	public void listAdd(Vector vR, int start, boolean fullCmd) {
+	public void listAdd(int id, Vector vR, int start, boolean fullCmd) {
 
 		//log("addToList "+vR); 
 
@@ -1069,7 +1069,7 @@ public class Dispatcher implements IConnectionListener {
 				listBufferedItem.delete(0, listBufferedItem.length());
 			}
 			if (!item.equals("") && ! (item.length() == 1 && item.charAt(0) == '\n')) {
-				listAddWithIcon(item); 
+				listAddWithIcon(id, item); 
 			}
 		}
 
@@ -1078,11 +1078,11 @@ public class Dispatcher implements IConnectionListener {
 		}
 	}
 
-	public void listAddWithIcon(String content) {
+	public void listAddWithIcon(int id, String content) {
 
 		ListItem item = new ListItem();
 
-		int idx = content.indexOf(":");
+		int idx = (id == CMD_ICONLIST ? content.indexOf(":") : 0);
 		if (idx > 0) {
 			item.icon = content.substring(0,idx).trim();
 			item.text = content.substring(idx+1).trim().replace('\r', ',');
@@ -1090,13 +1090,13 @@ public class Dispatcher implements IConnectionListener {
 			item.icon = null;
 			item.text = content;
 		}
-		anyRemote.protocol.listContent.add(item);
+		listContent.add(item);
 	}	
 
 	public void listClean() {
 		listSelectPos = -1;	
-		anyRemote.protocol.listContent.clear();
-		anyRemote.protocol.listBufferedItem.delete(0, anyRemote.protocol.listBufferedItem.length());
+		listContent.clear();
+		listBufferedItem.delete(0, listBufferedItem.length());
 	}
 	
 	private void listSetFont(Vector defs) {
@@ -1117,5 +1117,121 @@ public class Dispatcher implements IConnectionListener {
 			}
 			start++;
 		}
+	}
+	
+	//
+	// Text Screen activity persistent data handling
+	//
+	
+	// Set(text,add,title,_text_)		3+text
+	// Set(text,replace,title,_text_)	3+text
+	// Set(text,fg|bg,r,g,b)		6
+	// Set(text,font,small|medium|large)	3
+	// Set(text,close[,clear])		2 or 3
+	// Set(text,wrap,on|off)		3
+	// Set(text,show)
+	//
+	// Set(list,close) does NOT processed here !			2
+	//
+	public void textDataProcess(Vector vR) {   // message = add|replace|show|clear,title,long_text
+		
+		//if (textIsLog) return; // do not handle commands in this mode
+
+		String oper = (String) vR.elementAt(1);
+
+		if (oper.equals("clear")) {
+
+			textContent = "";
+
+		} else if (oper.equals("add") || 
+                  oper.equals("replace")) {
+
+			if (!((String) vR.elementAt(2)).equals("SAME")) {
+				textTitle = (String) vR.elementAt(2);
+			}
+
+			if (oper.equals("replace")) {
+				textContent = "";
+			}
+			textContent = (String) vR.elementAt(3);
+
+		} else if (oper.equals("fg")) {
+
+			textFrgr = anyRemote.parseColor(
+					(String) vR.elementAt(2),
+					(String) vR.elementAt(3),
+					(String) vR.elementAt(4));
+
+		} else if (oper.equals("bg")) {
+
+			textBkgr = anyRemote.parseColor(
+					(String) vR.elementAt(2),
+					(String) vR.elementAt(3),
+					(String) vR.elementAt(4));
+
+		} else if (oper.equals("font")) {
+
+			textFontParams(vR);
+
+		} else if (oper.equals("wrap")) {
+
+			// not supported
+
+		} else if (oper.equals("close")) {
+
+			if (vR.size() > 2 && ((String) vR.elementAt(2)).equals("clear")) {
+				textContent = "";
+			}
+
+		} else if (!oper.equals("show")) {
+			return; // seems command improperly formed
+		}
+	}	
+	
+	private void textFontParams(Vector defs) {
+
+		boolean bold   = false;
+		boolean italic = false;
+		float   size   = Dispatcher.SIZE_MEDIUM; 
+
+		int start = 2;
+		while(start<defs.size()) {
+			String spec = (String) defs.elementAt(start);
+			if (spec.equals("plain")) {
+				//style = Font.STYLE_PLAIN;
+			} else if (spec.equals("bold")) {
+				bold = true;
+			} else if (spec.equals("italic")) {
+				italic = true;
+			} else if (spec.equals("underlined")) {
+				//style = (style == Font.STYLE_PLAIN ? Font.STYLE_UNDERLINED : style|Font.STYLE_UNDERLINED);
+			} else if (spec.equals("small")) {
+				size = Dispatcher.SIZE_SMALL;
+			} else if (spec.equals("medium")) {
+				size = Dispatcher.SIZE_MEDIUM;
+			} else if (spec.equals("large")) {
+				size = Dispatcher.SIZE_LARGE;
+			} else if (spec.equals("monospace")) {
+				//face  = Font.FACE_MONOSPACE;
+			} else if (spec.equals("system")) {
+				//face  = Font.FACE_SYSTEM;
+			} else if (spec.equals("proportional")) {
+				//face  = Font.FACE_PROPORTIONAL;
+				//} else {
+				//	controller.showAlert("Incorrect font "+spec);
+			}
+			start++;
+		}
+
+		if (bold && italic) {
+			textTFace = Typeface.defaultFromStyle(Typeface.BOLD_ITALIC);
+		} else if (bold) {
+			textTFace = Typeface.defaultFromStyle(Typeface.BOLD);
+		} else if (italic) {
+			textTFace = Typeface.defaultFromStyle(Typeface.ITALIC);
+		} else {
+			textTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
+		}
+		textFSize = size;
 	}
 }

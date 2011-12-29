@@ -15,8 +15,7 @@
 
 		<activity android:name="SearchForm"></activity>
 		<activity android:name="ListScreen"></activity>
-		<activity android:name="TextScreen"
-		          android:screenOrientation="portrait"></activity>
+		<activity android:name="TextScreen"></activity>
 		<activity android:name="ControlScreen"></activity>
 	</application>
 

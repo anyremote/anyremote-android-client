@@ -131,7 +131,9 @@ public class anyRemote extends Activity {
 		super.onStart();
 		
 		finishFlag = false;
-		setCurrentView(SEARCH_FORM,"");
+		if (currForm != LOG_FORM && status == DISCONNECTED) {
+		    setCurrentView(SEARCH_FORM,"");
+		}
 	}
 	
 	@Override
@@ -269,6 +271,11 @@ public class anyRemote extends Activity {
 			break;
 		}
 	}
+	
+	public void setPrevView(int which) {
+		_log("setPrevView " + which);
+		prevForm = which;
+	}
 
 	// Collect data from Search Form
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -327,30 +334,12 @@ public class anyRemote extends Activity {
 			}
 
 		} else if (requestCode == LIST_FORM ||
-				requestCode == TEXT_FORM) {
+				   requestCode == TEXT_FORM) {
 
 			_log("onActivityResult LIST/TEXT");
-
-			/*if (resultCode == RESULT_OK) {
-
-                int form = intent.getIntExtra(SWITCHTO,-1);
-                if (form != -1) {
-                	currForm = form;
-                }
-                //if (act != null && act.length() > 0) {
-                //    if (act.contentEquals("exit")) {
-                //    	// how to do exit ?
-                //    } else if (act.contentEquals("disconnect")) {
-                //    	// how to do exit ?
-                //    	protocol.disconnect(true);
-                //    } 
-                //    // else - nothing
-                //}
-                setCurrentView(currForm, "show");        	
-            }*/
-			setCurrentView(CONTROL_FORM,"");
+			
 		} else if (requestCode == LOG_FORM) {
-			_log("onActivityResult LOG");
+			_log("onActivityResult LOG ->"+prevForm);
 			setCurrentView(prevForm, "show");
 		}
 	}
@@ -392,6 +381,7 @@ public class anyRemote extends Activity {
 
 		case R.id.exit_main:
 			finishFlag = true;
+			_log("onOptionsItemSelected exit_main");
 			setCurrentView(NO_FORM,"");
 			protocol.disconnect(true);
 			finish();
@@ -416,7 +406,10 @@ public class anyRemote extends Activity {
 
 			status = CONNECTED;
 			setProgressBarIndeterminateVisibility(false);
-			setCurrentView(CONTROL_FORM,"");
+
+			if (currForm != LOG_FORM) {
+			    setCurrentView(CONTROL_FORM,"");
+			}
 			break;
 
 		case DISCONNECTED:
@@ -431,9 +424,14 @@ public class anyRemote extends Activity {
 				ctokens.add(Dispatcher.CMD_CLOSE);
 				protocol.sendToAll(Dispatcher.CMD_CLOSE,ctokens);
 
-			    currForm = DUMMY_FORM;  // trick
+				if (currForm != LOG_FORM) {
+					currForm = DUMMY_FORM;  // trick
+				}
 			}
-			setCurrentView(SEARCH_FORM,"");
+
+			if (currForm != LOG_FORM) {
+			    setCurrentView(SEARCH_FORM,"");
+			}
 			break;
 		default:
 			_log("handleEvent: unknown event");
@@ -561,6 +559,11 @@ public class anyRemote extends Activity {
 			}
 		}
 	}
+	
+	public static boolean logVisible() {
+		return (currForm == LOG_FORM);
+	}
+
 
 	private static void _log(String log) {
 		_log("anyRemote", log);	

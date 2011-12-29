@@ -174,6 +174,7 @@ public class ControlScreen extends arActivity
 	@Override
 	protected void onDestroy() {	
 		log("onDestroy");		
+    	anyRemote.protocol.removeMessageHandlerCF(hdlLocalCopy);
 		super.onDestroy();
 	}
 
@@ -917,8 +918,6 @@ public class ControlScreen extends arActivity
 	protected void doFinish(String action) {
     	
     	log("doFinish "+action);
-
-    	anyRemote.protocol.removeMessageHandlerCF(hdlLocalCopy);
     	
 	    final Intent intent = new Intent();  
 	    intent.putExtra(anyRemote.ACTION, action);

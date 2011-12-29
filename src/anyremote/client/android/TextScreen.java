@@ -38,16 +38,10 @@ import anyremote.client.android.R;
 
 public class TextScreen extends arActivity  {
 
-	static final int ADD     = 1;
-	static final int REPLACE = 2;
-
-	String      title;
 	TextView    text;
-	boolean isLog = false;
-	
 	TextHandler hdlLocalCopy;
-
 	Vector<String> defMenu = new Vector<String>();
+	boolean isLog = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +49,7 @@ public class TextScreen extends arActivity  {
 		super.onCreate(savedInstanceState);  
 
 		setContentView(R.layout.text_form);
-		setTitle("");
-
+	
 		Intent  intent = getIntent();
 		String subid   = intent.getStringExtra("SUBID");
 
@@ -64,14 +57,12 @@ public class TextScreen extends arActivity  {
 
 		text = (TextView) findViewById(R.id.text_form);			
 
-		if (subid.equals("replace") || subid.equals("clear")) {
-			anyRemote.protocol.textContent = "";
-		} 
-
 		if (subid.equals("__LOG__")) {	// Special case for log view	
-			text.setText(anyRemote.logData); 
+
 			prefix = "Log"; // log stuff
 			isLog = true;
+			log("onCreate");
+			
 		} else {
 			
 			hdlLocalCopy = new TextHandler(this);
@@ -79,21 +70,33 @@ public class TextScreen extends arActivity  {
 		    
 			anyRemote.protocol.setFullscreen(this);
 
-			registerForContextMenu(text);
-
-			text.setText(anyRemote.protocol.textContent);
 			prefix = "TextScreen"; // log stuff
 			log("onCreate");
-		}
+		}		
+		registerForContextMenu(text);
 		text.setMovementMethod(new ScrollingMovementMethod());
 
-		setFont();
-		setTextColor();
-		setBackground();
-		callMenuUpdate();
-		setTitle(anyRemote.protocol.textTitle);
-
+		redraw();
+		
 		popup();
+	}
+	
+	// update all visuals
+	void redraw()  {
+		log("redraw");
+		
+		if (isLog) {
+			text.setText(anyRemote.logData); 
+			callMenuUpdate();
+			setTitle("Log");
+		} else {
+			text.setText(anyRemote.protocol.textContent);
+			setFont();
+			setTextColor();
+			setBackground();
+			callMenuUpdate();
+			setTitle(anyRemote.protocol.textTitle);
+		}
 	}
 	
 	@Override
@@ -113,10 +116,20 @@ public class TextScreen extends arActivity  {
 		//MainLoop.enable();
 		super.onResume();
 		
-        if (anyRemote.status == anyRemote.DISCONNECTED) {
+        if (anyRemote.status == anyRemote.DISCONNECTED && 
+        	!isLog) {
+        	
         	log("onResume no connection");
         	doFinish("");
         }
+	}
+	
+	@Override
+	protected void onDestroy() {	
+		log("onDestroy");	
+	   	anyRemote.protocol.removeMessageHandlerTF(hdlLocalCopy);		
+	   	isLog = false;
+	   	super.onDestroy();
 	}
 
 	// Handle long-click
@@ -143,12 +156,12 @@ public class TextScreen extends arActivity  {
 	
 	@Override
 	protected void doFinish(String action) {
-
+		
+		log("doFinish");
+		
 		final Intent intent = new Intent();  
 		intent.putExtra(anyRemote.ACTION, action);	    
-
-	   	anyRemote.protocol.removeMessageHandlerTF(hdlLocalCopy);
-
+		
 		if (isLog) {
 			intent.putExtra(anyRemote.SWITCHTO, anyRemote.NO_FORM);		
 		} else {
@@ -160,6 +173,7 @@ public class TextScreen extends arActivity  {
 		if (!isLog) {
 			log("doFinish finish");
 		}
+		
 		finish();  	
 	}
 
@@ -204,26 +218,30 @@ public class TextScreen extends arActivity  {
 	// Set(text,wrap,on|off)		3
 	// Set(text,show)			2
 	public void handleEvent(ProtocolMessage data) {
-
+		
+		log("handleEvent");
+		
 		if (isLog) return; 
-
-		//log("handleEvent "+" "+data.stage+" "+ data.tokens);
 		
 		if (data.tokens.size() == 0) {
 			return;
 		}
-		
+
 		if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
-			
+
 			Integer id  = (Integer) data.tokens.elementAt(0);
 			
 			if (handleCommonCommand(id, data.tokens)) {
 				return;
 			}
 			
-			processData(data.tokens);
-		} else if (data.stage == ProtocolMessage.INTERMED || data.stage == ProtocolMessage.LAST) {
-			boolean addVisible = setString(ADD, (String) data.tokens.elementAt(0));
+			if (id == Dispatcher.CMD_TEXT) {
+				
+				// update all visuals
+				redraw();
+			}
+		} else  if (data.stage == ProtocolMessage.INTERMED || data.stage == ProtocolMessage.LAST) {
+			redraw();
 		}
 	}		
 
@@ -243,86 +261,6 @@ public class TextScreen extends arActivity  {
 		processMenu(vR, anyRemote.protocol.textMenu, defMenu);
 	}
 
-	public boolean setString(int mode, String newStr) {
-
-		if (isLog) return true;
-
-		//log("setString " + mode + ">"+newStr);
-
-		boolean addVisible = true;
-		if (mode == REPLACE) {
-			text.setText("");
-		}
-		text.append(newStr);
-
-		anyRemote.protocol.textContent = text.getText().toString();
-
-		return true;
-	}
-
-	public void processData(Vector vR) {   // message = add|replace|show|clear,title,long_text
-		if (isLog) return;
-
-		String oper = (String) vR.elementAt(1);
-		//log("processData >" + oper + "< " + vR.size());
-
-		if (oper.equals("clear")) {
-
-			text.setText("");
-
-		} else if (oper.equals("add") || 
-
-				oper.equals("replace")) {
-			int op = REPLACE;
-			if (oper.equals("add")) {
-				op = ADD;
-			}
-
-			if (!((String) vR.elementAt(2)).equals("SAME")) {
-				anyRemote.protocol.textTitle = (String) vR.elementAt(2);
-				setTitle(anyRemote.protocol.textTitle);
-			}
-
-			boolean addVisible = setString(op, (String) vR.elementAt(3));
-
-		} else if (oper.equals("fg")) {
-
-			anyRemote.protocol.textFrgr = anyRemote.parseColor(
-					(String) vR.elementAt(2),
-					(String) vR.elementAt(3),
-					(String) vR.elementAt(4));
-			setTextColor();
-
-		} else if (oper.equals("bg")) {
-
-			anyRemote.protocol.textBkgr = anyRemote.parseColor(
-					(String) vR.elementAt(2),
-					(String) vR.elementAt(3),
-					(String) vR.elementAt(4));
-			setBackground();
-
-		} else if (oper.equals("font")) {
-
-			setFontParams(vR);
-			setFont();
-
-		} else if (oper.equals("wrap")) {
-
-			// not supported
-
-		} else if (oper.equals("close")) {
-
-			if (vR.size() > 2 && ((String) vR.elementAt(2)).equals("clear")) {
-				text.setText("");
-			}
-			doFinish("");
-			return;
-
-		} else if (!oper.equals("show")) {
-			return; // seems command improperly formed
-		}
-	}
-
 	private void setTextColor() {
 		text.setTextColor(anyRemote.protocol.textFrgr);
 	}
@@ -336,52 +274,5 @@ public class TextScreen extends arActivity  {
 		TextView ttx  = (TextView) findViewById(R.id.text_form);
 		ttx.setTypeface (anyRemote.protocol.textTFace);
 		ttx.setTextSize (anyRemote.protocol.textFSize);
-	}
-
-	private void setFontParams(Vector defs) {
-
-		boolean bold   = false;
-		boolean italic = false;
-		float   size   = Dispatcher.SIZE_MEDIUM; 
-
-		int start = 2;
-		while(start<defs.size()) {
-			String spec = (String) defs.elementAt(start);
-			if (spec.equals("plain")) {
-				//style = Font.STYLE_PLAIN;
-			} else if (spec.equals("bold")) {
-				bold = true;
-			} else if (spec.equals("italic")) {
-				italic = true;
-			} else if (spec.equals("underlined")) {
-				//style = (style == Font.STYLE_PLAIN ? Font.STYLE_UNDERLINED : style|Font.STYLE_UNDERLINED);
-			} else if (spec.equals("small")) {
-				size = Dispatcher.SIZE_SMALL;
-			} else if (spec.equals("medium")) {
-				size = Dispatcher.SIZE_MEDIUM;
-			} else if (spec.equals("large")) {
-				size = Dispatcher.SIZE_LARGE;
-			} else if (spec.equals("monospace")) {
-				//face  = Font.FACE_MONOSPACE;
-			} else if (spec.equals("system")) {
-				//face  = Font.FACE_SYSTEM;
-			} else if (spec.equals("proportional")) {
-				//face  = Font.FACE_PROPORTIONAL;
-				//} else {
-				//	controller.showAlert("Incorrect font "+spec);
-			}
-			start++;
-		}
-
-		if (bold && italic) {
-			anyRemote.protocol.textTFace = Typeface.defaultFromStyle(Typeface.BOLD_ITALIC);
-		} else if (bold) {
-			anyRemote.protocol.textTFace = Typeface.defaultFromStyle(Typeface.BOLD);
-		} else if (italic) {
-			anyRemote.protocol.textTFace = Typeface.defaultFromStyle(Typeface.ITALIC);
-		} else {
-			anyRemote.protocol.textTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
-		}
-		anyRemote.protocol.textFSize = size;
 	}
 }

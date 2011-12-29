@@ -110,6 +110,13 @@ public class ListScreen extends arActivity
         	doFinish("");
         }
 	}
+	
+	@Override
+	protected void onDestroy() {	
+		log("onDestroy");	
+	   	anyRemote.protocol.removeMessageHandlerLF(hdlLocalCopy);
+	   	super.onDestroy();
+	}
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {	
@@ -153,8 +160,6 @@ public class ListScreen extends arActivity
 	protected void doFinish(String action) {
 
 		log("doFinish");
-
-    	anyRemote.protocol.removeMessageHandlerLF(hdlLocalCopy);
 
 		final Intent intent = new Intent();  
 		intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);
