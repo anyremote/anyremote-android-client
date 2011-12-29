@@ -229,6 +229,13 @@ public class anyRemote extends Activity {
 				ctokens.add(Dispatcher.CMD_CLOSE);
 				protocol.sendToTextScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
 				break;
+
+			case WMAN_FORM:
+				_log("setCurrentView stop WinManager");
+				ctokens = new Vector();
+				ctokens.add(Dispatcher.CMD_CLOSE);
+				protocol.sendToWmanScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
+				break;
 	
 			case LOG_FORM:
 			case DUMMY_FORM:
@@ -261,6 +268,12 @@ public class anyRemote extends Activity {
 			final Intent showText = new Intent(getBaseContext(), TextScreen.class);
 			showText.putExtra("SUBID", subCommand);
 			startActivityForResult(showText, which); 
+			break;
+			
+		case WMAN_FORM:
+			_log("setCurrentView start WinManager");
+			final Intent showWman = new Intent(getBaseContext(), WinManager.class);
+			startActivityForResult(showWman, which); 
 			break;
 
 		case LOG_FORM:
@@ -334,9 +347,10 @@ public class anyRemote extends Activity {
 			}
 
 		} else if (requestCode == LIST_FORM ||
-				   requestCode == TEXT_FORM) {
+				   requestCode == TEXT_FORM ||
+				   requestCode == WMAN_FORM) {
 
-			_log("onActivityResult LIST/TEXT");
+			_log("onActivityResult LIST/TEXT/WMAN");
 			
 		} else if (requestCode == LOG_FORM) {
 			_log("onActivityResult LOG ->"+prevForm);

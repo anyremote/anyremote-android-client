@@ -485,8 +485,7 @@ public final class Connection implements Runnable {
 
 					readStage = READ_CMDID;
 
-					if (id == Dispatcher.CMD_IMAGE
-							|| id == Dispatcher.CMD_COVER) {
+					if (id == Dispatcher.CMD_IMAGE || id == Dispatcher.CMD_COVER) {
 						charMode = false;
 						// btoRead = 0; // in binary mode we will read full
 						// image
@@ -710,8 +709,8 @@ public final class Connection implements Runnable {
 		try {
 			String action = getWord(true);
 
-			if (// action.equals("window") ||
-			action.equals("icon")) {
+			if (action.equals("window") ||
+			    action.equals("icon")) {
 
 				boolean isIcon = false;
 				String iName = "";
@@ -792,13 +791,29 @@ public final class Connection implements Runnable {
 										+ iName + ".png " + e.toString());
 					}
 					return;
-				}
+				} else {
+					anyRemote.protocol.imScreen = screen;
+					
+					Vector tokens = new Vector();
+					tokens.add(Dispatcher.CMD_IMAGE);
+					
+					execCommand(tokens, Dispatcher.CMD_IMAGE, ProtocolMessage.FULL);
+					
+				} 
+				
+			} else if (action.equals("close")) {
+					
+				Vector tokens = new Vector();
+				tokens.add(Dispatcher.CMD_IMAGE);
+				tokens.add("close");
+				
+				execCommand(tokens, Dispatcher.CMD_IMAGE, ProtocolMessage.FULL);
+				
 				/*
 				 * } else if (action.equals("set_cursor")) { int x =
 				 * Integer.parseInt(controller.protocol.getWord(true)); int y =
 				 * Integer.parseInt(controller.protocol.getWord(true)); curX =
-				 * x+dX; curY = y+dY; } else if (action.equals("close")) {
-				 * controller.showScr(anyRemote.CONTROL_FORM); return; } else if
+				 * x+dX; curY = y+dY; }  else if
 				 * (action.equals("cursor")) { // have to repaint (draw or hide
 				 * cursor cross) useCursor = true; useDynCursor = false; if
 				 * (controller.cScreen.scr != anyRemote.WMAN_FORM) { return; } }

@@ -17,6 +17,7 @@
 		<activity android:name="ListScreen"></activity>
 		<activity android:name="TextScreen"></activity>
 		<activity android:name="ControlScreen"></activity>
+		<activity android:name="WinManager"></activity>
 	</application>
 
 

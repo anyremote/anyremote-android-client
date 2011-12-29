@@ -49,6 +49,7 @@ import anyremote.client.android.util.ListHandler;
 import anyremote.client.android.util.ListItem;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.util.TextHandler;
+import anyremote.client.android.util.WinHandler;
 import anyremote.client.android.util.UserException;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -151,6 +152,10 @@ public class Dispatcher implements IConnectionListener {
 	int         textBkgr;
 	float       textFSize;
 	Typeface    textTFace;
+	
+	// Image Screen stuff
+	ArrayList<WinHandler> imHandlers = new ArrayList<WinHandler>();	
+	Bitmap      imScreen;
 
 	// telephony handler
 	PhoneManager phoneManager;
@@ -370,6 +375,9 @@ public class Dispatcher implements IConnectionListener {
 			break;
 
 		case CMD_EFIELD:			
+		case CMD_FSCREEN:
+		case CMD_MENU:
+		case CMD_POPUP:
 
 			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
 				sendToControlScreen(id,cmdTokens,stage);
@@ -377,6 +385,8 @@ public class Dispatcher implements IConnectionListener {
 				sendToListScreen(id,cmdTokens,stage);
 			} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
 				sendToTextScreen(id,cmdTokens,stage);
+			} else if (anyRemote.getCurScreen() == anyRemote.WMAN_FORM) {
+				sendToWmanScreen(id,cmdTokens,stage);
 			}
 
 			// result will be handled in handleEditFieldResult()
@@ -385,18 +395,6 @@ public class Dispatcher implements IConnectionListener {
 		case CMD_FMAN:
 			//controller.cScreen.setData(anyRemote.FMGR_FORM,cmdTokens,stage);
 			break;  
-
-
-		case CMD_FSCREEN:
-			//controller.cScreen.setFullScreen((String) cmdTokens.elementAt(1));
-			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
-				sendToControlScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-				sendToListScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-				sendToTextScreen(id,cmdTokens,stage);
-			}
-			break;   
 
 		case CMD_ICONLIST:
 		case CMD_LIST:
@@ -436,33 +434,6 @@ public class Dispatcher implements IConnectionListener {
 			
 			sendToListScreen(id,data,stage);		
 			break;  
-
-		case CMD_MENU:
-
-			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
-				sendToControlScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-				sendToListScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-				sendToTextScreen(id,cmdTokens,stage);
-			//} else {
-				//screen.setMenu(cmdTokens);
-			}
-			break; 
-
-		case CMD_POPUP:
-			
-			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
-				sendToControlScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-				sendToListScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-				sendToTextScreen(id,cmdTokens,stage);
-			//} else {
-				//screen.setMenu(cmdTokens);
-			}
-
-			break; 
 
 		case CMD_PARAM:
 			//controller.setParam(cmdTokens);
@@ -508,7 +479,36 @@ public class Dispatcher implements IConnectionListener {
 			break;
 
 		case CMD_IMAGE:
-			//controller.cScreen.setData(anyRemote.WMAN_FORM,cmdTokens,stage);
+			
+			boolean doCloseW = false;
+			
+			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {
+				doCloseW = true;
+			}
+			
+			if (anyRemote.logVisible()) {
+				if (doCloseW) {
+					context.setPrevView(anyRemote.CONTROL_FORM);
+				}
+				return;
+			}
+
+			if (doCloseW) { 
+				// Close WinManager Activity (even it was not started ;-)) and open ControlForm
+				context.setCurrentView(anyRemote.CONTROL_FORM, "");
+				return;
+			}
+		
+			// Create activity with (possibly) empty list
+			if (anyRemote.getCurScreen() != anyRemote.WMAN_FORM) {
+				context.setCurrentView(anyRemote.WMAN_FORM, "");
+			}
+			
+			Vector dataw = new Vector();
+			dataw.add(id);
+			
+			sendToWmanScreen(id,dataw,stage);		
+
 			break;    
 
 		case CMD_GETSCRSIZE:
@@ -560,6 +560,8 @@ public class Dispatcher implements IConnectionListener {
 					sendToListScreen(id,cmdTokens,stage);
 				} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
 					sendToTextScreen(id,cmdTokens,stage);
+				} else if (anyRemote.getCurScreen() == anyRemote.WMAN_FORM) {
+					sendToWmanScreen(id,cmdTokens,stage);
 				} else /* if (anyRemote.currForm == anyRemote.CONTROL_FORM)*/ {
 					sendToControlScreen(id,cmdTokens,stage);
 				}
@@ -733,6 +735,45 @@ public class Dispatcher implements IConnectionListener {
 		}
 	}
 	
+	public void sendToWmanScreen(int id, Vector cmdTokens, int stage) {
+		
+		log("sendToWmanScreen "+id+" sz="+cmdTokens.size());
+		
+		
+		int num = 0;
+		while (imHandlers.size() == 0) {
+			log("sendToWmanScreen handler not set "+cmdTokens);
+
+			try {
+				Thread.sleep(1000);
+			} catch(Exception e) {
+				Thread.yield();
+			}
+			if (num>8) {
+				log("sendToWmanScreen SKIP EVENT");
+				return;
+			}
+			num++;
+		}
+		
+		ProtocolMessage pm = new ProtocolMessage();
+		pm.tokens = cmdTokens;
+		pm.stage  = stage;
+
+		final Iterator<WinHandler> itr = imHandlers.iterator();
+		while (itr.hasNext()) {
+			try {
+				final Handler handler = itr.next();
+				
+			    log("sendToWmanScreen SEND "+handler);
+			    
+		     	Message msg = handler.obtainMessage(id, pm);
+			    msg.sendToTarget();
+			} catch (Exception e) {
+			}
+		}
+	}
+	
 	public void sendToAll(int id, Vector cmdTokens) {
 
 		ProtocolMessage pm = new ProtocolMessage();
@@ -765,6 +806,17 @@ public class Dispatcher implements IConnectionListener {
 		while (itrt.hasNext()) {
 			try {
 				final Handler handler = itrt.next();
+			    
+		     	Message msg = handler.obtainMessage(id, pm);
+			    msg.sendToTarget();
+			} catch (Exception e) {
+			}
+		}
+		
+		final Iterator<WinHandler> itrw = imHandlers.iterator();
+		while (itrw.hasNext()) {
+			try {
+				final Handler handler = itrw.next();
 			    
 		     	Message msg = handler.obtainMessage(id, pm);
 			    msg.sendToTarget();
@@ -971,9 +1023,19 @@ public class Dispatcher implements IConnectionListener {
 			textHandlers.add(handler);
 		}
 	}
-	
-  	public synchronized void removeMessageHandlerTF(TextHandler handler) {
+  	
+ 	public synchronized void removeMessageHandlerTF(TextHandler handler) {
 		textHandlers.remove(handler);
+	}
+ 	
+ 	public synchronized void addMessageHandlerWM(WinHandler handler) {
+		if (!imHandlers.contains(handler)) {
+			imHandlers.add(handler);
+		}
+	}
+	
+  	public synchronized void removeMessageHandlerWM(WinHandler handler) {
+  		imHandlers.remove(handler);
 	}
 
 	//
