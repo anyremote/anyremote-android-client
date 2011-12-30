@@ -115,7 +115,7 @@ public class Dispatcher implements IConnectionListener {
 
 	// Control Screen stuff
 	Vector<String> cfMenu = new Vector<String>();
-	ArrayList<ControlScreenHandler> cfHandlers = new ArrayList<ControlScreenHandler>();	
+	ArrayList<Handler> cfHandlers = new ArrayList<Handler>();	
 	int    cfSkin;
 	String cfTitle;
 	String cfStatus;
@@ -134,7 +134,7 @@ public class Dispatcher implements IConnectionListener {
 	String listTitle;
 	int    listSelectPos = -1;
 	Vector<String> listMenu = new Vector<String>();
-	ArrayList<ListHandler> listHandlers = new ArrayList<ListHandler>();
+	ArrayList<Handler> listHandlers = new ArrayList<Handler>();
 	ArrayList<ListItem> listContent = null;
 	boolean listCustomBackColor = false;
 	boolean listCustomTextColor = false;
@@ -146,7 +146,7 @@ public class Dispatcher implements IConnectionListener {
 	// Text Screen stuff
 	String textTitle;
 	Vector<String> textMenu = new Vector<String>();
-	ArrayList<TextHandler> textHandlers = new ArrayList<TextHandler>();
+	ArrayList<Handler> textHandlers = new ArrayList<Handler>();
 	StringBuilder textContent;
 	int         textFrgr;
 	int         textBkgr;
@@ -154,7 +154,7 @@ public class Dispatcher implements IConnectionListener {
 	Typeface    textTFace;
 	
 	// Image Screen stuff
-	ArrayList<WinHandler> imHandlers = new ArrayList<WinHandler>();	
+	ArrayList<Handler> imHandlers = new ArrayList<Handler>();	
 	Bitmap      imScreen;
 
 	// telephony handler
@@ -642,7 +642,7 @@ public class Dispatcher implements IConnectionListener {
 		pm.tokens = cmdTokens;
 		pm.stage  = stage;
 		
-		final Iterator<ControlScreenHandler> itr = cfHandlers.iterator();
+		final Iterator<Handler> itr = cfHandlers.iterator();
 		while (itr.hasNext()) {
 			try {
 				final Handler handler = itr.next();
@@ -681,7 +681,7 @@ public class Dispatcher implements IConnectionListener {
 		pm.tokens = cmdTokens;
 		pm.stage  = stage;
 
-		final Iterator<ListHandler> itr = listHandlers.iterator();
+		final Iterator<Handler> itr = listHandlers.iterator();
 		while (itr.hasNext()) {
 			try {
 				final Handler handler = itr.next();
@@ -723,7 +723,7 @@ public class Dispatcher implements IConnectionListener {
 		pm.tokens = cmdTokens;
 		pm.stage  = stage;
 		
-		final Iterator<TextHandler> itr = textHandlers.iterator();
+		final Iterator<Handler> itr = textHandlers.iterator();
 		while (itr.hasNext()) {
 			try {
 				final Handler handler = itr.next();
@@ -762,7 +762,7 @@ public class Dispatcher implements IConnectionListener {
 		pm.tokens = cmdTokens;
 		pm.stage  = stage;
 
-		final Iterator<WinHandler> itr = imHandlers.iterator();
+		final Iterator<Handler> itr = imHandlers.iterator();
 		while (itr.hasNext()) {
 			try {
 				final Handler handler = itr.next();
@@ -782,7 +782,7 @@ public class Dispatcher implements IConnectionListener {
 		pm.tokens = cmdTokens;
 		pm.stage  = ProtocolMessage.FULL;
 
-		final Iterator<ControlScreenHandler> itrc = cfHandlers.iterator();
+		final Iterator<Handler> itrc = cfHandlers.iterator();
 		while (itrc.hasNext()) {
 			try {
 				final Handler handler = itrc.next();
@@ -793,7 +793,7 @@ public class Dispatcher implements IConnectionListener {
 			}
 		}
 		
-		final Iterator<ListHandler> itrl = listHandlers.iterator();
+		final Iterator<Handler> itrl = listHandlers.iterator();
 		while (itrl.hasNext()) {
 			try {
 				final Handler handler = itrl.next();
@@ -804,7 +804,7 @@ public class Dispatcher implements IConnectionListener {
 			}
 		}
 		
-		final Iterator<TextHandler> itrt = textHandlers.iterator();
+		final Iterator<Handler> itrt = textHandlers.iterator();
 		while (itrt.hasNext()) {
 			try {
 				final Handler handler = itrt.next();
@@ -815,7 +815,7 @@ public class Dispatcher implements IConnectionListener {
 			}
 		}
 		
-		final Iterator<WinHandler> itrw = imHandlers.iterator();
+		final Iterator<Handler> itrw = imHandlers.iterator();
 		while (itrw.hasNext()) {
 			try {
 				final Handler handler = itrw.next();
@@ -1000,43 +1000,43 @@ public class Dispatcher implements IConnectionListener {
 		anyRemote._log("Dispatcher",msg);
 	}
 	
-	public synchronized void addMessageHandlerCF(ControlScreenHandler handler) {
+	public synchronized void addMessageHandlerCF(Handler handler) {
 		if (!cfHandlers.contains(handler)) {
 			cfHandlers.add(handler);
 		}
 	}
 	
-  	public synchronized void removeMessageHandlerCF(ControlScreenHandler handler) {
+  	public synchronized void removeMessageHandlerCF(Handler handler) {
 		cfHandlers.remove(handler);
 	}
   	
-	public synchronized void addMessageHandlerLF(ListHandler handler) {
+	public synchronized void addMessageHandlerLF(Handler handler) {
 		if (!listHandlers.contains(handler)) {
 			listHandlers.add(handler);
 		}
 	}
 	
-  	public synchronized void removeMessageHandlerLF(ListHandler handler) {
+  	public synchronized void removeMessageHandlerLF(Handler handler) {
 		listHandlers.remove(handler);
 	}
 
-  	public synchronized void addMessageHandlerTF(TextHandler handler) {
+  	public synchronized void addMessageHandlerTF(Handler handler) {
 		if (!textHandlers.contains(handler)) {
 			textHandlers.add(handler);
 		}
 	}
   	
- 	public synchronized void removeMessageHandlerTF(TextHandler handler) {
+ 	public synchronized void removeMessageHandlerTF(Handler handler) {
 		textHandlers.remove(handler);
 	}
  	
- 	public synchronized void addMessageHandlerWM(WinHandler handler) {
+ 	public synchronized void addMessageHandlerWM(Handler handler) {
 		if (!imHandlers.contains(handler)) {
 			imHandlers.add(handler);
 		}
 	}
 	
-  	public synchronized void removeMessageHandlerWM(WinHandler handler) {
+  	public synchronized void removeMessageHandlerWM(Handler handler) {
   		imHandlers.remove(handler);
 	}
 
