@@ -23,12 +23,10 @@ package anyremote.client.android;
 
 import java.util.Vector;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -38,8 +36,8 @@ import anyremote.client.android.R;
 
 public class TextScreen extends arActivity  {
 
-	TextView    text;
-	TextHandler hdlLocalCopy;
+	TextView  text;
+	Dispatcher.ArHandler hdlLocalCopy;
 	Vector<String> defMenu = new Vector<String>();
 	boolean isLog = false;
 
@@ -65,8 +63,8 @@ public class TextScreen extends arActivity  {
 			
 		} else {
 			
-			hdlLocalCopy = new TextHandler(this);
-			anyRemote.protocol.addMessageHandlerTF(hdlLocalCopy);
+			hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.TEXT_FORM, new TextHandler(this));
+			anyRemote.protocol.addMessageHandler(hdlLocalCopy);
 		    
 			anyRemote.protocol.setFullscreen(this);
 
@@ -127,7 +125,7 @@ public class TextScreen extends arActivity  {
 	@Override
 	protected void onDestroy() {	
 		log("onDestroy");	
-	   	anyRemote.protocol.removeMessageHandlerTF(hdlLocalCopy);		
+	   	anyRemote.protocol.removeMessageHandler(hdlLocalCopy);		
 	   	isLog = false;
 	   	super.onDestroy();
 	}
@@ -163,7 +161,7 @@ public class TextScreen extends arActivity  {
 		intent.putExtra(anyRemote.ACTION, action);	    
 		
 		if (isLog) {
-			intent.putExtra(anyRemote.SWITCHTO, anyRemote.NO_FORM);		
+			//intent.putExtra(anyRemote.SWITCHTO, anyRemote.NO_FORM);		
 		} else {
 			log("doFinish");
 			intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);	   

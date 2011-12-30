@@ -32,13 +32,9 @@ import android.widget.TextView;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import anyremote.client.android.util.ListHandler;
-import anyremote.client.android.util.ListItem;
 import anyremote.client.android.util.ListScreenAdapter;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.R;
@@ -50,7 +46,7 @@ public class ListScreen extends arActivity
 
 	ListView          list;
 	ListScreenAdapter dataSource;
-	ListHandler       hdlLocalCopy;
+	Dispatcher.ArHandler hdlLocalCopy;
 
 	boolean skipDismissEditDialog = false;
 
@@ -66,8 +62,8 @@ public class ListScreen extends arActivity
 
 		dataSource = new ListScreenAdapter(this, R.layout.list_form_item, anyRemote.protocol.listContent);
 		
-		hdlLocalCopy = new ListHandler(this);
-		anyRemote.protocol.addMessageHandlerLF(hdlLocalCopy);
+		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.LIST_FORM, new ListHandler(this));
+		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
 		
 		anyRemote.protocol.setFullscreen(this);
 
@@ -114,7 +110,7 @@ public class ListScreen extends arActivity
 	@Override
 	protected void onDestroy() {	
 		log("onDestroy");	
-	   	anyRemote.protocol.removeMessageHandlerLF(hdlLocalCopy);
+	   	anyRemote.protocol.removeMessageHandler(hdlLocalCopy);
 	   	super.onDestroy();
 	}
 

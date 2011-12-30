@@ -26,13 +26,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Environment;
 import android.os.Handler;
@@ -43,13 +41,9 @@ import android.view.Surface;
 import android.view.WindowManager;
 import anyremote.client.android.Connection.IConnectionListener;
 import anyremote.client.android.util.Address;
-import anyremote.client.android.util.ControlScreenHandler;
 import anyremote.client.android.util.ISocket;
-import anyremote.client.android.util.ListHandler;
 import anyremote.client.android.util.ListItem;
 import anyremote.client.android.util.ProtocolMessage;
-import anyremote.client.android.util.TextHandler;
-import anyremote.client.android.util.WinHandler;
 import anyremote.client.android.util.UserException;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -101,9 +95,22 @@ public class Dispatcher implements IConnectionListener {
 	static final int SIZE_SMALL    = 12;
 	static final int SIZE_MEDIUM   = 22;
 	static final int SIZE_LARGE    = 36;
+	
+    public static class ArHandler {
+    	
+    	public ArHandler(int a,Handler h) {
+    		actId  = a;
+    		hdl    = h;
+    	}
+    	
+        public int actId   = anyRemote.NO_FORM;
+        public Handler hdl = null;
+     }
 
 	ArrayList<Handler> handlers;
-
+	
+	ArrayList<ArHandler> actHandlers = new ArrayList<ArHandler>();
+	
 	Connection   connection = null;
 	anyRemote    context    = null;
 	boolean      autoPass   = false;
@@ -352,7 +359,7 @@ public class Dispatcher implements IConnectionListener {
 			disconnect(true); 
 			break;
 
-			/*case CMD_EXIT:
+		/*case CMD_EXIT:
 			controller.exit();
 			break;*/
 
@@ -367,31 +374,21 @@ public class Dispatcher implements IConnectionListener {
 		case CMD_COVER:
 
 			// Create activity with (possibly) empty list
-			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
-				sendToControlScreen(id,cmdTokens,stage);
-			} else {
-				// Start list screen activity and transfer data
+			if (anyRemote.getCurScreen() != anyRemote.CONTROL_FORM) {
 				context.setCurrentView(anyRemote.CONTROL_FORM, "");
-				sendToControlScreen(id,cmdTokens,stage);
-			}			
-			break;
+			} 
+		    sendToActivity(anyRemote.CONTROL_FORM,id,cmdTokens,stage);
+
+		    break;
 
 		case CMD_EFIELD:			
 		case CMD_FSCREEN:
 		case CMD_MENU:
 		case CMD_POPUP:
-
-			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
-				sendToControlScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-				sendToListScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-				sendToTextScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.WMAN_FORM) {
-				sendToWmanScreen(id,cmdTokens,stage);
-			}
-
-			// result will be handled in handleEditFieldResult()
+			
+			sendToActivity(anyRemote.getCurScreen(),id,cmdTokens,stage);
+			// CMD_EFIELD: result will be handled in handleEditFieldResult()
+			
 			break; 
 
 		case CMD_FMAN:
@@ -434,7 +431,7 @@ public class Dispatcher implements IConnectionListener {
 			data.add(id);
 			data.add(needUpdateDataSource);
 			
-			sendToListScreen(id,data,stage);		
+			sendToActivity(anyRemote.LIST_FORM,id,data,stage);		
 			break;  
 
 		case CMD_PARAM:
@@ -471,8 +468,8 @@ public class Dispatcher implements IConnectionListener {
 			
 			Vector datat = new Vector();
 			datat.add(id);
-			
-			sendToTextScreen(id,datat,stage);		
+				
+			sendToActivity(anyRemote.TEXT_FORM,id,datat,stage);		
 			break;       
 
 		case CMD_VIBRATE:
@@ -509,7 +506,7 @@ public class Dispatcher implements IConnectionListener {
 			Vector dataw = new Vector();
 			dataw.add(id);
 			
-			sendToWmanScreen(id,dataw,stage);		
+			sendToActivity(anyRemote.WMAN_FORM,id,dataw,stage);		
 
 			break;    
 
@@ -558,15 +555,7 @@ public class Dispatcher implements IConnectionListener {
 
 			if (autoPass || currentConnPass.equals("")) {
 				log("ASK FOR PASS");
-				if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-					sendToListScreen(id,cmdTokens,stage);
-				} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-					sendToTextScreen(id,cmdTokens,stage);
-				} else if (anyRemote.getCurScreen() == anyRemote.WMAN_FORM) {
-					sendToWmanScreen(id,cmdTokens,stage);
-				} else /* if (anyRemote.currForm == anyRemote.CONTROL_FORM)*/ {
-					sendToControlScreen(id,cmdTokens,stage);
-				}
+				sendToActivity(anyRemote.getCurScreen(),id,cmdTokens,stage);
 				//result will be handled in handleEditFieldResult()
 			} else {
 				log("USE PASS >"+currentConnPass+"<");
@@ -613,216 +602,53 @@ public class Dispatcher implements IConnectionListener {
 			log("notifyMessage: Command or handler unknown");
 		}
 	}
+	
+	public void sendToActivity(int activity, int id, Vector cmdTokens, int stage) {
 
-	public void sendToControlScreen(int id, Vector cmdTokens, int stage) {
-		//log("sendToControlScreen "+id);
-		int num = 0;
-		
-		//while (cfHandler == null) {
-		while (cfHandlers.size() == 0) {
-			log("sendToControlScreen handler not set "+cmdTokens);
-
-			// do not close closed control form
-			if (cmdTokens.size() > 0 && ((Integer) cmdTokens.elementAt(0)) == CMD_CLOSE) {  // skip
-				return;
-			}
-
-			try {
-				Thread.sleep(1000);
-			} catch(Exception e) {
-				Thread.yield();
-			}
-			if (num>8) {
-				log("sendToControlScreen SKIP EVENT");
-				return;
-			}
-			num++;
-		}
-		ProtocolMessage pm = new ProtocolMessage();
-		pm.tokens = cmdTokens;
-		pm.stage  = stage;
-		
-		final Iterator<Handler> itr = cfHandlers.iterator();
-		while (itr.hasNext()) {
-			try {
-				final Handler handler = itr.next();
-				
-			    log("sendToControlScreen SEND "+handler);
-			    
-		     	Message msg = handler.obtainMessage(id, pm);
-			    msg.sendToTarget();
-			} catch (Exception e) {
-			}
-		}
-	}
-
-	public void sendToListScreen(int id, Vector cmdTokens, int stage) {
-		
-		log("sendToListScreen "+id+" sz="+cmdTokens.size());
-		
-		
-		int num = 0;
-		while (listHandlers.size() == 0) {
-			log("sendToListScreen handler not set "+cmdTokens);
-
-			try {
-				Thread.sleep(1000);
-			} catch(Exception e) {
-				Thread.yield();
-			}
-			if (num>8) {
-				log("sendToListScreen SKIP EVENT");
-				return;
-			}
-			num++;
-		}
-		
 		ProtocolMessage pm = new ProtocolMessage();
 		pm.tokens = cmdTokens;
 		pm.stage  = stage;
 
-		final Iterator<Handler> itr = listHandlers.iterator();
-		while (itr.hasNext()) {
-			try {
-				final Handler handler = itr.next();
-				
-			    log("sendToListScreen SEND "+handler);
-			    
-		     	Message msg = handler.obtainMessage(id, pm);
-			    msg.sendToTarget();
-			} catch (Exception e) {
-			}
-		}
-	}
-
-	public void sendToTextScreen(int id, Vector cmdTokens, int stage) {
-		//log("sendToTextScreen "+id);
 		int num = 0;
-		while (textHandlers.size() == 0) {
-			log("sendToTextScreen handler not set "+cmdTokens);
-			// do not close closed test
-			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
-				if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-					textContent.delete(0, textContent.length());
+		boolean sent = false;
+		while (!sent) {
+						
+			final Iterator<ArHandler> itr = actHandlers.iterator();
+			while (itr.hasNext()) {
+				try {
+					final ArHandler handler = itr.next();
+					if (activity < 0 || 					// send to all
+						handler.actId == activity) {
+						
+				        log("sendToActivity "+activity+" SEND ");
+				    
+			     	    Message msg = handler.hdl.obtainMessage(id, pm);
+				        msg.sendToTarget();
+				        
+				        sent = true;
+					}
+				} catch (Exception e) {
+			    }
+			}
+			
+			if (!sent) {
+				
+				if (activity == anyRemote.CONTROL_FORM) { 	// does it needed ?
+					if (cmdTokens.size() > 0 && ((Integer) cmdTokens.elementAt(0)) == CMD_CLOSE) {  // skip
+						return;
+					}
 				}
-				return;
-			}
-
-			try {
-				Thread.sleep(1000);
-			} catch(Exception e) {
-				Thread.yield();
-			}
-			if (num>8) {
-				log("sendToTextScreen SKIP EVENT");
-				return;
-			}
-			num++;
-		}
-		ProtocolMessage pm = new ProtocolMessage();
-		pm.tokens = cmdTokens;
-		pm.stage  = stage;
-		
-		final Iterator<Handler> itr = textHandlers.iterator();
-		while (itr.hasNext()) {
-			try {
-				final Handler handler = itr.next();
 				
-			    log("sendToTextScreen SEND "+handler);
-			    
-		     	Message msg = handler.obtainMessage(id, pm);
-			    msg.sendToTarget();
-			} catch (Exception e) {
-			}
-		}
-	}
-	
-	public void sendToWmanScreen(int id, Vector cmdTokens, int stage) {
-		
-		log("sendToWmanScreen "+id+" sz="+cmdTokens.size());
-		
-		
-		int num = 0;
-		while (imHandlers.size() == 0) {
-			log("sendToWmanScreen handler not set "+cmdTokens);
-
-			try {
-				Thread.sleep(1000);
-			} catch(Exception e) {
-				Thread.yield();
-			}
-			if (num>8) {
-				log("sendToWmanScreen SKIP EVENT");
-				return;
-			}
-			num++;
-		}
-		
-		ProtocolMessage pm = new ProtocolMessage();
-		pm.tokens = cmdTokens;
-		pm.stage  = stage;
-
-		final Iterator<Handler> itr = imHandlers.iterator();
-		while (itr.hasNext()) {
-			try {
-				final Handler handler = itr.next();
-				
-			    log("sendToWmanScreen SEND "+handler);
-			    
-		     	Message msg = handler.obtainMessage(id, pm);
-			    msg.sendToTarget();
-			} catch (Exception e) {
-			}
-		}
-	}
-	
-	public void sendToAll(int id, Vector cmdTokens) {
-
-		ProtocolMessage pm = new ProtocolMessage();
-		pm.tokens = cmdTokens;
-		pm.stage  = ProtocolMessage.FULL;
-
-		final Iterator<Handler> itrc = cfHandlers.iterator();
-		while (itrc.hasNext()) {
-			try {
-				final Handler handler = itrc.next();
-			    
-		     	Message msg = handler.obtainMessage(id, pm);
-			    msg.sendToTarget();
-			} catch (Exception e) {
-			}
-		}
-		
-		final Iterator<Handler> itrl = listHandlers.iterator();
-		while (itrl.hasNext()) {
-			try {
-				final Handler handler = itrl.next();
-			    
-		     	Message msg = handler.obtainMessage(id, pm);
-			    msg.sendToTarget();
-			} catch (Exception e) {
-			}
-		}
-		
-		final Iterator<Handler> itrt = textHandlers.iterator();
-		while (itrt.hasNext()) {
-			try {
-				final Handler handler = itrt.next();
-			    
-		     	Message msg = handler.obtainMessage(id, pm);
-			    msg.sendToTarget();
-			} catch (Exception e) {
-			}
-		}
-		
-		final Iterator<Handler> itrw = imHandlers.iterator();
-		while (itrw.hasNext()) {
-			try {
-				final Handler handler = itrw.next();
-			    
-		     	Message msg = handler.obtainMessage(id, pm);
-			    msg.sendToTarget();
-			} catch (Exception e) {
+				try {
+					Thread.sleep(1000);
+				} catch(Exception e) {
+					Thread.yield();
+				}
+				if (num > 8) {
+					log("sendToActivity "+activity+" SKIP EVENT");
+					return;
+				}
+				num++;
 			}
 		}
 	}
@@ -1000,46 +826,16 @@ public class Dispatcher implements IConnectionListener {
 		anyRemote._log("Dispatcher",msg);
 	}
 	
-	public synchronized void addMessageHandlerCF(Handler handler) {
-		if (!cfHandlers.contains(handler)) {
-			cfHandlers.add(handler);
+	public synchronized void addMessageHandler(ArHandler h) {
+		if (!actHandlers.contains(h)) {
+			actHandlers.add(h);
 		}
 	}
 	
-  	public synchronized void removeMessageHandlerCF(Handler handler) {
-		cfHandlers.remove(handler);
+  	public synchronized void removeMessageHandler(ArHandler h) {
+ 		actHandlers.remove(h);
 	}
   	
-	public synchronized void addMessageHandlerLF(Handler handler) {
-		if (!listHandlers.contains(handler)) {
-			listHandlers.add(handler);
-		}
-	}
-	
-  	public synchronized void removeMessageHandlerLF(Handler handler) {
-		listHandlers.remove(handler);
-	}
-
-  	public synchronized void addMessageHandlerTF(Handler handler) {
-		if (!textHandlers.contains(handler)) {
-			textHandlers.add(handler);
-		}
-	}
-  	
- 	public synchronized void removeMessageHandlerTF(Handler handler) {
-		textHandlers.remove(handler);
-	}
- 	
- 	public synchronized void addMessageHandlerWM(Handler handler) {
-		if (!imHandlers.contains(handler)) {
-			imHandlers.add(handler);
-		}
-	}
-	
-  	public synchronized void removeMessageHandlerWM(Handler handler) {
-  		imHandlers.remove(handler);
-	}
-
 	//
 	// List Screen activity persistent data handling
 	//

@@ -24,12 +24,7 @@ package anyremote.client.android;
 import java.io.File;
 import java.util.TreeMap;
 import java.util.Vector;
-
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -46,7 +41,6 @@ import android.view.Window;
 import anyremote.client.android.util.Address;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.util.ViewHandler;
-
 import anyremote.client.android.R;
 
 public class anyRemote extends Activity {
@@ -210,31 +204,13 @@ public class anyRemote extends Activity {
 				break;
 	
 			case CONTROL_FORM:
-				_log("setCurrentView stop ControlScreen");
-				ctokens = new Vector();
-				ctokens.add(Dispatcher.CMD_CLOSE);
-				protocol.sendToControlScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
-			break;
-	
 			case LIST_FORM:
-				_log("setCurrentView stop ListScreen");
-				ctokens = new Vector();
-				ctokens.add(Dispatcher.CMD_CLOSE);
-				protocol.sendToListScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
-				break;
-	
 			case TEXT_FORM:
-				_log("setCurrentView stop TextScreen");
-				ctokens = new Vector();
-				ctokens.add(Dispatcher.CMD_CLOSE);
-				protocol.sendToTextScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
-				break;
-
 			case WMAN_FORM:
-				_log("setCurrentView stop WinManager");
+				_log("setCurrentView stop "+prevForm);
 				ctokens = new Vector();
 				ctokens.add(Dispatcher.CMD_CLOSE);
-				protocol.sendToWmanScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
+				protocol.sendToActivity(prevForm, Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
 				break;
 	
 			case LOG_FORM:
@@ -354,6 +330,9 @@ public class anyRemote extends Activity {
 			
 		} else if (requestCode == LOG_FORM) {
 			_log("onActivityResult LOG ->"+prevForm);
+			if (prevForm  == LOG_FORM) {
+				prevForm = CONTROL_FORM; // still have issues with activity stop/start synchronizations
+			}
 			setCurrentView(prevForm, "show");
 		}
 	}
@@ -436,7 +415,7 @@ public class anyRemote extends Activity {
 				// send quit to all registered activity
 				Vector ctokens = new Vector();
 				ctokens.add(Dispatcher.CMD_CLOSE);
-				protocol.sendToAll(Dispatcher.CMD_CLOSE,ctokens);
+				protocol.sendToActivity(-1, Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
 
 				if (currForm != LOG_FORM) {
 					currForm = DUMMY_FORM;  // trick

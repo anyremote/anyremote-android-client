@@ -23,12 +23,9 @@ package anyremote.client.android;
 
 import java.util.Vector;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -39,7 +36,7 @@ import anyremote.client.android.R;
 public class WinManager extends arActivity  {
 	
 	ImageView image;
-	WinHandler hdlLocalCopy;
+	Dispatcher.ArHandler hdlLocalCopy;
 	Vector<String> defMenu = new Vector<String>();
 
 	@Override
@@ -55,8 +52,8 @@ public class WinManager extends arActivity  {
 		
 		defMenu.add("Back");
 			
-		hdlLocalCopy = new WinHandler(this);
-		anyRemote.protocol.addMessageHandlerWM(hdlLocalCopy);
+		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.WMAN_FORM, new WinHandler(this));
+		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
 		    
 		anyRemote.protocol.setFullscreen(this);
 
@@ -99,7 +96,7 @@ public class WinManager extends arActivity  {
 	@Override
 	protected void onDestroy() {	
 		log("onDestroy");	
-	   	anyRemote.protocol.removeMessageHandlerWM(hdlLocalCopy);		
+	   	anyRemote.protocol.removeMessageHandler(hdlLocalCopy);		
 	   	super.onDestroy();
 	}
 

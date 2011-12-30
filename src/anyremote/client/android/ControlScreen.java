@@ -23,32 +23,22 @@ package anyremote.client.android;
 
 import java.util.Vector;
 
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Environment;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-//import android.widget.SeekBar;
-//import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TableLayout;
 import android.widget.TextView;
-import android.text.method.ScrollingMovementMethod;
 import android.view.Display;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.KeyEvent;
-import android.view.WindowManager;
 import anyremote.client.android.util.ControlScreenHandler;
 import anyremote.client.android.util.ProtocolMessage;
 
@@ -93,7 +83,7 @@ public class ControlScreen extends arActivity
     
     boolean fullscreen  = false;
     boolean useJoystick = false;
-    ControlScreenHandler hdlLocalCopy;
+    Dispatcher.ArHandler hdlLocalCopy;
     
     ImageButton [] buttons;
     
@@ -113,14 +103,8 @@ public class ControlScreen extends arActivity
 		buttons = new ImageButton[NUM_ICONS];
 	    callMenuUpdate();
 	    
-	    //TextView title = (TextView) findViewById(R.id.cf_title);
-	    //title.setMovementMethod(new ScrollingMovementMethod());
-	    
-	    //TextView title2 = (TextView) findViewById(R.id.cf_btitle);
-	    //title2.setMovementMethod(new ScrollingMovementMethod());
-	    
-	    hdlLocalCopy = new ControlScreenHandler(this);
-	    anyRemote.protocol.addMessageHandlerCF(hdlLocalCopy);	    
+	    hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new ControlScreenHandler(this));
+	    anyRemote.protocol.addMessageHandler(hdlLocalCopy);	    
 		
 	    anyRemote.protocol.setFullscreen(this);
 		
@@ -167,7 +151,7 @@ public class ControlScreen extends arActivity
 	@Override
 	protected void onDestroy() {	
 		log("onDestroy");		
-    	anyRemote.protocol.removeMessageHandlerCF(hdlLocalCopy);
+    	anyRemote.protocol.removeMessageHandler(hdlLocalCopy);
 		super.onDestroy();
 	}
 
