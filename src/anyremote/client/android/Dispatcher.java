@@ -39,6 +39,7 @@ import android.os.Vibrator;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
+import android.widget.Toast;
 import anyremote.client.android.Connection.IConnectionListener;
 import anyremote.client.android.util.Address;
 import anyremote.client.android.util.ISocket;
@@ -105,7 +106,7 @@ public class Dispatcher implements IConnectionListener {
     	
         public int actId   = anyRemote.NO_FORM;
         public Handler hdl = null;
-     }
+    }
 
 	ArrayList<Handler> handlers;
 	
@@ -124,6 +125,7 @@ public class Dispatcher implements IConnectionListener {
 	Vector<String> cfMenu = new Vector<String>();
 	ArrayList<Handler> cfHandlers = new ArrayList<Handler>();	
 	int    cfSkin;
+	boolean cfUseJoystick;
 	String cfTitle;
 	String cfStatus;
 	String cfCaption;
@@ -797,6 +799,19 @@ public class Dispatcher implements IConnectionListener {
 		handlers.clear();
 	}
 
+	public void setFullscreen(String option) {
+
+		if (option.startsWith("on")) {
+			if (fullscreen) return;
+			fullscreen = true;			    	
+		} else if (option.startsWith("off")) {
+			if (!fullscreen) return;
+			fullscreen = false;
+		} else if (option.startsWith("toggle")) {
+			fullscreen = !fullscreen;
+		}
+	}
+	
 	public void setFullscreen(String option, arActivity act) {
 
 		if (option.startsWith("on")) {
@@ -837,9 +852,253 @@ public class Dispatcher implements IConnectionListener {
 	}
   	
 	//
+	// Control Screen activity persistent data handling
+	//
+    public void controlDataProcess(Vector vR) {
+    	
+    	//log("processData >"+vR+"<");
+    	if (vR.size() < 2) {
+    		return;
+    	}
+    	
+    	int id = (Integer) vR.elementAt(0);
+   
+		switch (id) {
+		
+		    case CMD_SKIN:
+		    	
+		    	controlSetSkin(vR); 
+			    break;
+				      
+		    case Dispatcher.CMD_STATUS:
+			   
+			    cfStatus = (String) vR.elementAt(1);
+				break;
+
+		    case CMD_TITLE:
+		    	
+		    	cfTitle = (String) vR.elementAt(1);
+				break;
+			
+		    case CMD_ICONS:
+		    	
+				controlSetIconLayout(vR);
+				break; 
+				
+  		    case CMD_BG:
+  		    	
+  		    	cfBkgr = anyRemote.parseColor(
+                        (String) vR.elementAt(1),
+                        (String) vR.elementAt(2),
+                        (String) vR.elementAt(3));
+   				break; 
+  		
+  		    case CMD_FG:
+
+  		    	cfFrgr = anyRemote.parseColor(
+                        (String) vR.elementAt(1),
+                        (String) vR.elementAt(2),
+                        (String) vR.elementAt(3));
+  		    	break;  
+  		  
+  		    case CMD_FONT:
+  		    	
+			    controlSetFontParams(vR);
+			    break; 
+			     
+		    case CMD_FSCREEN:
+		    	
+		    	setFullscreen((String) vR.elementAt(1));
+			    break;   
+			 				
+		    case CMD_VOLUME:
+		    	
+		    	Toast.makeText(context, "Volume is "+(String) vR.elementAt(1) +"%", Toast.LENGTH_SHORT).show();
+				break;  
+
+			case CMD_COVER:
+				
+				cfCover = (Bitmap) vR.elementAt(1); 
+				break;
+		}
+    }
+    
+	public void controlSetSkin(Vector vR) {
+		
+        String name   = (String) vR.elementAt(1);
+
+        //useCover    = false;
+        //cover       = null;
+         
+        //boolean newVolume = false;
+    	//int     newSize   = icSize;
+        
+        cfUseJoystick = false;
+        cfUpEvent   = "UP";
+        cfDownEvent = "DOWN";
+        cfInitFocus = 5;
+
+        boolean oneMore = false;
+        
+        for (int i=2;i<vR.size();) {
+        
+	        String oneParam = (String) vR.elementAt(i);
+                
+    		if (oneMore) {
+        		try {
+        		    cfInitFocus = btn2int(oneParam);
+                } catch (NumberFormatException e) {
+                	cfInitFocus = -1;
+ 	            }
+                	
+                oneMore = false;
+    		} else if (oneParam.equals("joystick_only")) {
+        		cfUseJoystick = true;
+		        //useKeypad   = false;
+    		} else if (oneParam.equals("keypad_only")) {
+        		cfUseJoystick = false;
+		        //useKeypad   = true;
+    		} else if (oneParam.equals("ticker")) {
+		        //newTicker   = true;
+    		} else if (oneParam.equals("noticker")) {
+		        //newTicker   = false;
+    		} else if (oneParam.equals("volume")) {
+		        //newVolume   = true;
+    		} else if (oneParam.equals("size16")) {
+		        //newSize = 16;
+    		} else if (oneParam.equals("size32")) {
+	            //newSize = 32;
+    		} else if (oneParam.equals("size48")) {
+	            //newSize = 48;
+    		} else if (oneParam.equals("size64")) {
+	            //newSize = 64;
+    		} else if (oneParam.equals("size128")) {
+	            //newSize = 128;
+    		} else if (oneParam.equals("split")) {
+	            //newSplit = true;
+    		} else if (oneParam.equals("choose")) {
+		        oneMore = true;
+    		} else if (oneParam.equals("up")) {
+                i++;
+                if (i<vR.size()) {
+                    cfUpEvent = (String) vR.elementAt(i);
+                }
+    		} else if (oneParam.equals("down")) {
+                i++;
+                if (i<vR.size()) {
+                	cfDownEvent = (String) vR.elementAt(i);
+                }
+    		} 
+            i++;
+        }
+        
+	    int newSkin = anyRemote.protocol.cfSkin;
+	    if (name.equals("default")) {
+	    	cfSkin = ControlScreen.SK_DEFAULT;
+        } else if (name.equals("bottomline")) {
+        	cfSkin = ControlScreen.SK_BOTTOMLINE;
+        }
+    }
+ 
+	private void controlSetIconLayout(Vector data) {
+     	
+    	if (data.size() == 0) {
+     	    return;
+    	}
+    	
+		if (!((String) data.elementAt(1)).equals("SAME")) {
+			cfCaption = (String) data.elementAt(1);
+        }
+		
+		int maxIcon = (cfSkin == ControlScreen.SK_BOTTOMLINE ?  ControlScreen.NUM_ICONS_BTM : ControlScreen.NUM_ICONS);
+		
+        for (int idx=2;idx<data.size()-1;idx+=2) {
+         	try {
+        		int i = btn2int((String) data.elementAt(idx));
+
+        		if (i >= 0 || i < maxIcon) {    
+        			anyRemote.protocol.cfIcons[i] = (String) data.elementAt(idx+1);
+       		    }  
+	         } catch (Exception e) { }
+        }
+    }
+   
+	private void controlSetFontParams(Vector defs) {
+		
+		boolean bold   = false;
+		boolean italic = false;
+		float   size   = SIZE_MEDIUM;
+		boolean setSize = false;
+		
+		int start = 1;
+       	while(start<defs.size()) {
+            String spec = (String) defs.elementAt(start);
+            if (spec.equals("plain")) {
+            	//style = Font.STYLE_PLAIN;
+            } else if (spec.equals("bold")) {
+            	bold = true;
+            } else if (spec.equals("italic")) {
+            	italic = true;
+            } else if (spec.equals("underlined")) {
+            	//style = (style == Font.STYLE_PLAIN ? Font.STYLE_UNDERLINED : style|Font.STYLE_UNDERLINED);
+            } else if (spec.equals("small")) {
+            	size = Dispatcher.SIZE_SMALL;
+            	setSize = true;
+            } else if (spec.equals("medium")) {
+            	size = Dispatcher.SIZE_MEDIUM;
+               	setSize = true;
+            } else if (spec.equals("large")) {
+            	size = Dispatcher.SIZE_LARGE;
+               	setSize = true;
+            } else if (spec.equals("monospace")) {
+            	//face  = Font.FACE_MONOSPACE;
+            } else if (spec.equals("system")) {
+            	//face  = Font.FACE_SYSTEM;
+            } else if (spec.equals("proportional")) {
+            	//face  = Font.FACE_PROPORTIONAL;
+            //} else {
+            //	controller.showAlert("Incorrect font "+spec);
+            }
+        	start++;
+        }
+       	
+	    if (bold && italic) {
+	    	cfTFace = Typeface.defaultFromStyle(Typeface.BOLD_ITALIC);
+	    } else if (bold) {
+	    	cfTFace = Typeface.defaultFromStyle(Typeface.BOLD);
+	    } else if (italic) {
+	    	cfTFace = Typeface.defaultFromStyle(Typeface.ITALIC);
+	    } else {
+	    	cfTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
+	    }
+	    
+	    if (setSize) {
+	        cfFSize = size;
+	    }
+	}
+
+	private int btn2int(String btn) {
+       	int i = -1;
+        
+		if (btn.equals("*")) {
+		    i=9;
+        } else if (btn.equals("#")) {
+        	i=11;
+        } else {
+        	try {
+        		i = Integer.parseInt(btn) - 1;
+        		if (i == -1) {	// 0 was parsed
+        			i = 10;
+        		}
+            } catch (NumberFormatException e) { }
+        }
+        return i;
+    }	
+	
+	//
 	// List Screen activity persistent data handling
 	//
-
+  	
 	//
 	// list|iconlist, add|replace|!close!|clear|!show![,Title,item1,...itemN]
 	// 

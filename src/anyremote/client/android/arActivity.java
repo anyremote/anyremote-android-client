@@ -29,6 +29,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.Menu;
 import anyremote.client.android.R;
+import anyremote.client.android.util.ProtocolMessage;
 
 public class arActivity extends Activity 
 		implements DialogInterface.OnDismissListener,
@@ -49,7 +50,11 @@ public class arActivity extends Activity
 	public void log(String msg) {
 		anyRemote._log(prefix,msg);
 	}
-
+	
+	public void handleEvent(ProtocolMessage data) {
+		log("handleEvent "+" "+data.stage+" "+ data.tokens);
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
      	menu.clear();

@@ -243,13 +243,13 @@ public class anyRemote extends Activity {
 			_log("setCurrentView start TextScreen");
 			final Intent showText = new Intent(getBaseContext(), TextScreen.class);
 			showText.putExtra("SUBID", subCommand);
-			startActivityForResult(showText, which); 
+			startActivity(showText); 
 			break;
 			
 		case WMAN_FORM:
 			_log("setCurrentView start WinManager");
 			final Intent showWman = new Intent(getBaseContext(), WinManager.class);
-			startActivityForResult(showWman, which); 
+			startActivity(showWman); 
 			break;
 
 		case LOG_FORM:

@@ -22,7 +22,6 @@
 package anyremote.client.android;
 
 import java.util.Vector;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -30,7 +29,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import anyremote.client.android.util.ProtocolMessage;
-import anyremote.client.android.util.WinHandler;
+import anyremote.client.android.util.arHandler;
 import anyremote.client.android.R;
 
 public class WinManager extends arActivity  {
@@ -45,14 +44,12 @@ public class WinManager extends arActivity  {
 		super.onCreate(savedInstanceState);  
 
 		setContentView(R.layout.win_manager);
-	
-		Intent  intent = getIntent();
 		
 		image = (ImageView) findViewById(R.id.window);	
 		
 		defMenu.add("Back");
 			
-		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.WMAN_FORM, new WinHandler(this));
+		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.WMAN_FORM, new arHandler(this));
 		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
 		    
 		anyRemote.protocol.setFullscreen(this);
@@ -126,13 +123,14 @@ public class WinManager extends arActivity  {
 		
 		log("doFinish");
 		
-		final Intent intent = new Intent();  
+		/*final Intent intent = new Intent();  
 		intent.putExtra(anyRemote.ACTION, action);	    
 		
 		intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);	   
 	
 		setResult(RESULT_OK, intent);
-		log("doFinish finish");
+		log("doFinish finish");*/
+		
 			
 		finish();  	
 	}

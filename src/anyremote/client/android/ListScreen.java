@@ -22,7 +22,6 @@
 package anyremote.client.android;
 
 import java.util.Vector;
-import android.content.Intent;
 import android.os.Bundle;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -34,9 +33,9 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
-import anyremote.client.android.util.ListHandler;
 import anyremote.client.android.util.ListScreenAdapter;
 import anyremote.client.android.util.ProtocolMessage;
+import anyremote.client.android.util.arHandler;
 import anyremote.client.android.R;
 
 public class ListScreen extends arActivity 
@@ -62,7 +61,7 @@ public class ListScreen extends arActivity
 
 		dataSource = new ListScreenAdapter(this, R.layout.list_form_item, anyRemote.protocol.listContent);
 		
-		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.LIST_FORM, new ListHandler(this));
+		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.LIST_FORM, new arHandler(this));
 		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
 		
 		anyRemote.protocol.setFullscreen(this);
@@ -157,11 +156,11 @@ public class ListScreen extends arActivity
 
 		log("doFinish");
 
-		final Intent intent = new Intent();  
-		intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);
-
-		setResult(RESULT_OK, intent);
-		log("doFinish finish");
+		//final Intent intent = new Intent();  
+		//intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);
+		//setResult(RESULT_OK, intent);	
+		//log("doFinish finish");
+		
 		finish();  	
 	}
 

@@ -31,7 +31,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import anyremote.client.android.util.ProtocolMessage;
-import anyremote.client.android.util.TextHandler;
+import anyremote.client.android.util.arHandler;
 import anyremote.client.android.R;
 
 public class TextScreen extends arActivity  {
@@ -63,7 +63,7 @@ public class TextScreen extends arActivity  {
 			
 		} else {
 			
-			hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.TEXT_FORM, new TextHandler(this));
+			hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.TEXT_FORM, new arHandler(this));
 			anyRemote.protocol.addMessageHandler(hdlLocalCopy);
 		    
 			anyRemote.protocol.setFullscreen(this);
@@ -124,8 +124,10 @@ public class TextScreen extends arActivity  {
 	
 	@Override
 	protected void onDestroy() {	
-		log("onDestroy");	
-	   	anyRemote.protocol.removeMessageHandler(hdlLocalCopy);		
+		log("onDestroy");
+		if (!isLog) {
+	   	    anyRemote.protocol.removeMessageHandler(hdlLocalCopy);
+		}
 	   	isLog = false;
 	   	super.onDestroy();
 	}
@@ -157,17 +159,20 @@ public class TextScreen extends arActivity  {
 		
 		log("doFinish");
 		
-		final Intent intent = new Intent();  
-		intent.putExtra(anyRemote.ACTION, action);	    
-		
 		if (isLog) {
+		    final Intent intent = new Intent();  
+		    intent.putExtra(anyRemote.ACTION, action);	    
+		
+		/*if (isLog) {
 			//intent.putExtra(anyRemote.SWITCHTO, anyRemote.NO_FORM);		
 		} else {
 			log("doFinish");
 			intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);	   
-		}
+		}*/
 
-		setResult(RESULT_OK, intent);
+		    setResult(RESULT_OK, intent);
+		}
+		
 		if (!isLog) {
 			log("doFinish finish");
 		}
