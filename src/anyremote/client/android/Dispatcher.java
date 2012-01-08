@@ -353,7 +353,7 @@ public class Dispatcher implements IConnectionListener {
 	@Override
 	public void notifyMessage(int id, Vector cmdTokens, int stage) {
 
-		log("notifyMessage " + id + " " + cmdTokens+"(cur screen is "+anyRemote.getCurScreen()+")");
+		log("notifyMessage got:" + id + " " + cmdTokens+"(cur screen is "+anyRemote.getCurScreen()+")");
 
 		switch (id) {
 

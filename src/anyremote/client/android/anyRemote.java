@@ -185,9 +185,9 @@ public class anyRemote extends Activity {
 
 		if (currForm == which) {
 			_log("setCurrentView TRY TO SWITCH TO THE SAME FORM ???");
-			if (currForm == SEARCH_FORM) {
+			//if (currForm == SEARCH_FORM) {
 				return;
-			}
+			//}
 		}
 		
 		prevForm = currForm;
@@ -231,19 +231,20 @@ public class anyRemote extends Activity {
 			_log("setCurrentView start ControlScreen");
 			final Intent control = new Intent(getBaseContext(), ControlScreen.class);
 			startActivityForResult(control, which); 
+			//startActivity(control); 
 			break;
 
 		case LIST_FORM:
 			_log("setCurrentView start ListScreen");
 			final Intent showList = new Intent(getBaseContext(), ListScreen.class);
-			startActivityForResult(showList, which); 
+			startActivity(showList); 
 			break;
 
 		case TEXT_FORM:
 			_log("setCurrentView start TextScreen");
 			final Intent showText = new Intent(getBaseContext(), TextScreen.class);
 			showText.putExtra("SUBID", subCommand);
-			startActivity(showText); 
+			startActivityForResult(showText, which); 
 			break;
 			
 		case WMAN_FORM:

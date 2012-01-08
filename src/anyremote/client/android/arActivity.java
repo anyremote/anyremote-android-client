@@ -287,7 +287,7 @@ public class arActivity extends Activity
 	//	Set(editfield, ...)
 	//	Get(pass)
 	//  Set(fullscreen,...)
-	//  Set(wait,...)
+	//  Set(popup,...)
 	//  Set(*,close)
 	//
 	public boolean handleCommonCommand(int id, Vector tokens) {
