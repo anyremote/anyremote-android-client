@@ -63,8 +63,6 @@ public class ListScreen extends arActivity
 		
 		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.LIST_FORM, new arHandler(this));
 		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
-		
-		anyRemote.protocol.setFullscreen(this);
 
 		setContentView(R.layout.list_form);
 
@@ -77,17 +75,12 @@ public class ListScreen extends arActivity
 
 		defMenu.add("Back");
 		callMenuUpdate();
-
-		redraw();
-		
-		popup();
 	}
 	
 	@Override
 	protected void onPause() {
 		log("onPause");
 		
-		dismissPopup();
 		popup();
 		
 		//MainLoop.disable();
@@ -104,6 +97,9 @@ public class ListScreen extends arActivity
         	log("onResume no connection");	
         	doFinish("");
         }
+        
+		redraw();
+		popup();
 	}
 	
 	@Override
@@ -155,12 +151,6 @@ public class ListScreen extends arActivity
 	protected void doFinish(String action) {
 
 		log("doFinish");
-
-		//final Intent intent = new Intent();  
-		//intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);
-		//setResult(RESULT_OK, intent);	
-		//log("doFinish finish");
-		
 		finish();  	
 	}
 
@@ -251,6 +241,9 @@ public class ListScreen extends arActivity
 	
 	// update all visuals
 	void redraw()  {
+		
+		anyRemote.protocol.setFullscreen(this);
+		
 		setTitle(anyRemote.protocol.listTitle);
 		
 		if (anyRemote.protocol.listFSize > 0) {

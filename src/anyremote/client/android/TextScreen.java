@@ -65,18 +65,12 @@ public class TextScreen extends arActivity  {
 			
 			hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.TEXT_FORM, new arHandler(this));
 			anyRemote.protocol.addMessageHandler(hdlLocalCopy);
-		    
-			anyRemote.protocol.setFullscreen(this);
 
 			prefix = "TextScreen"; // log stuff
 			log("onCreate");
 		}		
 		registerForContextMenu(text);
 		text.setMovementMethod(new ScrollingMovementMethod());
-
-		redraw();
-		
-		popup();
 	}
 	
 	// update all visuals
@@ -88,6 +82,9 @@ public class TextScreen extends arActivity  {
 			callMenuUpdate();
 			setTitle("Log");
 		} else {
+			
+			anyRemote.protocol.setFullscreen(this);
+
 			text.setText(anyRemote.protocol.textContent);
 			setFont();
 			setTextColor();
@@ -101,7 +98,6 @@ public class TextScreen extends arActivity  {
 	protected void onPause() {
 		log("onPause");
 		
-		dismissPopup();
 		popup();
 		
 		//MainLoop.disable();
@@ -120,6 +116,9 @@ public class TextScreen extends arActivity  {
         	log("onResume no connection");
         	doFinish("");
         }
+
+        redraw();
+		popup();
 	}
 	
 	@Override
@@ -162,14 +161,6 @@ public class TextScreen extends arActivity  {
 		if (isLog) {
 		    final Intent intent = new Intent();  
 		    intent.putExtra(anyRemote.ACTION, action);	    
-		
-		/*if (isLog) {
-			//intent.putExtra(anyRemote.SWITCHTO, anyRemote.NO_FORM);		
-		} else {
-			log("doFinish");
-			intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);	   
-		}*/
-
 		    setResult(RESULT_OK, intent);
 		}
 		

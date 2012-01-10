@@ -138,6 +138,7 @@ public class Dispatcher implements IConnectionListener {
 	Bitmap cfCover;
 	float  cfFSize;
 	Typeface cfTFace;
+	String cfVolume;
 
 	// List Screen stuff
 	String listTitle;
@@ -172,6 +173,12 @@ public class Dispatcher implements IConnectionListener {
 	// Popup stuff
 	boolean popupState     = false;
     StringBuilder popupMsg = new StringBuilder(16);
+
+    // Edit Field stuff
+    String efCaption = "";
+	String efLabel   = "";
+	String efValue   = "";
+	int efId; 
 	
 	boolean connectBT = false;
 
@@ -374,19 +381,68 @@ public class Dispatcher implements IConnectionListener {
 		case CMD_TITLE:
 		case CMD_VOLUME:
 		case CMD_COVER:
+			
+			controlDataProcess(cmdTokens);
 
 			// Create activity with (possibly) empty list
 			if (anyRemote.getCurScreen() != anyRemote.CONTROL_FORM) {
 				context.setCurrentView(anyRemote.CONTROL_FORM, "");
 			} 
-		    sendToActivity(anyRemote.CONTROL_FORM,id,cmdTokens,stage);
+			
+			Vector datac = new Vector();
+			datac.add(id);
+			
+		    sendToActivity(anyRemote.CONTROL_FORM,id,datac,stage);
 
 		    break;
 
-		case CMD_EFIELD:			
+		case CMD_EFIELD:
+			
+			if (cmdTokens.size() < 4) return;
+			
+			anyRemote.protocol.efCaption = (String) cmdTokens.elementAt(1);
+			anyRemote.protocol.efLabel   = (String) cmdTokens.elementAt(2);
+			anyRemote.protocol.efValue   = (String) cmdTokens.elementAt(3);
+			anyRemote.protocol.efId      = CMD_EFIELD;
+			
+			Vector data1 = new Vector();
+			data1.add(id);
+			
+			sendToActivity(anyRemote.getCurScreen(),id,data1,ProtocolMessage.FULL);
+			
 		case CMD_FSCREEN:
-		case CMD_MENU:
+			
+			anyRemote.protocol.setFullscreen((String) cmdTokens.elementAt(1));
+			
+			Vector data2 = new Vector();
+			data2.add(id);
+			
+			sendToActivity(anyRemote.getCurScreen(),id,data2,ProtocolMessage.FULL);
+
 		case CMD_POPUP:
+			
+			anyRemote.protocol.popupState = false;
+			anyRemote.protocol.popupMsg.delete(0, anyRemote.protocol.popupMsg.length());
+			
+			String op = (String) cmdTokens.elementAt(1);
+			
+			if (op.equals("show")) { 
+
+				anyRemote.protocol.popupState = true;
+				
+				for (int i=2;i<cmdTokens.size();i++) {
+					if (i != 2) {
+						anyRemote.protocol.popupMsg.append(", ");
+					}
+					anyRemote.protocol.popupMsg.append((String) cmdTokens.elementAt(i));
+				}
+			}
+			Vector data3 = new Vector();
+			data3.add(id);
+			
+			sendToActivity(anyRemote.getCurScreen(),id,data3,ProtocolMessage.FULL);
+			
+		case CMD_MENU:
 			
 			sendToActivity(anyRemote.getCurScreen(),id,cmdTokens,stage);
 			// CMD_EFIELD: result will be handled in handleEditFieldResult()
@@ -429,11 +485,11 @@ public class Dispatcher implements IConnectionListener {
 				context.setCurrentView(anyRemote.LIST_FORM, "");
 			}
 			
-			Vector data = new Vector();
-			data.add(id);
-			data.add(needUpdateDataSource);
+			Vector data4 = new Vector();
+			data4.add(id);
+			data4.add(needUpdateDataSource);
 			
-			sendToActivity(anyRemote.LIST_FORM,id,data,stage);		
+			sendToActivity(anyRemote.LIST_FORM,id,data4,stage);		
 			break;  
 
 		case CMD_PARAM:
@@ -500,7 +556,7 @@ public class Dispatcher implements IConnectionListener {
 				return;
 			}
 		
-			// Create activity with (possibly) empty list
+			// Create activity
 			if (anyRemote.getCurScreen() != anyRemote.WMAN_FORM) {
 				context.setCurrentView(anyRemote.WMAN_FORM, "");
 			}
@@ -813,16 +869,8 @@ public class Dispatcher implements IConnectionListener {
 	}
 	
 	public void setFullscreen(String option, arActivity act) {
-
-		if (option.startsWith("on")) {
-			if (fullscreen) return;
-			fullscreen = true;			    	
-		} else if (option.startsWith("off")) {
-			if (!fullscreen) return;
-			fullscreen = false;
-		} else if (option.startsWith("toggle")) {
-			fullscreen = !fullscreen;
-		}
+		
+		setFullscreen(option);
 		setFullscreen(act);
 	}
 
@@ -913,7 +961,7 @@ public class Dispatcher implements IConnectionListener {
 			 				
 		    case CMD_VOLUME:
 		    	
-		    	Toast.makeText(context, "Volume is "+(String) vR.elementAt(1) +"%", Toast.LENGTH_SHORT).show();
+		    	cfVolume = (String) vR.elementAt(1);
 				break;  
 
 			case CMD_COVER:
@@ -1017,7 +1065,7 @@ public class Dispatcher implements IConnectionListener {
         		int i = btn2int((String) data.elementAt(idx));
 
         		if (i >= 0 || i < maxIcon) {    
-        			anyRemote.protocol.cfIcons[i] = (String) data.elementAt(idx+1);
+        			cfIcons[i] = (String) data.elementAt(idx+1);
        		    }  
 	         } catch (Exception e) { }
         }

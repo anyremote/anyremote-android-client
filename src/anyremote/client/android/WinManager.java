@@ -51,22 +51,17 @@ public class WinManager extends arActivity  {
 			
 		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.WMAN_FORM, new arHandler(this));
 		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
-		    
-		anyRemote.protocol.setFullscreen(this);
 
 		prefix = "WinManager"; // log stuff
 		log("onCreate");
 
 		registerForContextMenu(image);
-
-		redraw();
-		
-		popup();
 	}
 	
 	// update all visuals
 	void redraw()  {
 		log("redraw");
+		anyRemote.protocol.setFullscreen(this);
 		image.setImageBitmap(anyRemote.protocol.imScreen);
 	}
 	
@@ -74,7 +69,6 @@ public class WinManager extends arActivity  {
 	protected void onPause() {
 		log("onPause");
 		
-		dismissPopup();
 		popup();
 	    super.onPause();	
 	}
@@ -88,6 +82,9 @@ public class WinManager extends arActivity  {
           	log("onResume no connection");
         	doFinish("");
         }
+
+        redraw();
+		popup();
 	}
 	
 	@Override
@@ -122,16 +119,6 @@ public class WinManager extends arActivity  {
 	protected void doFinish(String action) {
 		
 		log("doFinish");
-		
-		/*final Intent intent = new Intent();  
-		intent.putExtra(anyRemote.ACTION, action);	    
-		
-		intent.putExtra(anyRemote.SWITCHTO, anyRemote.CONTROL_FORM);	   
-	
-		setResult(RESULT_OK, intent);
-		log("doFinish finish");*/
-		
-			
 		finish();  	
 	}
 

@@ -136,14 +136,16 @@ public class arActivity extends Activity
 	// Edit field stuff
 	// 
 
-	void openEditField(int id, String caption, String label, String defvalue) {    	
+	void setupEditField(int id, String caption, String label, String defvalue) {    	
 
-		anyRemote.efCaption = caption;
-		anyRemote.efLabel   = label;
-		anyRemote.efValue   = defvalue;
-		anyRemote.efId      = id; 
+		anyRemote.protocol.efCaption = caption;
+		anyRemote.protocol.efLabel   = label;
+		anyRemote.protocol.efValue   = defvalue;
+		anyRemote.protocol.efId      = id;
 
-		showDialog(id);
+		if (id != -1) {
+		    showDialog(id);
+		}
 	}
 
 	// Got result from EditForm dialog ("Ok"/"Cancel" was pressed)
@@ -156,12 +158,9 @@ public class arActivity extends Activity
 			return;
 		}
 
-		handleEditFieldResult(anyRemote.efId, "Ok", ((EditFieldDialog) dialog).getValue());
-
-		anyRemote.efId      = -1;
-		anyRemote.efCaption = "";
-		anyRemote.efLabel   = "";
-		anyRemote.efValue   = "";
+		handleEditFieldResult(anyRemote.protocol.efId, "Ok", ((EditFieldDialog) dialog).getValue());
+		
+		setupEditField(-1, "", "", ""); // reset values
 	}
 
 	// Handle "Cancel" press in EditFieldDialog
@@ -171,12 +170,9 @@ public class arActivity extends Activity
 
 		skipDismissEditDialog = true;
 
-		handleEditFieldResult(anyRemote.efId, "Cancel", "");
-
-		anyRemote.efId      = -1;
-		anyRemote.efCaption = "";
-		anyRemote.efLabel   = "";
-		anyRemote.efValue   = "";
+		handleEditFieldResult(anyRemote.protocol.efId, "Cancel", "");
+		
+		setupEditField(-1, "", "", ""); // reset values
 	}
 
 	public void  handleEditFieldResult(int id, String button, String value) {
@@ -244,7 +240,7 @@ public class arActivity extends Activity
 
 			((EditFieldDialog) d).setupEField(getResources().getString(R.string.enter_item_name),
 					getResources().getString(R.string.enter_item_name),
-					anyRemote.efValue, 
+					anyRemote.protocol.efValue, 
 					true);
 			d.setOnDismissListener(this);
 			d.setOnCancelListener (this);
@@ -273,7 +269,9 @@ public class arActivity extends Activity
 
 		case Dispatcher.CMD_EFIELD:
 
-			((EditFieldDialog) d).setupEField(anyRemote.efCaption, anyRemote.efLabel, anyRemote.efValue, false);
+			((EditFieldDialog) d).setupEField(anyRemote.protocol.efCaption, 
+					                          anyRemote.protocol.efLabel, 
+					                          anyRemote.protocol.efValue, false);
 			d.setOnDismissListener(this);
 			d.setOnCancelListener (this);
 
@@ -306,26 +304,23 @@ public class arActivity extends Activity
 			processed = true;
 			
 		} else if (id == Dispatcher.CMD_EFIELD) {
-		
-			openEditField(id,
-					(String) tokens.elementAt(1),
-					(String) tokens.elementAt(2),
-					(String) tokens.elementAt(3));	
+
+			showDialog(id);
 			processed = true;
 			
 		} else if (id == Dispatcher.CMD_GETPASS) {
 			
-			openEditField(id,"","","");
+			setupEditField(id, "", "", ""); 
 			processed = true;
 			
 		} else if (id == Dispatcher.CMD_FSCREEN)  {   	
 			
-			anyRemote.protocol.setFullscreen((String) tokens.elementAt(1), this);
+			anyRemote.protocol.setFullscreen(this);
 			processed = true;
 			
 		} else if (id == Dispatcher.CMD_POPUP) {
 				
-		    showPopup(tokens);
+		    popup();
 			processed = true;
 		}
 		
@@ -334,32 +329,6 @@ public class arActivity extends Activity
 
 	protected void doFinish(String reason) {
 		log("doFinish "+reason);	
-	}
-	
-	public void dismissPopup() {
-		anyRemote.protocol.popupState = false;
-		anyRemote.protocol.popupMsg.delete(0, anyRemote.protocol.popupMsg.length());
-	}
-	
-	public void showPopup(Vector tokens) {
-		
-		String op = (String) tokens.elementAt(1);
-		
-		dismissPopup();
-		
-		if (op.equals("show")) { 
-
-			anyRemote.protocol.popupState = true;
-			
-			for (int i=2;i<tokens.size();i++) {
-				if (i != 2) {
-					anyRemote.protocol.popupMsg.append(", ");
-				}
-				anyRemote.protocol.popupMsg.append((String) tokens.elementAt(i));
-			}
-		}
-		
-		popup();
 	}
 	
 	public void popup() {

@@ -79,12 +79,6 @@ public class anyRemote extends Activity {
 
 	private ViewHandler viewHandler;
 
-	// Edif Form stuff
-	public static String  efCaption;
-	public static String  efLabel;
-	public static String  efValue;
-	public static int     efId;
-
 	// Logging stuff
 	public static StringBuilder logData;
 	
@@ -539,19 +533,17 @@ public class anyRemote extends Activity {
 		_log("popup " + show);
 		
 		//cxt.setProgressBarIndeterminateVisibility(show);
-		
+		if (waiting != null) {
+			waiting.dismiss();
+			waiting = null; 
+		}
 		if (show) {
 			if (waiting == null) {
 				waiting = new ProgressDialog(cxt, ProgressDialog.STYLE_HORIZONTAL);
-				waiting.setMessage(msg);
 			}
+			waiting.setMessage(msg);
 			waiting.show();
-		} else {
-			if (waiting != null) {
-				waiting.dismiss();
-				waiting = null; 
-			}
-		}
+		} 
 	}
 	
 	public static boolean logVisible() {
