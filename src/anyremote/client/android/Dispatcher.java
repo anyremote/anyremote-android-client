@@ -91,6 +91,8 @@ public class Dispatcher implements IConnectionListener {
 	static final int  CMD_EDIT_FORM_NAME  = 105;
 	static final int  CMD_EDIT_FORM_PASS  = 106;
 
+	static final int  CMD_LIST_UPDATE     = 107;
+
 	static final int  CMD_CLOSE  = 110;
 
 	static final int SIZE_SMALL    = 12;
@@ -166,6 +168,7 @@ public class Dispatcher implements IConnectionListener {
 	// Image Screen stuff
 	ArrayList<Handler> imHandlers = new ArrayList<Handler>();	
 	Bitmap      imScreen;
+	Vector<String> winMenu = new Vector<String>();
 
 	// telephony handler
 	PhoneManager phoneManager;
@@ -220,6 +223,7 @@ public class Dispatcher implements IConnectionListener {
 		cfFSize = SIZE_MEDIUM;
 		cfTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
 		cfMenu.clear();
+		menuAddDefault(anyRemote.CONTROL_FORM);
 		
 		listTitle     = "";
 		listSelectPos = -1;
@@ -228,6 +232,7 @@ public class Dispatcher implements IConnectionListener {
 		listContent.clear(); 
 		listFSize = -1;
 		listMenu.clear();
+		menuAddDefault(anyRemote.LIST_FORM);
 		listBufferedItem.delete(0, listBufferedItem.length());
 
 		textFrgr = anyRemote.parseColor("255","255","255");
@@ -236,6 +241,11 @@ public class Dispatcher implements IConnectionListener {
 		textFSize = SIZE_MEDIUM;
 		textTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
 		textMenu.clear();
+		menuAddDefault(anyRemote.TEXT_FORM);
+		
+		imScreen = null;
+		winMenu.clear();
+		menuAddDefault(anyRemote.WMAN_FORM);
 		
 		autoPass  = false;
 	}
@@ -389,10 +399,7 @@ public class Dispatcher implements IConnectionListener {
 				context.setCurrentView(anyRemote.CONTROL_FORM, "");
 			} 
 			
-			Vector datac = new Vector();
-			datac.add(id);
-			
-		    sendToActivity(anyRemote.CONTROL_FORM,id,datac,stage);
+		    sendToActivity(anyRemote.CONTROL_FORM,id,stage);
 
 		    break;
 
@@ -405,19 +412,14 @@ public class Dispatcher implements IConnectionListener {
 			anyRemote.protocol.efValue   = (String) cmdTokens.elementAt(3);
 			anyRemote.protocol.efId      = CMD_EFIELD;
 			
-			Vector data1 = new Vector();
-			data1.add(id);
-			
-			sendToActivity(anyRemote.getCurScreen(),id,data1,ProtocolMessage.FULL);
+			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
+			// CMD_EFIELD: result will be handled in handleEditFieldResult()
 			
 		case CMD_FSCREEN:
 			
 			anyRemote.protocol.setFullscreen((String) cmdTokens.elementAt(1));
 			
-			Vector data2 = new Vector();
-			data2.add(id);
-			
-			sendToActivity(anyRemote.getCurScreen(),id,data2,ProtocolMessage.FULL);
+			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
 
 		case CMD_POPUP:
 			
@@ -437,16 +439,12 @@ public class Dispatcher implements IConnectionListener {
 					anyRemote.protocol.popupMsg.append((String) cmdTokens.elementAt(i));
 				}
 			}
-			Vector data3 = new Vector();
-			data3.add(id);
 			
-			sendToActivity(anyRemote.getCurScreen(),id,data3,ProtocolMessage.FULL);
+			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
 			
 		case CMD_MENU:
-			
-			sendToActivity(anyRemote.getCurScreen(),id,cmdTokens,stage);
-			// CMD_EFIELD: result will be handled in handleEditFieldResult()
-			
+
+			menuProcess(cmdTokens, anyRemote.getCurScreen());
 			break; 
 
 		case CMD_FMAN:
@@ -485,11 +483,9 @@ public class Dispatcher implements IConnectionListener {
 				context.setCurrentView(anyRemote.LIST_FORM, "");
 			}
 			
-			Vector data4 = new Vector();
-			data4.add(id);
-			data4.add(needUpdateDataSource);
+			int lid = (needUpdateDataSource ? CMD_LIST_UPDATE : id);
 			
-			sendToActivity(anyRemote.LIST_FORM,id,data4,stage);		
+			sendToActivity(anyRemote.LIST_FORM,lid,stage);		
 			break;  
 
 		case CMD_PARAM:
@@ -523,11 +519,8 @@ public class Dispatcher implements IConnectionListener {
 			if (anyRemote.getCurScreen() != anyRemote.TEXT_FORM) {
 				context.setCurrentView(anyRemote.TEXT_FORM, "");
 			}
-			
-			Vector datat = new Vector();
-			datat.add(id);
 				
-			sendToActivity(anyRemote.TEXT_FORM,id,datat,stage);		
+			sendToActivity(anyRemote.TEXT_FORM,id,stage);		
 			break;       
 
 		case CMD_VIBRATE:
@@ -561,10 +554,7 @@ public class Dispatcher implements IConnectionListener {
 				context.setCurrentView(anyRemote.WMAN_FORM, "");
 			}
 			
-			Vector dataw = new Vector();
-			dataw.add(id);
-			
-			sendToActivity(anyRemote.WMAN_FORM,id,dataw,stage);		
+			sendToActivity(anyRemote.WMAN_FORM,id,stage);		
 
 			break;    
 
@@ -613,7 +603,7 @@ public class Dispatcher implements IConnectionListener {
 
 			if (autoPass || currentConnPass.equals("")) {
 				log("ASK FOR PASS");
-				sendToActivity(anyRemote.getCurScreen(),id,cmdTokens,stage);
+				sendToActivity(anyRemote.getCurScreen(),id,stage);
 				//result will be handled in handleEditFieldResult()
 			} else {
 				log("USE PASS >"+currentConnPass+"<");
@@ -661,10 +651,10 @@ public class Dispatcher implements IConnectionListener {
 		}
 	}
 	
-	public void sendToActivity(int activity, int id, Vector cmdTokens, int stage) {
+	public void sendToActivity(int activity, int id, int stage) {
 
 		ProtocolMessage pm = new ProtocolMessage();
-		pm.tokens = cmdTokens;
+		pm.id     = id;
 		pm.stage  = stage;
 
 		int num = 0;
@@ -692,7 +682,7 @@ public class Dispatcher implements IConnectionListener {
 			if (!sent) {
 				
 				if (activity == anyRemote.CONTROL_FORM) { 	// does it needed ?
-					if (cmdTokens.size() > 0 && ((Integer) cmdTokens.elementAt(0)) == CMD_CLOSE) {  // skip
+					if (id == CMD_CLOSE) {  // skip
 						return;
 					}
 				}
@@ -1416,5 +1406,121 @@ public class Dispatcher implements IConnectionListener {
 			textTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
 		}
 		textFSize = size;
+	}
+	
+	//
+	// Menu data handling
+	//
+	public void menuProcess(Vector vR, int screen) {
+		anyRemote._log("Dispatcher", "menuProcess "+screen+" "+vR);
+		
+		String oper  = (String) vR.elementAt(1); 
+
+		if (oper.equals("clear")) {
+
+			menuClean(screen);    
+
+		} else if (oper.equals("add") || oper.equals("replace")) {
+
+			if (oper.equals("replace")) {
+				menuClean(screen);
+				menuAddDefault(screen); 
+			}
+
+			menuAdd(vR, screen);
+		}
+	}
+	
+	void menuClean(int screen) {
+		
+		switch(screen) {
+			case anyRemote.CONTROL_FORM:
+				cfMenu.clear();
+				break;
+			case anyRemote.TEXT_FORM:
+			case anyRemote.LOG_FORM:
+				textMenu.clear();
+				break;
+			case anyRemote.LIST_FORM:
+				listMenu.clear();
+				break;
+			case anyRemote.WMAN_FORM:
+				winMenu.clear();
+				break;
+		}
+	}
+	
+	void menuAdd(Vector from, int screen) { 
+		
+		anyRemote._log("Dispatcher", "menuAdd "+screen+" "+from); 
+		
+		for (int idx=2;idx<from.size();idx++) {
+			String item = (String) from.elementAt(idx);
+
+			if (item.length() > 0) {
+				switch(screen) {
+					case anyRemote.CONTROL_FORM:
+						anyRemote._log("Dispatcher", "menuAdd cfMenu "+item);
+						cfMenu.add(item);
+						break;
+					case anyRemote.TEXT_FORM:
+						textMenu.add(item);
+						break;
+					case anyRemote.LIST_FORM:
+						listMenu.add(item);
+						break;
+					case anyRemote.WMAN_FORM:
+						winMenu.add(item);
+						break;
+				}
+			}
+		}
+	}
+
+	void menuReplaceDefault(int screen) {
+		menuClean(screen);
+		menuAddDefault(screen); 	
+	}
+	
+	void menuAddDefault(int screen) {   	
+		switch(screen) {
+			case anyRemote.CONTROL_FORM:
+				cfMenu.add("Disconnect");
+				cfMenu.add("Exit");
+				cfMenu.add("Log");	
+				break;
+			case anyRemote.TEXT_FORM:
+				textMenu.add("Back");
+				break;
+			case anyRemote.LIST_FORM:
+				listMenu.add("Back");
+				break;
+			case anyRemote.WMAN_FORM:
+				winMenu.add("Back");
+				break;
+			case anyRemote.LOG_FORM:
+				textMenu.add("Clear Log");
+				textMenu.add("Report Bug");
+				textMenu.add("Back");
+				break;
+		}
+	}
+	
+	Vector<String> getMenu() {
+		
+		int screen = anyRemote.getCurScreen();
+		
+		switch(screen) {
+			case anyRemote.CONTROL_FORM:
+				return cfMenu;
+			case anyRemote.TEXT_FORM:
+			case anyRemote.LOG_FORM:
+				return textMenu;
+			case anyRemote.LIST_FORM:
+				return listMenu;
+			case anyRemote.WMAN_FORM:
+				return winMenu;
+		}
+		return null;
 	}
 }

@@ -21,7 +21,6 @@
 
 package anyremote.client.android;
 
-import java.util.Vector;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -36,7 +35,6 @@ public class WinManager extends arActivity  {
 	
 	ImageView image;
 	Dispatcher.ArHandler hdlLocalCopy;
-	Vector<String> defMenu = new Vector<String>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +44,7 @@ public class WinManager extends arActivity  {
 		setContentView(R.layout.win_manager);
 		
 		image = (ImageView) findViewById(R.id.window);	
-		
-		defMenu.add("Back");
-			
+				
 		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.WMAN_FORM, new arHandler(this));
 		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
 
@@ -100,10 +96,7 @@ public class WinManager extends arActivity  {
 		super.onCreateContextMenu(menu, v, menuInfo);
 
 		if (v.getId() == R.id.window) {
-
-			for(int i = 0;i<menuItems.size();i++) {   	    	
-				menu.add(menuItems.elementAt(i));
-			}     	
+			addContextMenu(menu);
 		}
 	}
 
@@ -147,20 +140,14 @@ public class WinManager extends arActivity  {
 	public void handleEvent(ProtocolMessage data) {
 		
 		log("handleEvent");
-		
-		if (data.tokens.size() == 0) {
-			return;
-		}
 
 		if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
-
-			Integer id  = (Integer) data.tokens.elementAt(0);
 			
-			if (handleCommonCommand(id, data.tokens)) {
+			if (handleCommonCommand(data.id)) {
 				return;
 			}
 			
-			if (id == Dispatcher.CMD_IMAGE) {
+			if (data.id == Dispatcher.CMD_IMAGE) {
 				
 				// update all visuals
 				redraw();
@@ -170,15 +157,4 @@ public class WinManager extends arActivity  {
 			redraw();
 		}
 	}		
-
-	void callMenuUpdate()  { // Add predefined menu items
-
-		//log("callMenuUpdate "+isLog);
-		menuItems.add("Back");
-		restorePersistentMenu(anyRemote.protocol.textMenu);
-	}
-
-	public void processMenu(Vector vR) {
-		processMenu(vR, anyRemote.protocol.textMenu, defMenu);
-	}
 }

@@ -21,7 +21,6 @@
 
 package anyremote.client.android;
 
-import java.util.Vector;
 import android.os.Bundle;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -49,8 +48,6 @@ public class ListScreen extends arActivity
 
 	boolean skipDismissEditDialog = false;
 
-	Vector<String> defMenu = new Vector<String>();
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
@@ -72,9 +69,6 @@ public class ListScreen extends arActivity
 		list.setOnItemClickListener   (this); 
 		
 		registerForContextMenu(list);
-
-		defMenu.add("Back");
-		callMenuUpdate();
 	}
 	
 	@Override
@@ -129,10 +123,7 @@ public class ListScreen extends arActivity
 			final TextView tv= (TextView) info.targetView.findViewById(R.id.list_item_text);
 
 			menu.setHeaderTitle(tv.getText());
-
-			for(int i = 0;i<menuItems.size();i++) {   	    	
-				menu.add(menuItems.elementAt(i));
-			}     	
+			addContextMenu(menu);
 		}
 	}
 
@@ -203,32 +194,23 @@ public class ListScreen extends arActivity
 
 	public void handleEvent(ProtocolMessage data) {
 
-		log("handleEvent "+" "+data.stage+" "+ data.tokens);
-	
-		if (data.tokens.size() == 0) {
-			return;
-		}
+		log("handleEvent "+" "+data.stage+" "+ data.id);
 
 		if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
-
-			Integer id  = (Integer) data.tokens.elementAt(0);
 			
-			if (handleCommonCommand(id, data.tokens)) {
+			if (handleCommonCommand(data.id)) {
 				return;
 			}
 			
-			if (data.tokens.size() > 1 &&
-				(id == Dispatcher.CMD_LIST ||
-			     id == Dispatcher.CMD_ICONLIST)) {
 				
-				// update all visuals
-				redraw();
-				
-				// get info about data update
-				if ((Boolean) data.tokens.elementAt(1)) {
-					dataSource.notifyDataSetChanged();
-				}
+			// get info about data update
+			if (data.id == Dispatcher.CMD_LIST_UPDATE) {
+				dataSource.notifyDataSetChanged();
 			}
+			
+			// update all visuals
+			redraw();
+			
 		} else  if (data.stage == ProtocolMessage.INTERMED || data.stage == ProtocolMessage.LAST) {
 			dataSource.notifyDataSetChanged();
 		}
@@ -259,16 +241,6 @@ public class ListScreen extends arActivity
 			dataSource.setTextColor(anyRemote.protocol.listText);
 		}
 		selectUpdate();
-	}
-	
-	void callMenuUpdate()  { // Add predefined menu items
-
-		menuItems.add("Back");
-		restorePersistentMenu(anyRemote.protocol.listMenu);
-	}
-
-	public void processMenu(Vector vR) {
-		processMenu(vR, anyRemote.protocol.listMenu, defMenu);
 	}
 
 	@Override

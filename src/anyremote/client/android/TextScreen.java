@@ -21,7 +21,7 @@
 
 package anyremote.client.android;
 
-import java.util.Vector;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
@@ -38,7 +38,6 @@ public class TextScreen extends arActivity  {
 
 	TextView  text;
 	Dispatcher.ArHandler hdlLocalCopy;
-	Vector<String> defMenu = new Vector<String>();
 	boolean isLog = false;
 
 	@Override
@@ -50,8 +49,6 @@ public class TextScreen extends arActivity  {
 	
 		Intent  intent = getIntent();
 		String subid   = intent.getStringExtra("SUBID");
-
-		defMenu.add("Back");
 
 		text = (TextView) findViewById(R.id.text_form);			
 
@@ -69,7 +66,9 @@ public class TextScreen extends arActivity  {
 			prefix = "TextScreen"; // log stuff
 			log("onCreate");
 		}		
+		
 		registerForContextMenu(text);
+		
 		text.setMovementMethod(new ScrollingMovementMethod());
 	}
 	
@@ -79,7 +78,6 @@ public class TextScreen extends arActivity  {
 		
 		if (isLog) {
 			text.setText(anyRemote.logData); 
-			callMenuUpdate();
 			setTitle("Log");
 		} else {
 			
@@ -89,7 +87,6 @@ public class TextScreen extends arActivity  {
 			setFont();
 			setTextColor();
 			setBackground();
-			callMenuUpdate();
 			setTitle(anyRemote.protocol.textTitle);
 		}
 	}
@@ -138,10 +135,7 @@ public class TextScreen extends arActivity  {
 
 		if (!isLog && v.getId() == R.id.text_form) {
 			menu.setHeaderTitle(anyRemote.protocol.textTitle);
-
-			for(int i = 0;i<menuItems.size();i++) {   	    	
-				menu.add(menuItems.elementAt(i));
-			}     	
+			addContextMenu(menu);
 		}
 	}
 
@@ -186,10 +180,10 @@ public class TextScreen extends arActivity  {
 		if (isLog) {
 			if (command.equals("Back")) {
 				doFinish("log");  // just close Log form
-			} else if (command.equals("Clear log")) {
+			} else if (command.equals("Clear Log")) {
 				anyRemote.logData.delete(0,anyRemote.logData.length());
 				text.setText("");
-			} else if (command.equals("Report bug")) {
+			} else if (command.equals("Report Bug")) {
 
 				Intent mailIntent = new Intent(Intent.ACTION_SEND);
 				mailIntent.setType("text/plain");
@@ -216,20 +210,14 @@ public class TextScreen extends arActivity  {
 		log("handleEvent");
 		
 		if (isLog) return; 
-		
-		if (data.tokens.size() == 0) {
-			return;
-		}
 
 		if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
 
-			Integer id  = (Integer) data.tokens.elementAt(0);
-			
-			if (handleCommonCommand(id, data.tokens)) {
+			if (handleCommonCommand(data.id)) {
 				return;
 			}
 			
-			if (id == Dispatcher.CMD_TEXT) {
+			if (data.id == Dispatcher.CMD_TEXT) {
 				
 				// update all visuals
 				redraw();
@@ -238,22 +226,6 @@ public class TextScreen extends arActivity  {
 			redraw();
 		}
 	}		
-
-	void callMenuUpdate()  { // Add predefined menu items
-
-		//log("callMenuUpdate "+isLog);
-		menuItems.add("Back");
-		if (isLog) { 
-			menuItems.add("Clear log");
-			menuItems.add("Report bug");
-		} else {
-			restorePersistentMenu(anyRemote.protocol.textMenu);
-		}
-	}
-
-	public void processMenu(Vector vR) {
-		processMenu(vR, anyRemote.protocol.textMenu, defMenu);
-	}
 
 	private void setTextColor() {
 		text.setTextColor(anyRemote.protocol.textFrgr);

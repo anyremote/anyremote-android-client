@@ -39,8 +39,8 @@ import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
 import android.view.KeyEvent;
-import anyremote.client.android.util.ControlScreenHandler;
 import anyremote.client.android.util.ProtocolMessage;
+import anyremote.client.android.util.arHandler;
 
 public class ControlScreen extends arActivity 
                            implements View.OnClickListener,
@@ -86,9 +86,7 @@ public class ControlScreen extends arActivity
     Dispatcher.ArHandler hdlLocalCopy;
     
     ImageButton [] buttons;
-    
-    Vector<String> defMenu = new Vector<String>();
-     
+      
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);  
@@ -96,14 +94,9 @@ public class ControlScreen extends arActivity
 		prefix = "ControlScreen"; // log stuff
 		log("onCreate");
 		
-		defMenu.add("Disconnect");
-		defMenu.add("Exit");
-		defMenu.add("Log");	
-		
 		buttons = new ImageButton[NUM_ICONS];
-	    callMenuUpdate();
-	    
-	    hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new ControlScreenHandler(this));
+    
+	    hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new arHandler(this));
 	    anyRemote.protocol.addMessageHandler(hdlLocalCopy);	    
 	}
 	
@@ -154,24 +147,18 @@ public class ControlScreen extends arActivity
 
     public void handleEvent(ProtocolMessage data) {
 	   
-    	log("handleEvent "+ data.tokens);
-	    
-		if (data.tokens.size() == 0) {
-			return;
-		}
+    	log("handleEvent "+ data.id);
 		
 		if (data.stage != ProtocolMessage.FULL &&	// process only full commands
 		    data.stage == ProtocolMessage.FIRST) {
 			return;
 		}
-
-		Integer id  = (Integer) data.tokens.elementAt(0);
 		
-	    if (handleCommonCommand(id, data.tokens)) {
+	    if (handleCommonCommand(data.id)) {
 			return;
 		}
 	    
-	    if (id == Dispatcher.CMD_VOLUME) {
+	    if (data.id == Dispatcher.CMD_VOLUME) {
     	    Toast.makeText(this, "Volume is "+anyRemote.protocol.cfVolume +"%", Toast.LENGTH_SHORT).show();
 		    return;
 		}
@@ -675,53 +662,4 @@ public class ControlScreen extends arActivity
         setResult(RESULT_OK, intent);
         finish();  	
     }
-	
-	void callMenuUpdate()  { // Add predefined menu items
-		 menuItems.add("Disconnect");
-		 menuItems.add("Exit");
-		 menuItems.add("Log");	
-		 restorePersistentMenu(anyRemote.protocol.cfMenu);
-	}
-	
-	public void processMenu(Vector vR) {
-		processMenu(vR, anyRemote.protocol.cfMenu, defMenu);
- 	}
-	
-	/*private int key2num(int keycode) {
-		
-		switch (keycode) {
-			case KEY_NUM1: return 0;
-			case KEY_NUM2: return 1;
-			case KEY_NUM3: return 2;
-			case KEY_NUM4: return 3;
-			case KEY_NUM5: return 4;
-			case KEY_NUM6: return 5;
-			case KEY_NUM7: return 6;
-			case KEY_NUM8: return 7;
-			case KEY_NUM9: return 8;
-			case KEY_STAR: return 9;
-			case KEY_NUM0: return 10;
-			case KEY_POUND: return 11;
-			default: return -1;
-		}
-	}
-
-	private int num2key(int num) {
-		
-		switch (num) {
-			case 0 : return KEY_NUM1;
-			case 1 : return KEY_NUM2;
-			case 2 : return KEY_NUM3;
-			case 3 : return KEY_NUM4;
-			case 4 : return KEY_NUM5;
-			case 5 : return KEY_NUM6;
-			case 6 : return KEY_NUM7;
-			case 7 : return KEY_NUM8;
-			case 8 : return KEY_NUM9;
-			case 9 : return KEY_STAR;
-			case 10: return KEY_NUM0;
-			case 11: return KEY_POUND;
-			default: return KEY_UNKNOWN;
-		}
-	}*/
 }

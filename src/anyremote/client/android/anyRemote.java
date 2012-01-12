@@ -202,9 +202,7 @@ public class anyRemote extends Activity {
 			case TEXT_FORM:
 			case WMAN_FORM:
 				_log("setCurrentView stop "+prevForm);
-				ctokens = new Vector();
-				ctokens.add(Dispatcher.CMD_CLOSE);
-				protocol.sendToActivity(prevForm, Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
+				protocol.sendToActivity(prevForm, Dispatcher.CMD_CLOSE,ProtocolMessage.FULL);
 				break;
 	
 			case LOG_FORM:
@@ -212,6 +210,10 @@ public class anyRemote extends Activity {
 				break;
 	
 			}
+		}
+		
+		if (prevForm != LOG_FORM) {
+	     	protocol.menuReplaceDefault(currForm);
 		}
 
 		switch (currForm) { 
@@ -408,9 +410,7 @@ public class anyRemote extends Activity {
 			if (!finishFlag) {   // this happens on exit
 				
 				// send quit to all registered activity
-				Vector ctokens = new Vector();
-				ctokens.add(Dispatcher.CMD_CLOSE);
-				protocol.sendToActivity(-1, Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
+				protocol.sendToActivity(-1, Dispatcher.CMD_CLOSE,ProtocolMessage.FULL);
 
 				if (currForm != LOG_FORM) {
 					currForm = DUMMY_FORM;  // trick
