@@ -35,24 +35,21 @@ public class arActivity extends Activity
 		implements DialogInterface.OnDismissListener,
 				   DialogInterface.OnCancelListener {
 
-	protected Vector<String> menuItems;
+	//protected Vector<String> menuItems;
 	protected String prefix = "";	
 	private boolean skipDismissEditDialog = false;
 
-	@Override
+	/*@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
 		super.onCreate(savedInstanceState);
-		menuItems = new Vector<String>();
-		//callMenuUpdate(); do this from inherited classes
-	}
+	}*/
 
 	public void log(String msg) {
 		anyRemote._log(prefix,msg);
 	}
 	
 	public void handleEvent(ProtocolMessage data) {
-		log("handleEvent "+" "+data.stage+" "+ data.tokens);
+		log("handleEvent "+" "+data.stage+" "+ data.id);
 	}
 	
 	@Override
@@ -63,74 +60,28 @@ public class arActivity extends Activity
 	 
     @Override
 	public boolean onPrepareOptionsMenu(Menu menu) { 
+    	
     	menu.clear();
-			      
-	    for(int i = 0;i<menuItems.size();i++) {
-		    menu.add(menuItems.elementAt(i));
+     	
+       	Vector<String> menuItems = anyRemote.protocol.getMenu();
+    	if (menuItems != null) {
+		    for(int i = 0;i<menuItems.size();i++) {
+			    menu.add(menuItems.elementAt(i));
+		    }
 	    }
+   	
   		return true;
 	}
-
-    Vector<String> getMenu() {
-		return menuItems;
-	}
-
-	public void processMenu(Vector vR) {
-		processMenu(vR, null, null);
-	}
-
-	public void processMenu(Vector vR, Vector persistent, Vector<String> screenDefaultMenu) {
-		String oper  = (String) vR.elementAt(1); 
-
-		if (oper.equals("clear")) {
-
-			cleanMenu(persistent);  	    
-
-		} else if (oper.equals("add") || oper.equals("replace")) {
-
-			if (oper.equals("replace")) {
-
-				cleanMenu(persistent);
-
-				for (int idx=0;idx<screenDefaultMenu.size();idx++) {
-					//log("add menu item "+screenDefaultMenu.elementAt(idx));
-					menuItems.add(screenDefaultMenu.elementAt(idx));
-				}
-			}
-
-			addMenu(vR, persistent);
-		}
-	}
-
-	void cleanMenu(Vector persistent) {
-		menuItems.clear();
-		if (persistent != null) persistent.clear();
-	}
-
-	void callMenuUpdate()  { // Add predefined menu items
-	}
-
-	void addMenu(Vector from, Vector to) {   	
-		for (int idx=2;idx<from.size();idx++) {
-			String item = (String) from.elementAt(idx);
-			if (item.length() > 0) {
-				if (to != null) to.add((String) from.elementAt(idx));
-				menuItems.add((String) from.elementAt(idx));
-			}
-		}
-	}
-
-	void restorePersistentMenu(Vector from) {
-		//log("restorePersistentMenu");
-		if (from == null) {
-			return;
-		}
-
-		for (int idx=0;idx<from.size();idx++) {   	
-			//log("restorePersistentMenu "+(String) from.elementAt(idx));
-			menuItems.add((String) from.elementAt(idx));
-		}
-	}
+    
+	public void addContextMenu(Menu menu) { 
+  
+		Vector<String> menuItems = anyRemote.protocol.getMenu();
+    	if (menuItems != null) {
+		    for(int i = 0;i<menuItems.size();i++) {
+			    menu.add(menuItems.elementAt(i));
+		    }
+	    }
+ 	}
 
 	//
 	// Edit field stuff
@@ -288,7 +239,7 @@ public class arActivity extends Activity
 	//  Set(popup,...)
 	//  Set(*,close)
 	//
-	public boolean handleCommonCommand(int id, Vector tokens) {
+	public boolean handleCommonCommand(int id) {
 		
 		boolean processed = false;
 		
@@ -297,13 +248,8 @@ public class arActivity extends Activity
         	log("handleCommonCommand CMD_CLOSE");
   			doFinish("close");
   			processed = true;
-  			
-  		} if (id == Dispatcher.CMD_MENU) {
-			
-			processMenu(tokens);
-			processed = true;
-			
-		} else if (id == Dispatcher.CMD_EFIELD) {
+  
+        } else if (id == Dispatcher.CMD_EFIELD) {
 
 			showDialog(id);
 			processed = true;

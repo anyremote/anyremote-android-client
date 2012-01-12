@@ -34,6 +34,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.TableLayout;
 import android.widget.TextView;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Display;
 import android.view.MenuItem;
 import android.view.Surface;
@@ -95,7 +96,7 @@ public class ControlScreen extends arActivity
 		log("onCreate");
 		
 		buttons = new ImageButton[NUM_ICONS];
-    
+	  	
 	    hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new arHandler(this));
 	    anyRemote.protocol.addMessageHandler(hdlLocalCopy);	    
 	}
@@ -126,7 +127,7 @@ public class ControlScreen extends arActivity
         	log("onResume no connection");	
         	doFinish("");
         }
-
+ 
         redraw();
 		popup();
 
@@ -175,9 +176,8 @@ public class ControlScreen extends arActivity
         } 
 	    TextView title = (TextView) findViewById(id);
 	    
-	    title.setText(anyRemote.protocol.cfTitle);
-	    
 	    //title.setMovementMethod(new ScrollingMovementMethod());
+	    title.setText(anyRemote.protocol.cfTitle);
     }
     
     private void setStatusField() {
