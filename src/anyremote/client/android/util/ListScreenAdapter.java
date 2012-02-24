@@ -53,6 +53,14 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 		this.items   = items;
 	}
 	
+	public void update(ArrayList<ListItem> data) {
+		clear();
+		
+	   	for(ListItem item : data) {
+    	    items.add(item);
+        }
+	}
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
  
@@ -75,20 +83,23 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
     	im.setMaxWidth (2+(int) txt.getTextSize());
     	im.setScaleType(ScaleType.CENTER_INSIDE);
     	
-    	Bitmap iconBM = (items.get(position).icon == null ?  
-    			         null : anyRemote.getIconBitmap(im.getResources(),items.get(position).icon));
-    	if (iconBM == null) {
-     		im.setVisibility(View.GONE);
-    	} else {
-     		im.setVisibility(View.VISIBLE);
-     	    im.setImageBitmap(iconBM);
-     	    if (customTextColor && customBackColor) {
-     	        im.setBackgroundColor(bColor);
-     	    }
+    	synchronized (items) {
+	    	Bitmap iconBM = (items.get(position).icon == null ?  
+	    			         null : anyRemote.getIconBitmap(im.getResources(),items.get(position).icon));
+	    	if (iconBM == null) {
+	     		im.setVisibility(View.GONE);
+	    	} else {
+	     		im.setVisibility(View.VISIBLE);
+	     	    im.setImageBitmap(iconBM);
+	     	    if (customTextColor && customBackColor) {
+	     	        im.setBackgroundColor(bColor);
+	     	    }
+	    	}
+	
+	    	
+	    	txt.setText(items.get(position).text);
     	}
-
     	
-    	txt.setText(items.get(position).text);
     	if (fSize > 0) {
  	        txt.setTextSize(fSize);
 	    }
@@ -120,15 +131,5 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
   
     public void clear() {
     	items.clear();
-    }
-    
-    public void add(ArrayList<ListItem> newItems) {
-    	for(ListItem item : newItems) {
-    	    items.add(item);
-        }
-    }
-    
-    public void add(ListItem newItem) {
-     	items.add(newItem);
     }
 }

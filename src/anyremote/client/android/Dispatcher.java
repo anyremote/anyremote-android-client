@@ -1258,12 +1258,16 @@ public class Dispatcher implements IConnectionListener {
 			item.icon = null;
 			item.text = content;
 		}
-		listContent.add(item);
+		synchronized (listContent) {
+		    listContent.add(item);
+		}
 	}	
 
 	public void listClean() {
-		listSelectPos = -1;	
-		listContent.clear();
+		listSelectPos = -1;
+		synchronized (listContent) {
+		    listContent.clear();
+		}
 		listBufferedItem.delete(0, listBufferedItem.length());
 	}
 	

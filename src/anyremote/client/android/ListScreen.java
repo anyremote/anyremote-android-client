@@ -21,6 +21,8 @@
 
 package anyremote.client.android;
 
+import java.util.ArrayList;
+
 import android.os.Bundle;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -33,6 +35,7 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import anyremote.client.android.util.ListScreenAdapter;
+import anyremote.client.android.util.ListItem;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.util.arHandler;
 import anyremote.client.android.R;
@@ -45,6 +48,7 @@ public class ListScreen extends arActivity
 	ListView          list;
 	ListScreenAdapter dataSource;
 	Dispatcher.ArHandler hdlLocalCopy;
+	ArrayList<ListItem> listItems;
 
 	boolean skipDismissEditDialog = false;
 
@@ -55,8 +59,9 @@ public class ListScreen extends arActivity
 
 		prefix = "ListScreen"; // log stuff
 		log("onCreate");
-
-		dataSource = new ListScreenAdapter(this, R.layout.list_form_item, anyRemote.protocol.listContent);
+		
+		listItems  = new ArrayList<ListItem>();
+		dataSource = new ListScreenAdapter(this, R.layout.list_form_item, listItems);
 		
 		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.LIST_FORM, new arHandler(this));
 		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
@@ -201,10 +206,10 @@ public class ListScreen extends arActivity
 			if (handleCommonCommand(data.id)) {
 				return;
 			}
-			
 				
 			// get info about data update
 			if (data.id == Dispatcher.CMD_LIST_UPDATE) {
+				dataSource.update(anyRemote.protocol.listContent);
 				dataSource.notifyDataSetChanged();
 			}
 			
@@ -212,6 +217,7 @@ public class ListScreen extends arActivity
 			redraw();
 			
 		} else  if (data.stage == ProtocolMessage.INTERMED || data.stage == ProtocolMessage.LAST) {
+			dataSource.update(anyRemote.protocol.listContent);
 			dataSource.notifyDataSetChanged();
 		}
 		

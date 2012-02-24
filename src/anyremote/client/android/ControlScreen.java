@@ -272,7 +272,7 @@ public class ControlScreen extends arActivity
 			buttons[10] = (ImageButton) findViewById(R.id.b0);
 			buttons[11] = (ImageButton) findViewById(R.id.b11);
 			
-			h = h/7;   // 4 rows with icons and 2 line of text + gaps
+			h = h/6;   // 4 rows with icons and 2 line of text + gaps
 			w = w/3;   // 3 columns with icons
 			int sz = (w > h ? h : w);
 
