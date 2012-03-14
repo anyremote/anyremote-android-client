@@ -45,6 +45,7 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 	private boolean customBackColor = false;	
 	private int textColor = -1; //Color.rgb(255,255,255);
 	private int backColor = -1; //Color.rgb(0,0,0);
+	private float fSize   = -1;
 		
 	public ListScreenAdapter(Context context, int textViewResourceId, ArrayList<ListItem> items) {
 		super(context, textViewResourceId, items);
@@ -52,8 +53,17 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 		this.items   = items;
 	}
 	
+	public void update(ArrayList<ListItem> data) {
+		clear();
+		
+	   	for(ListItem item : data) {
+    	    items.add(item);
+        }
+	}
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+ 
       	final View v;
     	if (convertView == null) {
     		LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -73,21 +83,27 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
     	im.setMaxWidth (2+(int) txt.getTextSize());
     	im.setScaleType(ScaleType.CENTER_INSIDE);
     	
-    	Bitmap iconBM = (items.get(position).icon == null ?  
-    			         null : anyRemote.getIconBitmap(im.getResources(),items.get(position).icon));
-    	if (iconBM == null) {
-     		im.setVisibility(View.GONE);
-    	} else {
-     		im.setVisibility(View.VISIBLE);
-     	    im.setImageBitmap(iconBM);
-     	    if (customTextColor && customBackColor) {
-     	        im.setBackgroundColor(bColor);
-     	    }
+    	synchronized (items) {
+	    	Bitmap iconBM = (items.get(position).icon == null ?  
+	    			         null : anyRemote.getIconBitmap(im.getResources(),items.get(position).icon));
+	    	if (iconBM == null) {
+	     		im.setVisibility(View.GONE);
+	    	} else {
+	     		im.setVisibility(View.VISIBLE);
+	     	    im.setImageBitmap(iconBM);
+	     	    if (customTextColor && customBackColor) {
+	     	        im.setBackgroundColor(bColor);
+	     	    }
+	    	}
+	
+	    	
+	    	txt.setText(items.get(position).text);
     	}
-
     	
-    	txt.setText(items.get(position).text);
-    	if (customTextColor && customBackColor) {
+    	if (fSize > 0) {
+ 	        txt.setTextSize(fSize);
+	    }
+      	if (customTextColor && customBackColor) {
     	    txt.setBackgroundColor(bColor);
             txt.setTextColor(tColor);
     	}
@@ -95,8 +111,8 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
     	return v;
     }
     
-    public void setFont(int size) {
-	    
+    public void setFont(float size) {
+    	fSize = size;
 	}
    
     public void setSelectedPosition(int position) {
@@ -115,15 +131,5 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
   
     public void clear() {
     	items.clear();
-    }
-    
-    public void add(ArrayList<ListItem> newItems) {
-    	for(ListItem item : newItems) {
-    	    items.add(item);
-        }
-    }
-    
-    public void add(ListItem newItem) {
-     	items.add(newItem);
     }
 }

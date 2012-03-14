@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2012 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,28 +26,25 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.view.Display;
+import android.view.Surface;
 import android.view.WindowManager;
+import android.widget.Toast;
 import anyremote.client.android.Connection.IConnectionListener;
 import anyremote.client.android.util.Address;
-import anyremote.client.android.util.ControlScreenHandler;
 import anyremote.client.android.util.ISocket;
-import anyremote.client.android.util.ListHandler;
 import anyremote.client.android.util.ListItem;
 import anyremote.client.android.util.ProtocolMessage;
-import anyremote.client.android.util.TextHandler;
 import anyremote.client.android.util.UserException;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -94,14 +91,29 @@ public class Dispatcher implements IConnectionListener {
 	static final int  CMD_EDIT_FORM_NAME  = 105;
 	static final int  CMD_EDIT_FORM_PASS  = 106;
 
+	static final int  CMD_LIST_UPDATE     = 107;
+
 	static final int  CMD_CLOSE  = 110;
 
-	static final int SIZE_SMALL    = 10;
-	static final int SIZE_MEDIUM   = 15;
-	static final int SIZE_LARGE    = 25;
+	static final int SIZE_SMALL    = 12;
+	static final int SIZE_MEDIUM   = 22;
+	static final int SIZE_LARGE    = 36;
+	
+    public static class ArHandler {
+    	
+    	public ArHandler(int a,Handler h) {
+    		actId  = a;
+    		hdl    = h;
+    	}
+    	
+        public int actId   = anyRemote.NO_FORM;
+        public Handler hdl = null;
+    }
 
 	ArrayList<Handler> handlers;
-
+	
+	ArrayList<ArHandler> actHandlers = new ArrayList<ArHandler>();
+	
 	Connection   connection = null;
 	anyRemote    context    = null;
 	boolean      autoPass   = false;
@@ -113,33 +125,50 @@ public class Dispatcher implements IConnectionListener {
 
 	// Control Screen stuff
 	Vector<String> cfMenu = new Vector<String>();
-	ControlScreenHandler cfHandler;
+	ArrayList<Handler> cfHandlers = new ArrayList<Handler>();	
 	int    cfSkin;
+	boolean cfUseJoystick;
 	String cfTitle;
 	String cfStatus;
 	String cfCaption;
 	String [] cfIcons;
+	String cfUpEvent;
+	String cfDownEvent;
+	int    cfInitFocus;
 	int    cfFrgr;
 	int    cfBkgr;
 	Bitmap cfCover;
 	float  cfFSize;
 	Typeface cfTFace;
+	String cfVolume;
 
 	// List Screen stuff
 	String listTitle;
+	int    listSelectPos = -1;
 	Vector<String> listMenu = new Vector<String>();
-	ListHandler listHandler = null;
+	ArrayList<Handler> listHandlers = new ArrayList<Handler>();
 	ArrayList<ListItem> listContent = null;
+	boolean listCustomBackColor = false;
+	boolean listCustomTextColor = false;
+	int     listText;
+	int     listBkgr;
+	float   listFSize;
+	StringBuilder  listBufferedItem;
 
 	// Text Screen stuff
 	String textTitle;
 	Vector<String> textMenu = new Vector<String>();
-	TextHandler textHandler;
-	String      textContent;
+	ArrayList<Handler> textHandlers = new ArrayList<Handler>();
+	StringBuilder textContent;
 	int         textFrgr;
 	int         textBkgr;
 	float       textFSize;
 	Typeface    textTFace;
+	
+	// Image Screen stuff
+	ArrayList<Handler> imHandlers = new ArrayList<Handler>();	
+	Bitmap      imScreen;
+	Vector<String> winMenu = new Vector<String>();
 
 	// telephony handler
 	PhoneManager phoneManager;
@@ -147,6 +176,12 @@ public class Dispatcher implements IConnectionListener {
 	// Popup stuff
 	boolean popupState     = false;
     StringBuilder popupMsg = new StringBuilder(16);
+
+    // Edit Field stuff
+    String efCaption = "";
+	String efLabel   = "";
+	String efValue   = "";
+	int efId; 
 	
 	boolean connectBT = false;
 
@@ -159,6 +194,9 @@ public class Dispatcher implements IConnectionListener {
 
 		listContent = new ArrayList<ListItem>();
 		cfIcons     = new String[ControlScreen.NUM_ICONS];
+		listBufferedItem = new StringBuilder();
+		
+		textContent = new StringBuilder();
 		
 		setDefValues();
 		
@@ -173,6 +211,9 @@ public class Dispatcher implements IConnectionListener {
 			cfIcons[i] = "default";
 		}
 		cfSkin = ControlScreen.SK_DEFAULT;
+		cfUpEvent   = "UP";
+		cfDownEvent = "DOWN";
+		cfInitFocus = 5;
 		cfFrgr = anyRemote.parseColor("255","255","255");
 		cfBkgr = anyRemote.parseColor("0",  "0",  "0");		
 		cfTitle   = "";
@@ -181,12 +222,30 @@ public class Dispatcher implements IConnectionListener {
 		cfCover = null;
 		cfFSize = SIZE_MEDIUM;
 		cfTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
+		cfMenu.clear();
+		menuAddDefault(anyRemote.CONTROL_FORM);
+		
+		listTitle     = "";
+		listSelectPos = -1;
+		listCustomBackColor = false;
+		listCustomTextColor = false;
+		listContent.clear(); 
+		listFSize = -1;
+		listMenu.clear();
+		menuAddDefault(anyRemote.LIST_FORM);
+		listBufferedItem.delete(0, listBufferedItem.length());
 
 		textFrgr = anyRemote.parseColor("255","255","255");
 		textBkgr = anyRemote.parseColor("0",  "0",  "0");
-		textContent = "";
+		textContent.delete(0, textContent.length());
 		textFSize = SIZE_MEDIUM;
 		textTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
+		textMenu.clear();
+		menuAddDefault(anyRemote.TEXT_FORM);
+		
+		imScreen = null;
+		winMenu.clear();
+		menuAddDefault(anyRemote.WMAN_FORM);
 		
 		autoPass  = false;
 	}
@@ -311,7 +370,7 @@ public class Dispatcher implements IConnectionListener {
 	@Override
 	public void notifyMessage(int id, Vector cmdTokens, int stage) {
 
-		log("notifyMessage " + id + " " + cmdTokens+"(cur screen is "+anyRemote.getCurScreen()+")");
+		log("notifyMessage got:" + id + " " + cmdTokens+"(cur screen is "+anyRemote.getCurScreen()+")");
 
 		switch (id) {
 
@@ -319,7 +378,7 @@ public class Dispatcher implements IConnectionListener {
 			disconnect(true); 
 			break;
 
-			/*case CMD_EXIT:
+		/*case CMD_EXIT:
 			controller.exit();
 			break;*/
 
@@ -332,91 +391,102 @@ public class Dispatcher implements IConnectionListener {
 		case CMD_TITLE:
 		case CMD_VOLUME:
 		case CMD_COVER:
+			
+			controlDataProcess(cmdTokens);
 
 			// Create activity with (possibly) empty list
-			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
-				sendToControlScreen(id,cmdTokens,stage);
-			} else {
-				// Start list screen activity and transfer data
+			if (anyRemote.getCurScreen() != anyRemote.CONTROL_FORM) {
 				context.setCurrentView(anyRemote.CONTROL_FORM, "");
-				sendToControlScreen(id,cmdTokens,stage);
-			}			
-			break;
+			} 
+			
+		    sendToActivity(anyRemote.CONTROL_FORM,id,stage);
 
-		case CMD_EFIELD:			
+		    break;
 
-			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
-				sendToControlScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-				sendToListScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-				sendToTextScreen(id,cmdTokens,stage);
+		case CMD_EFIELD:
+			
+			if (cmdTokens.size() < 4) return;
+			
+			anyRemote.protocol.efCaption = (String) cmdTokens.elementAt(1);
+			anyRemote.protocol.efLabel   = (String) cmdTokens.elementAt(2);
+			anyRemote.protocol.efValue   = (String) cmdTokens.elementAt(3);
+			anyRemote.protocol.efId      = CMD_EFIELD;
+			
+			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
+			// CMD_EFIELD: result will be handled in handleEditFieldResult()
+			
+		case CMD_FSCREEN:
+			
+			anyRemote.protocol.setFullscreen((String) cmdTokens.elementAt(1));
+			
+			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
+
+		case CMD_POPUP:
+			
+			anyRemote.protocol.popupState = false;
+			anyRemote.protocol.popupMsg.delete(0, anyRemote.protocol.popupMsg.length());
+			
+			String op = (String) cmdTokens.elementAt(1);
+			
+			if (op.equals("show")) { 
+
+				anyRemote.protocol.popupState = true;
+				
+				for (int i=2;i<cmdTokens.size();i++) {
+					if (i != 2) {
+						anyRemote.protocol.popupMsg.append(", ");
+					}
+					anyRemote.protocol.popupMsg.append((String) cmdTokens.elementAt(i));
+				}
 			}
+			
+			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
+			
+		case CMD_MENU:
 
-			// result will be handled in handleEditFieldResult()
+			menuProcess(cmdTokens, anyRemote.getCurScreen());
 			break; 
 
 		case CMD_FMAN:
 			//controller.cScreen.setData(anyRemote.FMGR_FORM,cmdTokens,stage);
 			break;  
 
-
-		case CMD_FSCREEN:
-			//controller.cScreen.setFullScreen((String) cmdTokens.elementAt(1));
-			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
-				sendToControlScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-				sendToListScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-				sendToTextScreen(id,cmdTokens,stage);
-			}
-			break;   
-
 		case CMD_ICONLIST:
 		case CMD_LIST:
-
-			// Create activity with (possibly) empty list
-			if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-				sendToListScreen(id,cmdTokens,stage);
-			} else {
-				if (((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
-					if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-						listContent.clear();
-					}
-					return;
-				}
-				// Start list screen activity and transfer data
-				context.setCurrentView(anyRemote.LIST_FORM, (String) cmdTokens.get(1));
-				sendToListScreen(id,cmdTokens,stage);
-			}			
-			break;  
-
-		case CMD_MENU:
-
-			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
-				sendToControlScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-				sendToListScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-				sendToTextScreen(id,cmdTokens,stage);
-			//} else {
-				//screen.setMenu(cmdTokens);
+            
+			// setup List Screen activity persistent data			
+			if (anyRemote.getCurScreen() != anyRemote.LIST_FORM) {
+				// by default do not change system colors
+				listCustomBackColor = false;
+				listCustomTextColor = false;
 			}
-			break; 
-
-		case CMD_POPUP:
 			
-			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
-				sendToControlScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-				sendToListScreen(id,cmdTokens,stage);
-			} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-				sendToTextScreen(id,cmdTokens,stage);
-			//} else {
-				//screen.setMenu(cmdTokens);
+			boolean needUpdateDataSource = listDataProcess(id, cmdTokens, stage); 
+			
+			boolean doClose = ((String) cmdTokens.elementAt(1)).equals("close");
+			
+			if (anyRemote.logVisible()) {
+				if (doClose) {
+					context.setPrevView(anyRemote.CONTROL_FORM);
+				}
+				return;
 			}
 
-			break; 
+			if (doClose) { 
+				// Close List Activity (even it was not started ;-)) and open ControlForm
+				context.setCurrentView(anyRemote.CONTROL_FORM, "");
+				return;
+			}
+		
+			// Create activity with (possibly) empty list
+			if (anyRemote.getCurScreen() != anyRemote.LIST_FORM) {
+				context.setCurrentView(anyRemote.LIST_FORM, "");
+			}
+			
+			int lid = (needUpdateDataSource ? CMD_LIST_UPDATE : id);
+			
+			sendToActivity(anyRemote.LIST_FORM,lid,stage);		
+			break;  
 
 		case CMD_PARAM:
 			//controller.setParam(cmdTokens);
@@ -426,22 +496,31 @@ public class Dispatcher implements IConnectionListener {
 			//screen.drawSync();
 			break;
 
-		case CMD_TEXT:
-
-			// Create activity with (possibly) empty list
-			if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-				sendToTextScreen(id,cmdTokens,stage);
-			} else {
-				if (((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
-					if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-						textContent = "";
-					}
-					return;
+		case CMD_TEXT:	
+			
+			textDataProcess(cmdTokens, stage); 
+			
+			boolean doCloset = ((String) cmdTokens.elementAt(1)).equals("close");
+			
+			if (anyRemote.logVisible()) {
+				if (doCloset) {
+					context.setPrevView(anyRemote.CONTROL_FORM);
 				}
-				// Start list screen activity and transfer data
-				context.setCurrentView(anyRemote.TEXT_FORM, (String) cmdTokens.get(1));
-				sendToTextScreen(id,cmdTokens,stage);
-			}			
+				return;
+			}
+			
+			if (doCloset) { 
+				// Close Text Activity (even it was not started ;-)) and open ControlForm
+				context.setCurrentView(anyRemote.CONTROL_FORM, "");
+				return;
+			}
+		
+			// Create activity with (possibly) empty list
+			if (anyRemote.getCurScreen() != anyRemote.TEXT_FORM) {
+				context.setCurrentView(anyRemote.TEXT_FORM, "");
+			}
+				
+			sendToActivity(anyRemote.TEXT_FORM,id,stage);		
 			break;       
 
 		case CMD_VIBRATE:
@@ -450,15 +529,44 @@ public class Dispatcher implements IConnectionListener {
 			break;
 
 		case CMD_IMAGE:
-			//controller.cScreen.setData(anyRemote.WMAN_FORM,cmdTokens,stage);
+			
+			boolean doCloseW = false;
+			
+			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {
+				doCloseW = true;
+			}
+			
+			if (anyRemote.logVisible()) {
+				if (doCloseW) {
+					context.setPrevView(anyRemote.CONTROL_FORM);
+				}
+				return;
+			}
+
+			if (doCloseW) { 
+				// Close WinManager Activity (even it was not started ;-)) and open ControlForm
+				context.setCurrentView(anyRemote.CONTROL_FORM, "");
+				return;
+			}
+		
+			// Create activity
+			if (anyRemote.getCurScreen() != anyRemote.WMAN_FORM) {
+				context.setCurrentView(anyRemote.WMAN_FORM, "");
+			}
+			
+			sendToActivity(anyRemote.WMAN_FORM,id,stage);		
+
 			break;    
 
 		case CMD_GETSCRSIZE:
 
 			Display display = context.getWindowManager().getDefaultDisplay(); 
-
-			sendMessage("SizeX("+display.getWidth() +",)");
-			sendMessage("SizeY("+display.getHeight()+",)");
+			boolean rotated = (display.getOrientation() == Surface.ROTATION_90 ||
+	                           display.getOrientation() == Surface.ROTATION_270);
+			String ori = (rotated ? "R" : "");
+	        
+			sendMessage("SizeX("+display.getWidth() +","+ori+")");
+			sendMessage("SizeY("+display.getHeight()+","+ori+")");
 			break;
 
 		case CMD_GETCVRSIZE:
@@ -471,7 +579,7 @@ public class Dispatcher implements IConnectionListener {
 			try {
 				ComponentName comp = new ComponentName(context, this.getClass());
 				PackageInfo pinfo = context.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
-				sendMessage("Version(,"+pinfo.versionName);
+				sendMessage("Version(,"+pinfo.versionName+")");
 			} catch (android.content.pm.PackageManager.NameNotFoundException e) {
 				sendMessage("Version(,unknown)");
 			}          
@@ -495,13 +603,7 @@ public class Dispatcher implements IConnectionListener {
 
 			if (autoPass || currentConnPass.equals("")) {
 				log("ASK FOR PASS");
-				if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
-					sendToListScreen(id,cmdTokens,stage);
-				} else if (anyRemote.getCurScreen() == anyRemote.TEXT_FORM) {
-					sendToTextScreen(id,cmdTokens,stage);
-				} else /* if (anyRemote.currForm == anyRemote.CONTROL_FORM)*/ {
-					sendToControlScreen(id,cmdTokens,stage);
-				}
+				sendToActivity(anyRemote.getCurScreen(),id,stage);
 				//result will be handled in handleEditFieldResult()
 			} else {
 				log("USE PASS >"+currentConnPass+"<");
@@ -517,7 +619,7 @@ public class Dispatcher implements IConnectionListener {
 			break;
 
 		case CMD_GETPLTF:
-			sendMessage("Model("+android.os.Build.MODEL+"/Android-"+android.os.Build.VERSION.RELEASE);
+			sendMessage("Model("+android.os.Build.MODEL+"/Android-"+android.os.Build.VERSION.RELEASE+")");
 			break;
 
 		case CMD_GETICON:
@@ -548,100 +650,55 @@ public class Dispatcher implements IConnectionListener {
 			log("notifyMessage: Command or handler unknown");
 		}
 	}
+	
+	public void sendToActivity(int activity, int id, int stage) {
 
-	void closeCurrentScreen(int screen) {
-		if (screen == anyRemote.LIST_FORM) {
-			Vector tokens = new Vector();
-			tokens.add(screen);
-			tokens.add("close");
-			sendToListScreen(CMD_LIST,tokens,ProtocolMessage.FULL);
-		}
-	}
-
-	public void sendToControlScreen(int id, Vector cmdTokens, int stage) {
-		//log("sendToControlScreen "+id);
-		int num = 0;
-		while (cfHandler == null) {
-			log("sendToControlScreen handler not set");
-
-			// do not close closed control form
-			if (cmdTokens.size() > 0 && ((Integer) cmdTokens.elementAt(0)) == CMD_CLOSE) {  // skip
-				return;
-			}
-
-			try {
-				Thread.sleep(1000);
-			} catch(Exception e) {
-				Thread.yield();
-			}
-			if (num>8) return;
-			num++;
-		}
 		ProtocolMessage pm = new ProtocolMessage();
-		pm.tokens = cmdTokens;
+		pm.id     = id;
 		pm.stage  = stage;
-		Message msg = cfHandler.obtainMessage(id, pm);
-		//log("sendToControlScreen SEND");
-		msg.sendToTarget();
-	}
 
-	public void sendToListScreen(int id, Vector cmdTokens, int stage) {
-		//log("sendToListScreen "+id);
 		int num = 0;
-		while (listHandler == null) {
-			log("sendToListScreen handler not set");
-
-			// do not close closed list
-			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
-				if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-					listContent.clear();
+		boolean sent = false;
+		while (!sent) {
+						
+			final Iterator<ArHandler> itr = actHandlers.iterator();
+			while (itr.hasNext()) {
+				try {
+					final ArHandler handler = itr.next();
+					if (activity < 0 || 					// send to all
+						handler.actId == activity) {
+						
+				        log("sendToActivity "+activity+" SEND ");
+				    
+			     	    Message msg = handler.hdl.obtainMessage(id, pm);
+				        msg.sendToTarget();
+				        
+				        sent = true;
+					}
+				} catch (Exception e) {
+			    }
+			}
+			
+			if (!sent) {
+				
+				if (activity == anyRemote.CONTROL_FORM) { 	// does it needed ?
+					if (id == CMD_CLOSE) {  // skip
+						return;
+					}
 				}
-				return;
-			}
-
-			try {
-				Thread.sleep(1000);
-			} catch(Exception e) {
-				Thread.yield();
-			}
-			if (num>8) return;
-			num++;
-		}
-		ProtocolMessage pm = new ProtocolMessage();
-		pm.tokens = cmdTokens;
-		pm.stage  = stage;
-		Message msg = listHandler.obtainMessage(id, pm);
-		//log("sendToListScreen SEND");
-		msg.sendToTarget();
-	}
-
-	public void sendToTextScreen(int id, Vector cmdTokens, int stage) {
-		//log("sendToTextScreen "+id);
-		int num = 0;
-		while (textHandler == null) {
-			log("sendToTextScreen handler not set");
-			// do not close closed test
-			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {  // skip
-				if (cmdTokens.size() > 2 && ((String) cmdTokens.elementAt(2)).equals("clear")) {
-					textContent = "";
+				
+				try {
+					Thread.sleep(1000);
+				} catch(Exception e) {
+					Thread.yield();
 				}
-				return;
+				if (num > 8) {
+					log("sendToActivity "+activity+" SKIP EVENT");
+					return;
+				}
+				num++;
 			}
-
-			try {
-				Thread.sleep(1000);
-			} catch(Exception e) {
-				Thread.yield();
-			}
-			if (num>8) return;
-			num++;
 		}
-		ProtocolMessage pm = new ProtocolMessage();
-		pm.tokens = cmdTokens;
-		pm.stage  = stage;
-		Message msg = textHandler.obtainMessage(id, pm);
-		//log("sendToTextScreen SEND");
-		msg.sendToTarget();
 	}
 
 	public void handleEditFieldResult(int id, String button, String value) {
@@ -718,7 +775,7 @@ public class Dispatcher implements IConnectionListener {
 	public void sendMessage(String command) {
 		if (connection != null && !connection.isClosed()) {
 			//log("sendMessage " + command);
-		    connection.send(command);
+		    connection.send(command+";\r");
 		}
 	}
 
@@ -788,22 +845,7 @@ public class Dispatcher implements IConnectionListener {
 		handlers.clear();
 	}
 
-	public void setListHandler(ListHandler evHandler) {
-		//log("setListHandler "+(evHandler==null?"reset":"set"));
-		listHandler = evHandler; 	
-	}
-
-	public void setTextHandler(TextHandler evHandler) {
-		//log("setTextHandler "+(evHandler==null?"reset":"set"));
-		textHandler = evHandler; 	
-	}
-
-	public void setControlScreenHandler(ControlScreenHandler evHandler) {
-		//log("setControlScreenHandler "+(evHandler==null?"reset":"set"));
-		cfHandler = evHandler; 	
-	}
-
-	public void setFullscreen(String option, arActivity act) {
+	public void setFullscreen(String option) {
 
 		if (option.startsWith("on")) {
 			if (fullscreen) return;
@@ -814,6 +856,11 @@ public class Dispatcher implements IConnectionListener {
 		} else if (option.startsWith("toggle")) {
 			fullscreen = !fullscreen;
 		}
+	}
+	
+	public void setFullscreen(String option, arActivity act) {
+		
+		setFullscreen(option);
 		setFullscreen(act);
 	}
 
@@ -831,5 +878,653 @@ public class Dispatcher implements IConnectionListener {
 	public void log(String msg) {
 		anyRemote._log("Dispatcher",msg);
 	}
+	
+	public synchronized void addMessageHandler(ArHandler h) {
+		if (!actHandlers.contains(h)) {
+			actHandlers.add(h);
+		}
+	}
+	
+  	public synchronized void removeMessageHandler(ArHandler h) {
+ 		actHandlers.remove(h);
+	}
+  	
+	//
+	// Control Screen activity persistent data handling
+	//
+    public void controlDataProcess(Vector vR) {
+    	
+    	//log("processData >"+vR+"<");
+    	if (vR.size() < 2) {
+    		return;
+    	}
+    	
+    	int id = (Integer) vR.elementAt(0);
+   
+		switch (id) {
+		
+		    case CMD_SKIN:
+		    	
+		    	controlSetSkin(vR); 
+			    break;
+				      
+		    case Dispatcher.CMD_STATUS:
+			   
+			    cfStatus = (String) vR.elementAt(1);
+				break;
 
+		    case CMD_TITLE:
+		    	
+		    	cfTitle = (String) vR.elementAt(1);
+				break;
+			
+		    case CMD_ICONS:
+		    	
+				controlSetIconLayout(vR);
+				break; 
+				
+  		    case CMD_BG:
+  		    	
+  		    	cfBkgr = anyRemote.parseColor(
+                        (String) vR.elementAt(1),
+                        (String) vR.elementAt(2),
+                        (String) vR.elementAt(3));
+   				break; 
+  		
+  		    case CMD_FG:
+
+  		    	cfFrgr = anyRemote.parseColor(
+                        (String) vR.elementAt(1),
+                        (String) vR.elementAt(2),
+                        (String) vR.elementAt(3));
+  		    	break;  
+  		  
+  		    case CMD_FONT:
+  		    	
+			    controlSetFontParams(vR);
+			    break; 
+			     
+		    case CMD_FSCREEN:
+		    	
+		    	setFullscreen((String) vR.elementAt(1));
+			    break;   
+			 				
+		    case CMD_VOLUME:
+		    	
+		    	cfVolume = (String) vR.elementAt(1);
+				break;  
+
+			case CMD_COVER:
+				
+				cfCover = (Bitmap) vR.elementAt(1); 
+				break;
+		}
+    }
+    
+	public void controlSetSkin(Vector vR) {
+		
+        String name   = (String) vR.elementAt(1);
+
+        //useCover    = false;
+        //cover       = null;
+         
+        //boolean newVolume = false;
+    	//int     newSize   = icSize;
+        
+        cfUseJoystick = false;
+        cfUpEvent   = "UP";
+        cfDownEvent = "DOWN";
+        cfInitFocus = 5;
+
+        boolean oneMore = false;
+        
+        for (int i=2;i<vR.size();) {
+        
+	        String oneParam = (String) vR.elementAt(i);
+                
+    		if (oneMore) {
+        		try {
+        		    cfInitFocus = btn2int(oneParam);
+                } catch (NumberFormatException e) {
+                	cfInitFocus = -1;
+ 	            }
+                	
+                oneMore = false;
+    		} else if (oneParam.equals("joystick_only")) {
+        		cfUseJoystick = true;
+		        //useKeypad   = false;
+    		} else if (oneParam.equals("keypad_only")) {
+        		cfUseJoystick = false;
+		        //useKeypad   = true;
+    		} else if (oneParam.equals("ticker")) {
+		        //newTicker   = true;
+    		} else if (oneParam.equals("noticker")) {
+		        //newTicker   = false;
+    		} else if (oneParam.equals("volume")) {
+		        //newVolume   = true;
+    		} else if (oneParam.equals("size16")) {
+		        //newSize = 16;
+    		} else if (oneParam.equals("size32")) {
+	            //newSize = 32;
+    		} else if (oneParam.equals("size48")) {
+	            //newSize = 48;
+    		} else if (oneParam.equals("size64")) {
+	            //newSize = 64;
+    		} else if (oneParam.equals("size128")) {
+	            //newSize = 128;
+    		} else if (oneParam.equals("split")) {
+	            //newSplit = true;
+    		} else if (oneParam.equals("choose")) {
+		        oneMore = true;
+    		} else if (oneParam.equals("up")) {
+                i++;
+                if (i<vR.size()) {
+                    cfUpEvent = (String) vR.elementAt(i);
+                }
+    		} else if (oneParam.equals("down")) {
+                i++;
+                if (i<vR.size()) {
+                	cfDownEvent = (String) vR.elementAt(i);
+                }
+    		} 
+            i++;
+        }
+        
+	    int newSkin = anyRemote.protocol.cfSkin;
+	    if (name.equals("default")) {
+	    	cfSkin = ControlScreen.SK_DEFAULT;
+        } else if (name.equals("bottomline")) {
+        	cfSkin = ControlScreen.SK_BOTTOMLINE;
+        }
+    }
+ 
+	private void controlSetIconLayout(Vector data) {
+     	
+    	if (data.size() == 0) {
+     	    return;
+    	}
+    	
+		if (!((String) data.elementAt(1)).equals("SAME")) {
+			cfCaption = (String) data.elementAt(1);
+        }
+		
+		int maxIcon = (cfSkin == ControlScreen.SK_BOTTOMLINE ?  ControlScreen.NUM_ICONS_BTM : ControlScreen.NUM_ICONS);
+		
+        for (int idx=2;idx<data.size()-1;idx+=2) {
+         	try {
+        		int i = btn2int((String) data.elementAt(idx));
+
+        		if (i >= 0 || i < maxIcon) {    
+        			cfIcons[i] = (String) data.elementAt(idx+1);
+       		    }  
+	         } catch (Exception e) { }
+        }
+    }
+   
+	private void controlSetFontParams(Vector defs) {
+		
+		boolean bold   = false;
+		boolean italic = false;
+		float   size   = SIZE_MEDIUM;
+		boolean setSize = false;
+		
+		int start = 1;
+       	while(start<defs.size()) {
+            String spec = (String) defs.elementAt(start);
+            if (spec.equals("plain")) {
+            	//style = Font.STYLE_PLAIN;
+            } else if (spec.equals("bold")) {
+            	bold = true;
+            } else if (spec.equals("italic")) {
+            	italic = true;
+            } else if (spec.equals("underlined")) {
+            	//style = (style == Font.STYLE_PLAIN ? Font.STYLE_UNDERLINED : style|Font.STYLE_UNDERLINED);
+            } else if (spec.equals("small")) {
+            	size = Dispatcher.SIZE_SMALL;
+            	setSize = true;
+            } else if (spec.equals("medium")) {
+            	size = Dispatcher.SIZE_MEDIUM;
+               	setSize = true;
+            } else if (spec.equals("large")) {
+            	size = Dispatcher.SIZE_LARGE;
+               	setSize = true;
+            } else if (spec.equals("monospace")) {
+            	//face  = Font.FACE_MONOSPACE;
+            } else if (spec.equals("system")) {
+            	//face  = Font.FACE_SYSTEM;
+            } else if (spec.equals("proportional")) {
+            	//face  = Font.FACE_PROPORTIONAL;
+            //} else {
+            //	controller.showAlert("Incorrect font "+spec);
+            }
+        	start++;
+        }
+       	
+	    if (bold && italic) {
+	    	cfTFace = Typeface.defaultFromStyle(Typeface.BOLD_ITALIC);
+	    } else if (bold) {
+	    	cfTFace = Typeface.defaultFromStyle(Typeface.BOLD);
+	    } else if (italic) {
+	    	cfTFace = Typeface.defaultFromStyle(Typeface.ITALIC);
+	    } else {
+	    	cfTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
+	    }
+	    
+	    if (setSize) {
+	        cfFSize = size;
+	    }
+	}
+
+	private int btn2int(String btn) {
+       	int i = -1;
+        
+		if (btn.equals("*")) {
+		    i=9;
+        } else if (btn.equals("#")) {
+        	i=11;
+        } else {
+        	try {
+        		i = Integer.parseInt(btn) - 1;
+        		if (i == -1) {	// 0 was parsed
+        			i = 10;
+        		}
+            } catch (NumberFormatException e) { }
+        }
+        return i;
+    }	
+	
+	//
+	// List Screen activity persistent data handling
+	//
+  	
+	//
+	// list|iconlist, add|replace|!close!|clear|!show![,Title,item1,...itemN]
+	// 
+	// Set(list,close) does NOT processed here !
+	//
+	public boolean listDataProcess(int id, Vector vR, int stage) {	
+		log("listDataProcess "+id+" "+vR); 
+
+		if (stage == ProtocolMessage.INTERMED ||
+	        stage == ProtocolMessage.LAST) {
+			// get next portion of Set(list,add/replace ...)
+			listAdd(id, vR, 0, false);
+			return true;
+		}
+		
+		String oper  = (String) vR.elementAt(1); 
+		boolean needUpdataDataSource = true;
+
+		if (oper.equals("clear")) {
+
+			listClean();
+
+		} else if (oper.equals("close")) {
+            
+			// here processed only "clear" part of the command
+			if (vR.size() > 2 && ((String) vR.elementAt(2)).equals("clear")) {
+				listClean();
+			}
+			
+		} else if (oper.equals("fg")) {
+
+			int color = anyRemote.parseColor(
+					(String) vR.elementAt(2),
+					(String) vR.elementAt(3),
+					(String) vR.elementAt(4));
+			listText = color;
+			listCustomTextColor = true;
+			
+		} else if (oper.equals("bg")) {
+
+			int color = anyRemote.parseColor(
+					(String) vR.elementAt(2),
+					(String) vR.elementAt(3),
+					(String) vR.elementAt(4));
+			listBkgr = color;
+			listCustomBackColor = true;
+	
+		} else if (oper.equals("font")) {
+
+			listSetFont(vR);
+
+		} else if (oper.equals("select")) {
+
+			try { 
+				int i = Integer.parseInt((String) vR.elementAt(2))-1;
+				if (i>0) {
+					listSelectPos = i;
+				}
+			} catch(Exception z) { 
+				listSelectPos = -1;	
+			}
+
+		} else if (oper.equals("add") || oper.equals("replace")) {
+
+			String title = (String) vR.elementAt(2);
+
+			if (oper.equals("replace")) {
+				listClean();
+			}
+			if (!title.equals("SAME")) {
+				listTitle = title;
+			}
+			listAdd(id, vR, 3, (stage == ProtocolMessage.FULL));
+						
+		} else if (oper.equals("show")) {
+			// nothing to do
+			needUpdataDataSource = false;
+		} else {
+	    	log("processList: ERROR improper command >"+oper+"<");
+		}
+		return needUpdataDataSource;
+	}
+
+	public void listAdd(int id, Vector vR, int start, boolean fullCmd) {
+
+		//log("addToList "+vR); 
+
+		int end = vR.size();
+		if (!fullCmd) {
+			end -= 1;
+		}
+
+		for (int idx=start;idx<end;idx++) {
+
+			String item = (String) vR.elementAt(idx);
+			if (start == 0 && idx == 0) {
+				item = listBufferedItem.toString() + item;
+				listBufferedItem.delete(0, listBufferedItem.length());
+			}
+			if (!item.equals("") && ! (item.length() == 1 && item.charAt(0) == '\n')) {
+				listAddWithIcon(id, item); 
+			}
+		}
+
+		if (!fullCmd) {
+			listBufferedItem.append((String) vR.elementAt(end));
+		}
+	}
+
+	public void listAddWithIcon(int id, String content) {
+
+		ListItem item = new ListItem();
+
+		int idx = (id == CMD_ICONLIST ? content.indexOf(":") : 0);
+		if (idx > 0) {
+			item.icon = content.substring(0,idx).trim();
+			item.text = content.substring(idx+1).trim().replace('\r', ',');
+		} else {
+			item.icon = null;
+			item.text = content;
+		}
+		synchronized (listContent) {
+		    listContent.add(item);
+		}
+	}	
+
+	public void listClean() {
+		listSelectPos = -1;
+		synchronized (listContent) {
+		    listContent.clear();
+		}
+		listBufferedItem.delete(0, listBufferedItem.length());
+	}
+	
+	private void listSetFont(Vector defs) {
+
+		float size = Dispatcher.SIZE_MEDIUM; 
+
+		int start = 2;
+		while(start<defs.size()) {
+			String spec = (String) defs.elementAt(start);
+			if (spec.equals("small")) {
+				listFSize = Dispatcher.SIZE_SMALL;
+			} else if (spec.equals("medium")) {
+				listFSize = Dispatcher.SIZE_MEDIUM;
+			} else if (spec.equals("large")) {
+				listFSize = Dispatcher.SIZE_LARGE;
+			} else {
+				listFSize = -1;
+			}
+			start++;
+		}
+	}
+	
+	//
+	// Text Screen activity persistent data handling
+	//
+	
+	// Set(text,add,title,_text_)		3+text
+	// Set(text,replace,title,_text_)	3+text
+	// Set(text,fg|bg,r,g,b)		6
+	// Set(text,font,small|medium|large)	3
+	// Set(text,close[,clear])		2 or 3
+	// Set(text,wrap,on|off)		3
+	// Set(text,show)
+	//
+	// Set(list,close) does NOT processed here !			2
+	//
+	public void textDataProcess(Vector vR, int stage) {   // message = add|replace|show|clear,title,long_text
+		
+		if (stage == ProtocolMessage.INTERMED ||
+		    stage == ProtocolMessage.LAST) {
+			
+			    textContent.append((String) vR.elementAt(3));
+				return;
+		}
+
+		String oper = (String) vR.elementAt(1);
+
+		if (oper.equals("clear")) {
+
+			textContent.delete(0, textContent.length());
+
+		} else if (oper.equals("add") || 
+                  oper.equals("replace")) {
+
+			if (!((String) vR.elementAt(2)).equals("SAME")) {
+				textTitle = (String) vR.elementAt(2);
+			}
+
+			if (oper.equals("replace")) {
+				textContent.delete(0, textContent.length());
+			}
+			textContent.append((String) vR.elementAt(3));
+
+		} else if (oper.equals("fg")) {
+
+			textFrgr = anyRemote.parseColor(
+					(String) vR.elementAt(2),
+					(String) vR.elementAt(3),
+					(String) vR.elementAt(4));
+
+		} else if (oper.equals("bg")) {
+
+			textBkgr = anyRemote.parseColor(
+					(String) vR.elementAt(2),
+					(String) vR.elementAt(3),
+					(String) vR.elementAt(4));
+
+		} else if (oper.equals("font")) {
+
+			textFontParams(vR);
+
+		} else if (oper.equals("wrap")) {
+
+			// not supported
+
+		} else if (oper.equals("close")) {
+
+			if (vR.size() > 2 && ((String) vR.elementAt(2)).equals("clear")) {
+				textContent.delete(0, textContent.length());
+			}
+
+		} else if (!oper.equals("show")) {
+			return; // seems command improperly formed
+		}
+	}	
+	
+	private void textFontParams(Vector defs) {
+
+		boolean bold   = false;
+		boolean italic = false;
+		float   size   = Dispatcher.SIZE_MEDIUM; 
+
+		int start = 2;
+		while(start<defs.size()) {
+			String spec = (String) defs.elementAt(start);
+			if (spec.equals("plain")) {
+				//style = Font.STYLE_PLAIN;
+			} else if (spec.equals("bold")) {
+				bold = true;
+			} else if (spec.equals("italic")) {
+				italic = true;
+			} else if (spec.equals("underlined")) {
+				//style = (style == Font.STYLE_PLAIN ? Font.STYLE_UNDERLINED : style|Font.STYLE_UNDERLINED);
+			} else if (spec.equals("small")) {
+				size = Dispatcher.SIZE_SMALL;
+			} else if (spec.equals("medium")) {
+				size = Dispatcher.SIZE_MEDIUM;
+			} else if (spec.equals("large")) {
+				size = Dispatcher.SIZE_LARGE;
+			} else if (spec.equals("monospace")) {
+				//face  = Font.FACE_MONOSPACE;
+			} else if (spec.equals("system")) {
+				//face  = Font.FACE_SYSTEM;
+			} else if (spec.equals("proportional")) {
+				//face  = Font.FACE_PROPORTIONAL;
+				//} else {
+				//	controller.showAlert("Incorrect font "+spec);
+			}
+			start++;
+		}
+
+		if (bold && italic) {
+			textTFace = Typeface.defaultFromStyle(Typeface.BOLD_ITALIC);
+		} else if (bold) {
+			textTFace = Typeface.defaultFromStyle(Typeface.BOLD);
+		} else if (italic) {
+			textTFace = Typeface.defaultFromStyle(Typeface.ITALIC);
+		} else {
+			textTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
+		}
+		textFSize = size;
+	}
+	
+	//
+	// Menu data handling
+	//
+	public void menuProcess(Vector vR, int screen) {
+		anyRemote._log("Dispatcher", "menuProcess "+screen+" "+vR);
+		
+		String oper  = (String) vR.elementAt(1); 
+
+		if (oper.equals("clear")) {
+
+			menuClean(screen);    
+
+		} else if (oper.equals("add") || oper.equals("replace")) {
+
+			if (oper.equals("replace")) {
+				menuClean(screen);
+				menuAddDefault(screen); 
+			}
+
+			menuAdd(vR, screen);
+		}
+	}
+	
+	void menuClean(int screen) {
+		
+		switch(screen) {
+			case anyRemote.CONTROL_FORM:
+				cfMenu.clear();
+				break;
+			case anyRemote.TEXT_FORM:
+			case anyRemote.LOG_FORM:
+				textMenu.clear();
+				break;
+			case anyRemote.LIST_FORM:
+				listMenu.clear();
+				break;
+			case anyRemote.WMAN_FORM:
+				winMenu.clear();
+				break;
+		}
+	}
+	
+	void menuAdd(Vector from, int screen) { 
+		
+		anyRemote._log("Dispatcher", "menuAdd "+screen+" "+from); 
+		
+		for (int idx=2;idx<from.size();idx++) {
+			String item = (String) from.elementAt(idx);
+
+			if (item.length() > 0) {
+				switch(screen) {
+					case anyRemote.CONTROL_FORM:
+						anyRemote._log("Dispatcher", "menuAdd cfMenu "+item);
+						cfMenu.add(item);
+						break;
+					case anyRemote.TEXT_FORM:
+						textMenu.add(item);
+						break;
+					case anyRemote.LIST_FORM:
+						listMenu.add(item);
+						break;
+					case anyRemote.WMAN_FORM:
+						winMenu.add(item);
+						break;
+				}
+			}
+		}
+	}
+
+	void menuReplaceDefault(int screen) {
+		menuClean(screen);
+		menuAddDefault(screen); 	
+	}
+	
+	void menuAddDefault(int screen) {   	
+		switch(screen) {
+			case anyRemote.CONTROL_FORM:
+				cfMenu.add("Disconnect");
+				cfMenu.add("Exit");
+				cfMenu.add("Log");	
+				break;
+			case anyRemote.TEXT_FORM:
+				textMenu.add("Back");
+				break;
+			case anyRemote.LIST_FORM:
+				listMenu.add("Back");
+				break;
+			case anyRemote.WMAN_FORM:
+				winMenu.add("Back");
+				break;
+			case anyRemote.LOG_FORM:
+				textMenu.add("Clear Log");
+				textMenu.add("Report Bug");
+				textMenu.add("Back");
+				break;
+		}
+	}
+	
+	Vector<String> getMenu() {
+		
+		int screen = anyRemote.getCurScreen();
+		
+		switch(screen) {
+			case anyRemote.CONTROL_FORM:
+				return cfMenu;
+			case anyRemote.TEXT_FORM:
+			case anyRemote.LOG_FORM:
+				return textMenu;
+			case anyRemote.LIST_FORM:
+				return listMenu;
+			case anyRemote.WMAN_FORM:
+				return winMenu;
+		}
+		return null;
+	}
 }

@@ -9,7 +9,7 @@
 	<item android:id="@+id/enter_item_name" 	android:title="@string/enter_item_name">	</item>
 	<item android:id="@+id/enter_item_pass"     android:title="@string/enter_item_pass">	</item>
 	<item android:id="@+id/clean_item"   		android:title="@string/clean_item" >	</item>
-	<item android:id="@+id/exit_item"   		android:title="@string/exit_item" android:icon="@drawable/no">	</item>
+	<item android:id="@+id/exit_item"   		android:title="@string/exit_item">	</item>
 	<item android:id="@+id/log_item"   		android:title="@string/log_item">	</item>
 
 </menu>

@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2012 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,12 +24,7 @@ package anyremote.client.android;
 import java.io.File;
 import java.util.TreeMap;
 import java.util.Vector;
-
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -46,7 +41,6 @@ import android.view.Window;
 import anyremote.client.android.util.Address;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.util.ViewHandler;
-
 import anyremote.client.android.R;
 
 public class anyRemote extends Activity {
@@ -76,19 +70,14 @@ public class anyRemote extends Activity {
 
 	int         prevForm;
 	private static int  currForm;
-	int         status;
+	static int         status;
 	static Dispatcher  protocol;
-	Vector<Address>   addressesA;		
+	Vector<Address>    addressesA;
+	public static boolean  finishFlag = false;
 	
 	private static TreeMap iconMap = new TreeMap(); //String.CASE_INSENSITIVE_ORDER);
 
 	private ViewHandler viewHandler;
-
-	// Edif Form stuff
-	public static String  efCaption;
-	public static String  efLabel;
-	public static String  efValue;
-	public static int     efId;
 
 	// Logging stuff
 	public static StringBuilder logData;
@@ -119,15 +108,20 @@ public class anyRemote extends Activity {
 		protocol.addHandler(viewHandler);
 
 		MainLoop.enable();
-
+		
+		currForm = DUMMY_FORM;
 		status = DISCONNECTED;
-		setCurrentView(SEARCH_FORM,"");
 	}          
 
 	@Override
 	protected void onStart() {
 		_log("onStart "+currForm);		
 		super.onStart();
+		
+		finishFlag = false;
+		if (currForm != LOG_FORM && status == DISCONNECTED) {
+		    setCurrentView(SEARCH_FORM,"");
+		}
 	}
 	
 	@Override
@@ -156,7 +150,8 @@ public class anyRemote extends Activity {
 		_log("onDestroy");
 
 		super.onDestroy();
-
+		
+		finishFlag = true;
 		setCurrentView(NO_FORM,"");
 		status = DISCONNECTED;
 		protocol.disconnect(true);
@@ -178,81 +173,94 @@ public class anyRemote extends Activity {
 	//}
 
 	public void setCurrentView(int which, String subCommand) {
-		_log("setCurrentView " + which + " (was " + currForm + ") sc="+subCommand);
+		_log("setCurrentView " + which + " (was " + currForm + ") finish="+finishFlag);
 
-		if (currForm == NO_FORM) return; // on destroy
+		if (finishFlag == true) return; // on destroy
 
 		if (currForm == which) {
 			_log("setCurrentView TRY TO SWITCH TO THE SAME FORM ???");
-			return;
-		}
-
-		// finish current form
-		switch (currForm) { 
-		case SEARCH_FORM:
-			_log("[AR] setCurrentView mess SEARCH_FORM with some other");
-			break;
-
-		case CONTROL_FORM:
-			//if (which!=LOG_FORM) {  // already closed if switching to log-form
-			Vector ctokens = new Vector();
-			ctokens.add(Dispatcher.CMD_CLOSE);
-			protocol.sendToControlScreen(Dispatcher.CMD_CLOSE,ctokens,ProtocolMessage.FULL);
+			//if (currForm == SEARCH_FORM) {
+				return;
 			//}
-		break;
-
-		case LIST_FORM:
-			Vector ltokens = new Vector();
-			ltokens.add(Dispatcher.CMD_LIST);
-			ltokens.add("close");      	    	
-			protocol.sendToListScreen(Dispatcher.CMD_LIST,ltokens,ProtocolMessage.FULL);
-			break;
-
-		case TEXT_FORM:
-			Vector ttokens = new Vector();
-			ttokens.add(Dispatcher.CMD_TEXT);
-			ttokens.add("close");      	    	
-			protocol.sendToTextScreen(Dispatcher.CMD_TEXT,ttokens,ProtocolMessage.FULL);
-			break;
-
-		case LOG_FORM:
-		case DUMMY_FORM:
-			break;
-
 		}
-
+		
 		prevForm = currForm;
 		currForm = which;
 
-		switch (which) { 
+		if (currForm != prevForm) {
+			
+			Vector ctokens;
+			
+			// finish current form
+			switch (prevForm) { 
+			case SEARCH_FORM:
+				_log("[AR] setCurrentView mess SEARCH_FORM with some other");
+				break;
+	
+			case CONTROL_FORM:
+			case LIST_FORM:
+			case TEXT_FORM:
+			case WMAN_FORM:
+				_log("setCurrentView stop "+prevForm);
+				protocol.sendToActivity(prevForm, Dispatcher.CMD_CLOSE,ProtocolMessage.FULL);
+				break;
+	
+			case LOG_FORM:
+			case DUMMY_FORM:
+				break;
+	
+			}
+		}
+		
+		if (prevForm != LOG_FORM) {
+	     	protocol.menuReplaceDefault(currForm);
+		}
+
+		switch (currForm) { 
 		case SEARCH_FORM:
+			_log("setCurrentView start SearchForm");
 			final Intent doSearch = new Intent(getBaseContext(), SearchForm.class);
 			startActivityForResult(doSearch, which); 
 			break;
 
 		case CONTROL_FORM:
+			_log("setCurrentView start ControlScreen");
 			final Intent control = new Intent(getBaseContext(), ControlScreen.class);
 			startActivityForResult(control, which); 
+			//startActivity(control); 
 			break;
 
 		case LIST_FORM:
+			_log("setCurrentView start ListScreen");
 			final Intent showList = new Intent(getBaseContext(), ListScreen.class);
-			showList.putExtra("SUBID", subCommand);
-			startActivityForResult(showList, which); 
+			startActivity(showList); 
 			break;
 
 		case TEXT_FORM:
+			_log("setCurrentView start TextScreen");
 			final Intent showText = new Intent(getBaseContext(), TextScreen.class);
 			showText.putExtra("SUBID", subCommand);
 			startActivityForResult(showText, which); 
 			break;
+			
+		case WMAN_FORM:
+			_log("setCurrentView start WinManager");
+			final Intent showWman = new Intent(getBaseContext(), WinManager.class);
+			startActivity(showWman); 
+			break;
 
 		case LOG_FORM:
+			_log("setCurrentView start TextScreen (LOG)");
 			final Intent showLog = new Intent(getBaseContext(), TextScreen.class);
 			showLog.putExtra("SUBID", "__LOG__");
 			startActivityForResult(showLog, which); 
 			break;
 		}
+	}
+	
+	public void setPrevView(int which) {
+		_log("setPrevView " + which);
+		prevForm = which;
 	}
 
 	// Collect data from Search Form
@@ -312,30 +320,16 @@ public class anyRemote extends Activity {
 			}
 
 		} else if (requestCode == LIST_FORM ||
-				requestCode == TEXT_FORM) {
+				   requestCode == TEXT_FORM ||
+				   requestCode == WMAN_FORM) {
 
-			_log("onActivityResult LIST/TEXT");
-
-			/*if (resultCode == RESULT_OK) {
-
-                int form = intent.getIntExtra(SWITCHTO,-1);
-                if (form != -1) {
-                	currForm = form;
-                }
-                //if (act != null && act.length() > 0) {
-                //    if (act.contentEquals("exit")) {
-                //    	// how to do exit ?
-                //    } else if (act.contentEquals("disconnect")) {
-                //    	// how to do exit ?
-                //    	protocol.disconnect(true);
-                //    } 
-                //    // else - nothing
-                //}
-                setCurrentView(currForm, "show");        	
-            }*/
-			setCurrentView(CONTROL_FORM,"");
+			_log("onActivityResult LIST/TEXT/WMAN");
+			
 		} else if (requestCode == LOG_FORM) {
-			_log("onActivityResult LOG");
+			_log("onActivityResult LOG ->"+prevForm);
+			if (prevForm  == LOG_FORM) {
+				prevForm = CONTROL_FORM; // still have issues with activity stop/start synchronizations
+			}
 			setCurrentView(prevForm, "show");
 		}
 	}
@@ -376,6 +370,8 @@ public class anyRemote extends Activity {
 			return true;
 
 		case R.id.exit_main:
+			finishFlag = true;
+			_log("onOptionsItemSelected exit_main");
 			setCurrentView(NO_FORM,"");
 			protocol.disconnect(true);
 			finish();
@@ -400,18 +396,30 @@ public class anyRemote extends Activity {
 
 			status = CONNECTED;
 			setProgressBarIndeterminateVisibility(false);
-			setCurrentView(CONTROL_FORM,"");
+
+			if (currForm != LOG_FORM) {
+			    setCurrentView(CONTROL_FORM,"");
+			}
 			break;
 
 		case DISCONNECTED:
 			_log("handleEvent: Connection lost");
 			status = DISCONNECTED;
-			protocol.closeCurrentScreen(currForm);
+			//protocol.closeCurrentScreen(currForm);
 			
-			if (currForm != NO_FORM) {   // this happens on exit
-			    currForm = CONTROL_FORM;  // trick
+			if (!finishFlag) {   // this happens on exit
+				
+				// send quit to all registered activity
+				protocol.sendToActivity(-1, Dispatcher.CMD_CLOSE,ProtocolMessage.FULL);
+
+				if (currForm != LOG_FORM) {
+					currForm = DUMMY_FORM;  // trick
+				}
 			}
-			setCurrentView(SEARCH_FORM,"");
+
+			if (currForm != LOG_FORM) {
+			    setCurrentView(SEARCH_FORM,"");
+			}
 			break;
 		default:
 			_log("handleEvent: unknown event");
@@ -511,6 +519,7 @@ public class anyRemote extends Activity {
 	void doExit() {
 		// how to do exit ?
 		_log("doExit");
+		finishFlag = true;
 		setCurrentView(NO_FORM, "");
 		protocol.disconnect(true);
 		super.onBackPressed();
@@ -524,20 +533,23 @@ public class anyRemote extends Activity {
 		_log("popup " + show);
 		
 		//cxt.setProgressBarIndeterminateVisibility(show);
-		
+		if (waiting != null) {
+			waiting.dismiss();
+			waiting = null; 
+		}
 		if (show) {
 			if (waiting == null) {
 				waiting = new ProgressDialog(cxt, ProgressDialog.STYLE_HORIZONTAL);
-				waiting.setMessage(msg);
 			}
+			waiting.setMessage(msg);
 			waiting.show();
-		} else {
-			if (waiting != null) {
-				waiting.dismiss();
-				waiting = null; 
-			}
-		}
+		} 
 	}
+	
+	public static boolean logVisible() {
+		return (currForm == LOG_FORM);
+	}
+
 
 	private static void _log(String log) {
 		_log("anyRemote", log);	

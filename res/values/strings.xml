@@ -20,7 +20,7 @@
 	<string name="label_pass">Password</string>
 	<string name="clean_item">Clean Address</string>
 	<string name="autoconnect_item">Autoconnect</string>
-	<string name="log_item">Show Log</string>
+	<string name="log_item">Log</string>
 	
 	<string name="default_bt">btspp://0008F4163049</string>
 	<string name="default_ip">socket://192.168.1.1:5000</string>

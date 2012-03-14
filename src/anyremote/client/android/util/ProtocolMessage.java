@@ -29,6 +29,6 @@ public class ProtocolMessage {
 	public static final int INTERMED = 2;
 	public static final int LAST     = 3;
 	
-	public Vector tokens;
+	public int id;
 	public int stage;
 }

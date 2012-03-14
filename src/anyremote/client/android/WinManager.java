@@ -21,74 +21,44 @@
 
 package anyremote.client.android;
 
-
-import android.content.Intent;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageView;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.util.arHandler;
 import anyremote.client.android.R;
 
-public class TextScreen extends arActivity  {
-
-	TextView  text;
+public class WinManager extends arActivity  {
+	
+	ImageView image;
 	Dispatcher.ArHandler hdlLocalCopy;
-	boolean isLog = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);  
 
-		setContentView(R.layout.text_form);
-	
-		Intent  intent = getIntent();
-		String subid   = intent.getStringExtra("SUBID");
-
-		text = (TextView) findViewById(R.id.text_form);			
-
-		if (subid.equals("__LOG__")) {	// Special case for log view	
-
-			prefix = "Log"; // log stuff
-			isLog = true;
-			log("onCreate");
-			
-		} else {
-			
-			hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.TEXT_FORM, new arHandler(this));
-			anyRemote.protocol.addMessageHandler(hdlLocalCopy);
-
-			prefix = "TextScreen"; // log stuff
-			log("onCreate");
-		}		
+		setContentView(R.layout.win_manager);
 		
-		registerForContextMenu(text);
-		
-		text.setMovementMethod(new ScrollingMovementMethod());
+		image = (ImageView) findViewById(R.id.window);	
+				
+		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.WMAN_FORM, new arHandler(this));
+		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
+
+		prefix = "WinManager"; // log stuff
+		log("onCreate");
+
+		registerForContextMenu(image);
 	}
 	
 	// update all visuals
 	void redraw()  {
 		log("redraw");
-		
-		if (isLog) {
-			text.setText(anyRemote.logData); 
-			setTitle("Log");
-		} else {
-			
-			anyRemote.protocol.setFullscreen(this);
-
-			text.setText(anyRemote.protocol.textContent);
-			setFont();
-			setTextColor();
-			setBackground();
-			setTitle(anyRemote.protocol.textTitle);
-		}
+		anyRemote.protocol.setFullscreen(this);
+		image.setImageBitmap(anyRemote.protocol.imScreen);
 	}
 	
 	@Override
@@ -96,21 +66,16 @@ public class TextScreen extends arActivity  {
 		log("onPause");
 		
 		popup();
-		
-		//MainLoop.disable();
 	    super.onPause();	
 	}
 	
 	@Override
 	protected void onResume() {
 		log("onResume");
-		//MainLoop.enable();
 		super.onResume();
 		
-        if (anyRemote.status == anyRemote.DISCONNECTED && 
-        	!isLog) {
-        	
-        	log("onResume no connection");
+        if (anyRemote.status == anyRemote.DISCONNECTED) {
+          	log("onResume no connection");
         	doFinish("");
         }
 
@@ -120,11 +85,8 @@ public class TextScreen extends arActivity  {
 	
 	@Override
 	protected void onDestroy() {	
-		log("onDestroy");
-		if (!isLog) {
-	   	    anyRemote.protocol.removeMessageHandler(hdlLocalCopy);
-		}
-	   	isLog = false;
+		log("onDestroy");	
+	   	anyRemote.protocol.removeMessageHandler(hdlLocalCopy);		
 	   	super.onDestroy();
 	}
 
@@ -133,8 +95,7 @@ public class TextScreen extends arActivity  {
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
 
-		if (!isLog && v.getId() == R.id.text_form) {
-			menu.setHeaderTitle(anyRemote.protocol.textTitle);
+		if (v.getId() == R.id.window) {
 			addContextMenu(menu);
 		}
 	}
@@ -151,17 +112,6 @@ public class TextScreen extends arActivity  {
 	protected void doFinish(String action) {
 		
 		log("doFinish");
-		
-		if (isLog) {
-		    final Intent intent = new Intent();  
-		    intent.putExtra(anyRemote.ACTION, action);	    
-		    setResult(RESULT_OK, intent);
-		}
-		
-		if (!isLog) {
-			log("doFinish finish");
-		}
-		
 		finish();  	
 	}
 
@@ -177,25 +127,7 @@ public class TextScreen extends arActivity  {
 	}
 
 	public void commandAction(String command) {
-		if (isLog) {
-			if (command.equals("Back")) {
-				doFinish("log");  // just close Log form
-			} else if (command.equals("Clear Log")) {
-				anyRemote.logData.delete(0,anyRemote.logData.length());
-				text.setText("");
-			} else if (command.equals("Report Bug")) {
-
-				Intent mailIntent = new Intent(Intent.ACTION_SEND);
-				mailIntent.setType("text/plain");
-				mailIntent.putExtra(Intent.EXTRA_EMAIL, new String[] { "anyremote@mail.ru" });
-				mailIntent.putExtra(Intent.EXTRA_SUBJECT, "anyRemote android client bugreport");
-				mailIntent.putExtra(Intent.EXTRA_TEXT, anyRemote.logData.toString());
-
-				startActivity(Intent.createChooser(mailIntent, "Bug report"));
-			}
-		} else {
-			anyRemote.protocol.queueCommand(command);
-		}
+		anyRemote.protocol.queueCommand(command);
 	}
 
 	// Set(text,add,title,_text_)		3+text
@@ -208,37 +140,21 @@ public class TextScreen extends arActivity  {
 	public void handleEvent(ProtocolMessage data) {
 		
 		log("handleEvent");
-		
-		if (isLog) return; 
 
 		if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
-
+			
 			if (handleCommonCommand(data.id)) {
 				return;
 			}
 			
-			if (data.id == Dispatcher.CMD_TEXT) {
+			if (data.id == Dispatcher.CMD_IMAGE) {
 				
 				// update all visuals
 				redraw();
 			}
 		} else  if (data.stage == ProtocolMessage.INTERMED || data.stage == ProtocolMessage.LAST) {
+			// should not come here
 			redraw();
 		}
 	}		
-
-	private void setTextColor() {
-		text.setTextColor(anyRemote.protocol.textFrgr);
-	}
-
-	private void setBackground() {
-		text.setBackgroundColor(anyRemote.protocol.textBkgr);
-	}
-
-	private void setFont() {
-
-		TextView ttx  = (TextView) findViewById(R.id.text_form);
-		ttx.setTypeface (anyRemote.protocol.textTFace);
-		ttx.setTextSize (anyRemote.protocol.textFSize);
-	}
 }

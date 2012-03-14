@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2012 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,105 +25,78 @@ import java.util.Vector;
 
 import android.app.Activity;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
 import anyremote.client.android.R;
+import anyremote.client.android.util.ProtocolMessage;
 
 public class arActivity extends Activity 
 		implements DialogInterface.OnDismissListener,
 				   DialogInterface.OnCancelListener {
 
-	protected Vector<String> menuItems;
+	//protected Vector<String> menuItems;
 	protected String prefix = "";	
 	private boolean skipDismissEditDialog = false;
 
-	@Override
+	/*@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
 		super.onCreate(savedInstanceState);
-		menuItems = new Vector<String>();
-		//callMenuUpdate(); do this from inherited classes
-	}
+	}*/
 
 	public void log(String msg) {
 		anyRemote._log(prefix,msg);
 	}
-
-	Vector<String> getMenu() {
-		return menuItems;
+	
+	public void handleEvent(ProtocolMessage data) {
+		log("handleEvent "+" "+data.stage+" "+ data.id);
 	}
-
-	public void processMenu(Vector vR) {
-		processMenu(vR, null, null);
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+     	menu.clear();
+    	return true;
+    }
+	 
+    @Override
+	public boolean onPrepareOptionsMenu(Menu menu) { 
+    	
+    	menu.clear();
+     	
+       	Vector<String> menuItems = anyRemote.protocol.getMenu();
+    	if (menuItems != null) {
+		    for(int i = 0;i<menuItems.size();i++) {
+			    menu.add(menuItems.elementAt(i));
+		    }
+	    }
+   	
+  		return true;
 	}
-
-	public void processMenu(Vector vR, Vector persistent, Vector<String> screenDefaultMenu) {
-		String oper  = (String) vR.elementAt(1); 
-
-		if (oper.equals("clear")) {
-
-			cleanMenu(persistent);  	    
-
-		} else if (oper.equals("add") || oper.equals("replace")) {
-
-			if (oper.equals("replace")) {
-
-				cleanMenu(persistent);
-
-				for (int idx=0;idx<screenDefaultMenu.size();idx++) {
-					//log("add menu item "+screenDefaultMenu.elementAt(idx));
-					menuItems.add(screenDefaultMenu.elementAt(idx));
-				}
-			}
-
-			addMenu(vR, persistent);
-		}
-	}
-
-	void cleanMenu(Vector persistent) {
-		menuItems.clear();
-		if (persistent != null) persistent.clear();
-	}
-
-	void callMenuUpdate()  { // Add predefined menu items
-	}
-
-	void addMenu(Vector from, Vector to) {   	
-		for (int idx=2;idx<from.size();idx++) {
-			String item = (String) from.elementAt(idx);
-			if (item.length() > 0) {
-				if (to != null) to.add((String) from.elementAt(idx));
-				menuItems.add((String) from.elementAt(idx));
-			}
-		}
-	}
-
-	void restorePersistentMenu(Vector from) {
-		//log("restorePersistentMenu");
-		if (from == null) {
-			return;
-		}
-
-		for (int idx=0;idx<from.size();idx++) {   	
-			//log("restorePersistentMenu "+(String) from.elementAt(idx));
-			menuItems.add((String) from.elementAt(idx));
-		}
-	}
+    
+	public void addContextMenu(Menu menu) { 
+  
+		Vector<String> menuItems = anyRemote.protocol.getMenu();
+    	if (menuItems != null) {
+		    for(int i = 0;i<menuItems.size();i++) {
+			    menu.add(menuItems.elementAt(i));
+		    }
+	    }
+ 	}
 
 	//
 	// Edit field stuff
 	// 
 
-	void openEditField(int id, String caption, String label, String defvalue) {    	
+	void setupEditField(int id, String caption, String label, String defvalue) {    	
 
-		anyRemote.efCaption = caption;
-		anyRemote.efLabel   = label;
-		anyRemote.efValue   = defvalue;
-		anyRemote.efId      = id; 
+		anyRemote.protocol.efCaption = caption;
+		anyRemote.protocol.efLabel   = label;
+		anyRemote.protocol.efValue   = defvalue;
+		anyRemote.protocol.efId      = id;
 
-		showDialog(id);
+		if (id != -1) {
+		    showDialog(id);
+		}
 	}
 
 	// Got result from EditForm dialog ("Ok"/"Cancel" was pressed)
@@ -136,12 +109,9 @@ public class arActivity extends Activity
 			return;
 		}
 
-		handleEditFieldResult(anyRemote.efId, "Ok", ((EditFieldDialog) dialog).getValue());
-
-		anyRemote.efId      = -1;
-		anyRemote.efCaption = "";
-		anyRemote.efLabel   = "";
-		anyRemote.efValue   = "";
+		handleEditFieldResult(anyRemote.protocol.efId, "Ok", ((EditFieldDialog) dialog).getValue());
+		
+		setupEditField(-1, "", "", ""); // reset values
 	}
 
 	// Handle "Cancel" press in EditFieldDialog
@@ -151,12 +121,9 @@ public class arActivity extends Activity
 
 		skipDismissEditDialog = true;
 
-		handleEditFieldResult(anyRemote.efId, "Cancel", "");
-
-		anyRemote.efId      = -1;
-		anyRemote.efCaption = "";
-		anyRemote.efLabel   = "";
-		anyRemote.efValue   = "";
+		handleEditFieldResult(anyRemote.protocol.efId, "Cancel", "");
+		
+		setupEditField(-1, "", "", ""); // reset values
 	}
 
 	public void  handleEditFieldResult(int id, String button, String value) {
@@ -224,7 +191,7 @@ public class arActivity extends Activity
 
 			((EditFieldDialog) d).setupEField(getResources().getString(R.string.enter_item_name),
 					getResources().getString(R.string.enter_item_name),
-					anyRemote.efValue, 
+					anyRemote.protocol.efValue, 
 					true);
 			d.setOnDismissListener(this);
 			d.setOnCancelListener (this);
@@ -253,7 +220,9 @@ public class arActivity extends Activity
 
 		case Dispatcher.CMD_EFIELD:
 
-			((EditFieldDialog) d).setupEField(anyRemote.efCaption, anyRemote.efLabel, anyRemote.efValue, false);
+			((EditFieldDialog) d).setupEField(anyRemote.protocol.efCaption, 
+					                          anyRemote.protocol.efLabel, 
+					                          anyRemote.protocol.efValue, false);
 			d.setOnDismissListener(this);
 			d.setOnCancelListener (this);
 
@@ -267,68 +236,45 @@ public class arActivity extends Activity
 	//	Set(editfield, ...)
 	//	Get(pass)
 	//  Set(fullscreen,...)
-	//  Set(wait,...)
+	//  Set(popup,...)
+	//  Set(*,close)
 	//
-	public boolean handleCommonCommand(int id, Vector tokens) {
+	public boolean handleCommonCommand(int id) {
 		
 		boolean processed = false;
 		
-		if (id == Dispatcher.CMD_MENU) {
-			
-			processMenu(tokens);
-			processed = true;
-			
-		} else if (id == Dispatcher.CMD_EFIELD) {
-		
-			openEditField(id,
-					(String) tokens.elementAt(1),
-					(String) tokens.elementAt(2),
-					(String) tokens.elementAt(3));	
+        if (id == Dispatcher.CMD_CLOSE) {
+        	
+        	log("handleCommonCommand CMD_CLOSE");
+  			doFinish("close");
+  			processed = true;
+  
+        } else if (id == Dispatcher.CMD_EFIELD) {
+
+			showDialog(id);
 			processed = true;
 			
 		} else if (id == Dispatcher.CMD_GETPASS) {
 			
-			openEditField(id,"","","");
+			setupEditField(id, "", "", ""); 
 			processed = true;
 			
 		} else if (id == Dispatcher.CMD_FSCREEN)  {   	
 			
-			anyRemote.protocol.setFullscreen((String) tokens.elementAt(1), this);
+			anyRemote.protocol.setFullscreen(this);
 			processed = true;
 			
 		} else if (id == Dispatcher.CMD_POPUP) {
 				
-		    showPopup(tokens);
+		    popup();
 			processed = true;
 		}
 		
 		return processed;
 	}
-	
-	public void dismissPopup() {
-		anyRemote.protocol.popupState = false;
-		anyRemote.protocol.popupMsg.delete(0, anyRemote.protocol.popupMsg.length());
-	}
-	
-	public void showPopup(Vector tokens) {
-		
-		String op = (String) tokens.elementAt(1);
-		
-		dismissPopup();
-		
-		if (op.equals("show")) { 
 
-			anyRemote.protocol.popupState = true;
-			
-			for (int i=2;i<tokens.size();i++) {
-				if (i != 2) {
-					anyRemote.protocol.popupMsg.append(", ");
-				}
-				anyRemote.protocol.popupMsg.append((String) tokens.elementAt(i));
-			}
-		}
-		
-		popup();
+	protected void doFinish(String reason) {
+		log("doFinish "+reason);	
 	}
 	
 	public void popup() {

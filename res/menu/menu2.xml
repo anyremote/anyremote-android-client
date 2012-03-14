@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:title="@string/disconnect_item" android:id="@+id/disconnect_main" android:icon="@drawable/refresh">
+	<item android:title="@string/disconnect_item" android:id="@+id/disconnect_main">
 	</item>
-	<item android:title="@string/exit_item" android:id="@+id/exit_main" android:icon="@drawable/no">
+	<item android:title="@string/exit_item" android:id="@+id/exit_main">
 	</item>
-	<item android:id="@+id/log_main"   		android:title="@string/log_item" android:icon="@drawable/file">	</item>
+	<item android:id="@+id/log_main"   		android:title="@string/log_item">	</item>
 </menu>

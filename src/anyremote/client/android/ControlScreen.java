@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2012 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,33 +23,25 @@ package anyremote.client.android;
 
 import java.util.Vector;
 
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Environment;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
-//import android.widget.SeekBar;
-//import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TableLayout;
 import android.widget.TextView;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Display;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.KeyEvent;
-import android.view.WindowManager;
-import anyremote.client.android.util.ControlScreenHandler;
 import anyremote.client.android.util.ProtocolMessage;
+import anyremote.client.android.util.arHandler;
 
 public class ControlScreen extends arActivity 
                            implements View.OnClickListener,
@@ -83,8 +75,6 @@ public class ControlScreen extends arActivity
 	static final String STR_NUM0  = "0";
 	static final String STR_POUND = "#";
 	static final String STR_UNKNOWN = "";
-
-	ControlScreenHandler evHandler; 
 	
 	static final int SK_DEFAULT    = 0;
     static final int SK_BOTTOMLINE = 1;
@@ -94,11 +84,10 @@ public class ControlScreen extends arActivity
     
     boolean fullscreen  = false;
     boolean useJoystick = false;
+    Dispatcher.ArHandler hdlLocalCopy;
     
     ImageButton [] buttons;
-    
-    Vector<String> defMenu = new Vector<String>();
-     
+      
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);  
@@ -106,47 +95,22 @@ public class ControlScreen extends arActivity
 		prefix = "ControlScreen"; // log stuff
 		log("onCreate");
 		
-		defMenu.add("Disconnect");
-		defMenu.add("Exit");
-		defMenu.add("Log");	
-		
 		buttons = new ImageButton[NUM_ICONS];
-		setSkin();
-		
-		setTitle(anyRemote.protocol.cfCaption);
-		
-		setFont();
-		setTextColor();
-	    setBackground();
-		setTitleField();
-		setStatusField();
-		setCover();
-	    callMenuUpdate();
-	    
-	    //TextView title = (TextView) findViewById(R.id.cf_title);
-	    //title.setMovementMethod(new ScrollingMovementMethod());
-	    
-	    //TextView title2 = (TextView) findViewById(R.id.cf_btitle);
-	    //title2.setMovementMethod(new ScrollingMovementMethod());
-
-		evHandler = new ControlScreenHandler(this);
-		anyRemote.protocol.setControlScreenHandler(evHandler);
-		anyRemote.protocol.setFullscreen(this);
-		
-		popup();
+	  	
+	    hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new arHandler(this));
+	    anyRemote.protocol.addMessageHandler(hdlLocalCopy);	    
 	}
 	
-	@Override
+	/*@Override
 	protected void onStart() {
 		log("onStart");		
 		super.onStart();
-	}
+	}*/
 	
 	@Override
 	protected void onPause() {
 		log("onPause");	
 		
-		dismissPopup();
 		popup();
 		
 		//MainLoop.disable();
@@ -158,6 +122,15 @@ public class ControlScreen extends arActivity
 		log("onResume");		
 		//MainLoop.enable();
 		super.onResume();
+		
+        if (anyRemote.status == anyRemote.DISCONNECTED) {
+        	log("onResume no connection");	
+        	doFinish("");
+        }
+ 
+        redraw();
+		popup();
+
 	}
 	
 	@Override
@@ -169,121 +142,29 @@ public class ControlScreen extends arActivity
 	@Override
 	protected void onDestroy() {	
 		log("onDestroy");		
+    	anyRemote.protocol.removeMessageHandler(hdlLocalCopy);
 		super.onDestroy();
 	}
 
     public void handleEvent(ProtocolMessage data) {
 	   
-    	log("handleEvent "+ data.tokens);
-	    
-		if (data.tokens.size() == 0) {
-			return;
-		}
+    	log("handleEvent "+ data.id);
 		
 		if (data.stage != ProtocolMessage.FULL &&	// process only full commands
 		    data.stage == ProtocolMessage.FIRST) {
 			return;
 		}
-
-		Integer id  = (Integer) data.tokens.elementAt(0);
 		
-	    if (handleCommonCommand(id, data.tokens)) {
+	    if (handleCommonCommand(data.id)) {
 			return;
 		}
 	    
-        if (id == Dispatcher.CMD_CLOSE) {
-  			doFinish("close");
-  		} else {
-			processData(data.tokens);
+	    if (data.id == Dispatcher.CMD_VOLUME) {
+    	    Toast.makeText(this, "Volume is "+anyRemote.protocol.cfVolume +"%", Toast.LENGTH_SHORT).show();
+		    return;
 		}
-    }
 
-    public void processData(Vector vR) {
-    	
-    	//log("processData >"+vR+"<");
-    	if (vR.size() == 0) {
-    		return;
-    	}
-    	
-    	int id = (Integer) vR.elementAt(0);
-    	
-	    if (id == Dispatcher.CMD_CLOSE) {
-	    	doFinish("close");
-		 	return;
-	    }
-	    
-	   	if (vR.size() < 2) {
-    		return;
-    	}
- 
-		switch (id) {
-		
-		    case Dispatcher.CMD_SKIN:
-		    	
-		    	setSkin(vR); 
-			    break;
-				      
-		    case Dispatcher.CMD_STATUS:
-			   
-			    anyRemote.protocol.cfStatus = (String) vR.elementAt(1);
-			    setStatusField();
-				break;
-
-		    case Dispatcher.CMD_TITLE:
-		    	
-		    	anyRemote.protocol.cfTitle = (String) vR.elementAt(1);
-		    	setTitleField();
-				break;
-			
-		    case Dispatcher.CMD_ICONS:
-		    	
-				setIconLayout(vR);
-				break; 
-				
-  		    case Dispatcher.CMD_BG:
-  		    	anyRemote.protocol.cfBkgr = anyRemote.parseColor(
-                        (String) vR.elementAt(1),
-                        (String) vR.elementAt(2),
-                        (String) vR.elementAt(3));
-  		    	setBackground();
-  		    	
- 				break; 
-  		
-  		    case Dispatcher.CMD_FG:
-
-  		    	anyRemote.protocol.cfFrgr = anyRemote.parseColor(
-                        (String) vR.elementAt(1),
-                        (String) vR.elementAt(2),
-                        (String) vR.elementAt(3));
-  		    	setTextColor();
- 		    	break;  
-  		  
-  		    case Dispatcher.CMD_FONT:
-  		    	
-			    setFontParams(vR);
-			    setFont();
-			    break; 
-			     
-		    case Dispatcher.CMD_FSCREEN:
-		    	
-		    	anyRemote.protocol.setFullscreen((String) vR.elementAt(1), this);
-			    break;   
-			 				
-		    case Dispatcher.CMD_VOLUME:
-		    	
-				//screen.controlForm.setVolume((String) cmdTokens.elementAt(1));
-		    	Toast.makeText(this, "Volume is "+(String) vR.elementAt(1) +"%", Toast.LENGTH_SHORT).show();
-				break;  
-				   
-			case Dispatcher.CMD_IMAGE:
-				//controller.cScreen.setData(anyRemote.WMAN_FORM,cmdTokens,stage);
-				break;    
-
-			case Dispatcher.CMD_COVER:
-				anyRemote.protocol.cfCover = (Bitmap) vR.elementAt(1); 
-			    setCover();
-				break;
-		}
+	    redraw();
     }
     
     private void setTitleField() {
@@ -295,9 +176,8 @@ public class ControlScreen extends arActivity
         } 
 	    TextView title = (TextView) findViewById(id);
 	    
-	    title.setText(anyRemote.protocol.cfTitle);
-	    
 	    //title.setMovementMethod(new ScrollingMovementMethod());
+	    title.setText(anyRemote.protocol.cfTitle);
     }
     
     private void setStatusField() {
@@ -312,114 +192,16 @@ public class ControlScreen extends arActivity
         
     	status.setText(anyRemote.protocol.cfStatus);
     }
-    
-    private void setIconLayout(Vector data) {
-     	
-    	if (data.size() == 0) {
-     	    return;
-    	}
     	
-		if (!((String) data.elementAt(1)).equals("SAME")) {
-			anyRemote.protocol.cfCaption = (String) data.elementAt(1);
-			setTitle(anyRemote.protocol.cfCaption);
-        }
-		
-		int maxIcon = (anyRemote.protocol.cfSkin == SK_BOTTOMLINE ?  NUM_ICONS_BTM : NUM_ICONS);
-		
-        for (int idx=2;idx<data.size()-1;idx+=2) {
-         	try {
-        		int i = btn2int((String) data.elementAt(idx));
-
-        		if (i >= 0 || i < maxIcon) {    
-        			anyRemote.protocol.cfIcons[i] = (String) data.elementAt(idx+1);
-       		    }  
-	         } catch (Exception e) { }
-        }
-        
-        setSkin();
-    }
-   
-	public void setSkin(Vector vR) {
-        String name   = (String) vR.elementAt(1);
-
-        //useCover    = false;
-        //cover       = null;
-         
-        //boolean newVolume = false;
-    	//int     newSize   = icSize;
-        
-        useJoystick = true;
-
-        boolean oneMore = false;
-        
-        for (int i=2;i<vR.size();) {
-        
-	        String oneParam = (String) vR.elementAt(i);
-                
-    		if (oneMore) {
-        		try {
-        			//newCur = btn2int(oneParam);
-                } catch (NumberFormatException e) {
- 	            }
-                	
-                oneMore = false;
-    		} else if (oneParam.equals("joystick_only")) {
-        		useJoystick = true;
-		        //useKeypad   = false;
-    		} else if (oneParam.equals("keypad_only")) {
-        		useJoystick = false;
-		        //useKeypad   = true;
-    		} else if (oneParam.equals("ticker")) {
-		        //newTicker   = true;
-    		} else if (oneParam.equals("noticker")) {
-		        //newTicker   = false;
-    		} else if (oneParam.equals("volume")) {
-		        //newVolume   = true;
-    		} else if (oneParam.equals("size16")) {
-		        //newSize = 16;
-    		} else if (oneParam.equals("size32")) {
-	            //newSize = 32;
-    		} else if (oneParam.equals("size48")) {
-	            //newSize = 48;
-    		} else if (oneParam.equals("size64")) {
-	            //newSize = 64;
-    		} else if (oneParam.equals("size128")) {
-	            //newSize = 128;
-    		} else if (oneParam.equals("split")) {
-	            //newSplit = true;
-    		} else if (oneParam.equals("choose")) {
-		        //oneMore = true;
-    		} else if (oneParam.equals("up")) {
-                i++;
-                if (i<vR.size()) {
-                    //upEvent = (String) vR.elementAt(i);
-                }
-    		} else if (oneParam.equals("down")) {
-                i++;
-                if (i<vR.size()) {
-                	//downEvent = (String) vR.elementAt(i);
-                }
-    		} 
-            i++;
-        }
-        
-	    int newSkin = anyRemote.protocol.cfSkin;
-	    if (name.equals("default")) {
-        	newSkin = SK_DEFAULT;
-        } else if (name.equals("bottomline")) {
-        	newSkin = SK_BOTTOMLINE;
-         }
-
-	    if (anyRemote.protocol.cfSkin  != newSkin) {
-            anyRemote.protocol.cfSkin = newSkin;
-            setSkin();
- 	    }
-    }
-	
 	private void setSkinSimple() {
 		
-		Display display = getWindowManager().getDefaultDisplay(); 
-		int sz = (display.getWidth() > display.getHeight() ? display.getHeight() : display.getWidth());
+		Display display = getWindowManager().getDefaultDisplay();
+		
+		boolean rotated = (display.getOrientation() == Surface.ROTATION_90 ||
+		                   display.getOrientation() == Surface.ROTATION_270);
+		int h = (rotated ? display.getWidth()  : display.getHeight());
+		int w = (rotated ? display.getHeight() : display.getWidth());
+		//log("setSkin SCR "+rotated+" "+w+"x"+h);
 
 		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 			
@@ -457,15 +239,20 @@ public class ControlScreen extends arActivity
 			}
 			
 			for (int i=0;i<NUM_ICONS_BTM;i++) {
-				buttons[i].setMaxHeight(sz/realCnt);    	
-				buttons[i].setMaxWidth (sz/realCnt);
+				buttons[i].setMaxHeight(w/realCnt);    	
+				buttons[i].setMaxWidth (w/realCnt);
 			}
 			
+			int sz = (w > h ? h : w);
 			ImageView cover = (ImageView) findViewById(R.id.cover);
 			cover.setMaxHeight((2*sz)/3);    	
 			cover.setMaxWidth ((2*sz)/3);
 			cover.setBackgroundColor(anyRemote.protocol.cfBkgr);
-
+			
+			if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
+				buttons[anyRemote.protocol.cfInitFocus-1].requestFocus();
+				buttons[anyRemote.protocol.cfInitFocus-1].requestFocusFromTouch();
+			}
 		} else {
 			
 			//log("setSkin SK_DEFAULT");
@@ -485,6 +272,10 @@ public class ControlScreen extends arActivity
 			buttons[10] = (ImageButton) findViewById(R.id.b0);
 			buttons[11] = (ImageButton) findViewById(R.id.b11);
 			
+			h = h/6;   // 4 rows with icons and 2 line of text + gaps
+			w = w/3;   // 3 columns with icons
+			int sz = (w > h ? h : w);
+
 			for (int i=0;i<NUM_ICONS;i++) {
 				
 				Bitmap ic = anyRemote.getIconBitmap(getResources(), anyRemote.protocol.cfIcons[i]);
@@ -497,19 +288,30 @@ public class ControlScreen extends arActivity
 				buttons[i].setVisibility(View.VISIBLE);
 				buttons[i].setOnClickListener(this);
 				
-				buttons[i].setMaxHeight(sz/4);    	
-				buttons[i].setMaxWidth (sz/4);
+				buttons[i].setMaxHeight(sz);    	
+				buttons[i].setMaxWidth (sz);
+			}
+			if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
+				buttons[anyRemote.protocol.cfInitFocus-1].requestFocus();
+				buttons[anyRemote.protocol.cfInitFocus-1].requestFocusFromTouch();
 			}
 		}
 	}
 	
-	private void setSkin() {
+	private void redraw() {
+		
+		anyRemote.protocol.setFullscreen(this);
+		
+		setTitle(anyRemote.protocol.cfCaption);
+		
 	    setSkinSimple();
 		setFont();
 		setTextColor();
 	    setBackground();
+	    
 		setTitleField();
 		setStatusField();
+		
 		setCover();
 	}
 	
@@ -533,9 +335,6 @@ public class ControlScreen extends arActivity
 	        
 	        TableLayout tl = (TableLayout) findViewById(R.id.icons);
 	        tl.setBackgroundColor(anyRemote.protocol.cfBkgr);
-		}
-	    for (int i=0;i<maxIcon;i++) {
-			//buttons[i].setBackgroundColor(anyRemote.protocol.cfBkgr);
 		}
 	}
 	
@@ -561,54 +360,7 @@ public class ControlScreen extends arActivity
 			cover.setImageBitmap(anyRemote.protocol.cfCover);
 		}
 	}
-	
-	private void setFontParams(Vector defs) {
 		
-		boolean bold   = false;
-		boolean italic = false;
-		float   size   = Dispatcher.SIZE_MEDIUM; 
-		
-		int start = 1;
-       	while(start<defs.size()) {
-            String spec = (String) defs.elementAt(start);
-            if (spec.equals("plain")) {
-            	//style = Font.STYLE_PLAIN;
-            } else if (spec.equals("bold")) {
-            	bold = true;
-            } else if (spec.equals("italic")) {
-            	italic = true;
-            } else if (spec.equals("underlined")) {
-            	//style = (style == Font.STYLE_PLAIN ? Font.STYLE_UNDERLINED : style|Font.STYLE_UNDERLINED);
-            } else if (spec.equals("small")) {
-            	size = Dispatcher.SIZE_SMALL;
-            } else if (spec.equals("medium")) {
-            	size = Dispatcher.SIZE_MEDIUM;
-            } else if (spec.equals("large")) {
-            	size = Dispatcher.SIZE_LARGE;
-            } else if (spec.equals("monospace")) {
-            	//face  = Font.FACE_MONOSPACE;
-            } else if (spec.equals("system")) {
-            	//face  = Font.FACE_SYSTEM;
-            } else if (spec.equals("proportional")) {
-            	//face  = Font.FACE_PROPORTIONAL;
-            //} else {
-            //	controller.showAlert("Incorrect font "+spec);
-            }
-        	start++;
-        }
-       	
-	    if (bold && italic) {
-	    	anyRemote.protocol.cfTFace = Typeface.defaultFromStyle(Typeface.BOLD_ITALIC);
-	    } else if (bold) {
-	    	anyRemote.protocol.cfTFace = Typeface.defaultFromStyle(Typeface.BOLD);
-	    } else if (italic) {
-	    	anyRemote.protocol.cfTFace = Typeface.defaultFromStyle(Typeface.ITALIC);
-	    } else {
-	    	anyRemote.protocol.cfTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
-	    }
-	    anyRemote.protocol.cfFSize = size;
-	}
-	
     private void setFont() {
        	
 		int t = R.id.cf_title;
@@ -811,10 +563,12 @@ public class ControlScreen extends arActivity
 			case KeyEvent.KEYCODE_VOLUME_DOWN: return "VOL-";
 			case KeyEvent.KEYCODE_DPAD_UP:     
 				    return (useJoystick || 
-				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? "UP"   : "");   // do not process them if joystick_only param was set
+				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? 
+				    				 anyRemote.protocol.cfUpEvent : "");   // do not process them if joystick_only param was set
 			case KeyEvent.KEYCODE_DPAD_DOWN:   
 				    return (useJoystick || 
-				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? "DOWN" : "");
+				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? 
+				    				anyRemote.protocol.cfDownEvent : "");
 			case KeyEvent.KEYCODE_DPAD_LEFT:   
 				    return (useJoystick ? "LEFT" : "");   // do not process them if joystick_only param was set 
 			case KeyEvent.KEYCODE_DPAD_RIGHT:  
@@ -872,23 +626,7 @@ public class ControlScreen extends arActivity
 		anyRemote.protocol.queueCommand(key, true);
 		anyRemote.protocol.queueCommand(key, false);
  	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-     	menu.clear();
-    	return true;
-    }
-	 
-    @Override
-	public boolean onPrepareOptionsMenu(Menu menu) { 
-    	menu.clear();
-			      
-	    for(int i = 0;i<menuItems.size();i++) {
-		    menu.add(menuItems.elementAt(i));
-	    }
-  		return true;
-	}
-    
+	    
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 	    commandAction(item.getTitle().toString());
@@ -914,82 +652,14 @@ public class ControlScreen extends arActivity
         }
     }
 	
-   private void doFinish(String action) {
+	@Override
+	protected void doFinish(String action) {
     	
     	log("doFinish "+action);
- 
-    	anyRemote.protocol.setControlScreenHandler(null);
     	
 	    final Intent intent = new Intent();  
 	    intent.putExtra(anyRemote.ACTION, action);
         setResult(RESULT_OK, intent);
         finish();  	
     }
-	
-	void callMenuUpdate()  { // Add predefined menu items
-		 menuItems.add("Disconnect");
-		 menuItems.add("Exit");
-		 menuItems.add("Log");	
-		 restorePersistentMenu(anyRemote.protocol.cfMenu);
-	}
-	
-	public void processMenu(Vector vR) {
-		processMenu(vR, anyRemote.protocol.cfMenu, defMenu);
- 	}
-	
-	private int btn2int(String btn) {
-       	int i = -1;
-        
-		if (btn.equals("*")) {
-		    i=9;
-        } else if (btn.equals("#")) {
-        	i=11;
-        } else {
-        	try {
-        		i = Integer.parseInt(btn) - 1;
-        		if (i == -1) {	// 0 was parsed
-        			i = 10;
-        		}
-            } catch (NumberFormatException e) { }
-        }
-        return i;
-    }	
-	
-	/*private int key2num(int keycode) {
-		
-		switch (keycode) {
-			case KEY_NUM1: return 0;
-			case KEY_NUM2: return 1;
-			case KEY_NUM3: return 2;
-			case KEY_NUM4: return 3;
-			case KEY_NUM5: return 4;
-			case KEY_NUM6: return 5;
-			case KEY_NUM7: return 6;
-			case KEY_NUM8: return 7;
-			case KEY_NUM9: return 8;
-			case KEY_STAR: return 9;
-			case KEY_NUM0: return 10;
-			case KEY_POUND: return 11;
-			default: return -1;
-		}
-	}
-
-	private int num2key(int num) {
-		
-		switch (num) {
-			case 0 : return KEY_NUM1;
-			case 1 : return KEY_NUM2;
-			case 2 : return KEY_NUM3;
-			case 3 : return KEY_NUM4;
-			case 4 : return KEY_NUM5;
-			case 5 : return KEY_NUM6;
-			case 6 : return KEY_NUM7;
-			case 7 : return KEY_NUM8;
-			case 8 : return KEY_NUM9;
-			case 9 : return KEY_STAR;
-			case 10: return KEY_NUM0;
-			case 11: return KEY_POUND;
-			default: return KEY_UNKNOWN;
-		}
-	}*/
 }

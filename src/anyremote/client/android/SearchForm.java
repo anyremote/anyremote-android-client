@@ -451,13 +451,13 @@ AdapterView.OnItemSelectedListener {
 		case R.id.enter_bt_item:
 
 			stopBluetoothDiscovery();
-			openEditField(Dispatcher.CMD_EDIT_FORM_BT, null, null, null);
+			setupEditField(Dispatcher.CMD_EDIT_FORM_BT, null, null, null);
 			break;
 
 		case R.id.enter_ip_item:
 
 			stopBluetoothDiscovery();
-			openEditField(Dispatcher.CMD_EDIT_FORM_IP, null, null, null);
+			setupEditField(Dispatcher.CMD_EDIT_FORM_IP, null, null, null);
 			break;
 
 		case R.id.enter_item_name:
@@ -482,7 +482,7 @@ AdapterView.OnItemSelectedListener {
 				connectTo   = url;
 				connectName = address;
 
-				openEditField(Dispatcher.CMD_EDIT_FORM_NAME, null, null, address);
+				setupEditField(Dispatcher.CMD_EDIT_FORM_NAME, null, null, address);
 			}			    
 			break;
 
@@ -508,7 +508,7 @@ AdapterView.OnItemSelectedListener {
 				connectTo   = url;
 				connectName = address;
 
-				openEditField(Dispatcher.CMD_EDIT_FORM_PASS, null, null, null);
+				setupEditField(Dispatcher.CMD_EDIT_FORM_PASS, null, null, null);
 			}			    
 			break;
 
@@ -614,7 +614,7 @@ AdapterView.OnItemSelectedListener {
 		connectPass = "";
 		connectOpts = "";
 		
-		//log("doRealConnect: finish");
+		log("SearchForm::doRealConnect: finish");
 		finish();
 	}
 
