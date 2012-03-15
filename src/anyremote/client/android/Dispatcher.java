@@ -82,6 +82,7 @@ public class Dispatcher implements IConnectionListener {
 	static final int CMD_GETCURSOR  = 56;
 	static final int CMD_GETPASS    = 57;
 	static final int CMD_GETPING    = 58;
+	static final int CMD_GETICSIZE  = 59;
 
 	static final int CMD_CLOSECONN  = 101;
 	//static final int CMD_EXIT       = 102;
@@ -141,6 +142,8 @@ public class Dispatcher implements IConnectionListener {
 	float  cfFSize;
 	Typeface cfTFace;
 	String cfVolume;
+	int cfPadding;
+	int cfIconSize;
 
 	// List Screen stuff
 	String listTitle;
@@ -220,6 +223,8 @@ public class Dispatcher implements IConnectionListener {
 		cfStatus  = "";
 		cfCaption = "";		
 		cfCover = null;
+		cfPadding = 0;
+		cfIconSize = 64;
 		cfFSize = SIZE_MEDIUM;
 		cfTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
 		cfMenu.clear();
@@ -489,7 +494,45 @@ public class Dispatcher implements IConnectionListener {
 			break;  
 
 		case CMD_PARAM:
-			//controller.setParam(cmdTokens);
+			
+			for (int i = 1; i < cmdTokens.size(); ) {
+				
+				String tag = (String) cmdTokens.elementAt(i);
+				/*if (tag.equals("icon_padding")) {
+					i++;
+					if (i >= cmdTokens.size()) return;
+					
+					log("icon_padding "+((String) cmdTokens.elementAt(i)));
+					
+					cfPadding = Integer.parseInt(((String) cmdTokens.elementAt(i)));
+					
+					if (cfPadding < 0) cfPadding = 0;
+					
+					Display display = context.getWindowManager().getDefaultDisplay(); 
+					if (cfPadding >= display.getWidth()/6) cfPadding = display.getWidth()/6;
+					
+					if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
+						sendToActivity(anyRemote.CONTROL_FORM,id,stage);
+					} 
+					
+				} else*/ if (tag.equals("icon_size")) {
+					i++;
+					if (i >= cmdTokens.size()) return;
+					
+					cfIconSize = Integer.parseInt(((String) cmdTokens.elementAt(i)));
+					
+					if (cfIconSize < 16) cfIconSize = 16;
+					
+					Display display = context.getWindowManager().getDefaultDisplay(); 
+					if (cfIconSize >= display.getWidth()/3) cfIconSize = display.getWidth()/3;
+					
+					if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
+						sendToActivity(anyRemote.CONTROL_FORM,id,stage);
+					} 
+				}
+				i++;
+			}
+			
 			break;
 
 		case CMD_REPAINT:
@@ -573,6 +616,14 @@ public class Dispatcher implements IConnectionListener {
 
 			Display d = context.getWindowManager().getDefaultDisplay(); 
 			queueCommand("CoverSize("+(d.getWidth()*2)/3+",)");
+			break;
+
+		case CMD_GETICSIZE:
+			
+			synchronized (cfTitle) {
+			    queueCommand("IconSize("+cfIconSize+",)");
+			}
+			
 			break;
 
 		case CMD_GETVER:
@@ -1012,8 +1063,6 @@ public class Dispatcher implements IConnectionListener {
 	            //newSize = 64;
     		} else if (oneParam.equals("size128")) {
 	            //newSize = 128;
-    		} else if (oneParam.equals("split")) {
-	            //newSplit = true;
     		} else if (oneParam.equals("choose")) {
 		        oneMore = true;
     		} else if (oneParam.equals("up")) {

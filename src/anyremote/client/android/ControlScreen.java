@@ -31,6 +31,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.TableRow;
 import android.widget.Toast;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -128,7 +129,7 @@ public class ControlScreen extends arActivity
         	doFinish("");
         }
  
-        redraw();
+        redraw(false);
 		popup();
 
 	}
@@ -164,7 +165,7 @@ public class ControlScreen extends arActivity
 		    return;
 		}
 
-	    redraw();
+	    redraw((data.id != Dispatcher.CMD_PARAM));
     }
     
     private void setTitleField() {
@@ -193,7 +194,7 @@ public class ControlScreen extends arActivity
     	status.setText(anyRemote.protocol.cfStatus);
     }
     	
-	private void setSkinSimple() {
+	private void setSkinSimple(boolean reset) {
 		
 		Display display = getWindowManager().getDefaultDisplay();
 		
@@ -238,11 +239,18 @@ public class ControlScreen extends arActivity
 				buttons[i].setOnClickListener(this);
 			}
 			
-			for (int i=0;i<NUM_ICONS_BTM;i++) {
-				buttons[i].setMaxHeight(w/realCnt);    	
-				buttons[i].setMaxWidth (w/realCnt);
+			if (reset) {
+			    anyRemote.protocol.cfIconSize = w/realCnt;
 			}
-			
+			for (int i=0;i<NUM_ICONS_BTM;i++) {
+				buttons[i].setMaxHeight(anyRemote.protocol.cfIconSize);    	
+				buttons[i].setMaxWidth (anyRemote.protocol.cfIconSize);
+				buttons[i].setMinimumHeight(anyRemote.protocol.cfIconSize);    	
+				buttons[i].setMinimumWidth (anyRemote.protocol.cfIconSize);
+				//buttons[i].setPadding(anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding, 
+	            //                      anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding);
+			}
+				
 			int sz = (w > h ? h : w);
 			ImageView cover = (ImageView) findViewById(R.id.cover);
 			cover.setMaxHeight((2*sz)/3);    	
@@ -255,7 +263,7 @@ public class ControlScreen extends arActivity
 			}
 		} else {
 			
-			//log("setSkin SK_DEFAULT");
+			log("setSkin SK_DEFAULT "+reset);
 			
 		    setContentView(R.layout.control_form_default);
 
@@ -272,10 +280,11 @@ public class ControlScreen extends arActivity
 			buttons[10] = (ImageButton) findViewById(R.id.b0);
 			buttons[11] = (ImageButton) findViewById(R.id.b11);
 			
-			h = h/6;   // 4 rows with icons and 2 line of text + gaps
-			w = w/3;   // 3 columns with icons
-			int sz = (w > h ? h : w);
-
+			if (reset) {
+				h = h/6;   // 4 rows with icons and 2 line of text + gaps
+				w = w/3;   // 3 columns with icons
+			    anyRemote.protocol.cfIconSize = (w > h ? h : w);
+			}
 			for (int i=0;i<NUM_ICONS;i++) {
 				
 				Bitmap ic = anyRemote.getIconBitmap(getResources(), anyRemote.protocol.cfIcons[i]);
@@ -288,9 +297,15 @@ public class ControlScreen extends arActivity
 				buttons[i].setVisibility(View.VISIBLE);
 				buttons[i].setOnClickListener(this);
 				
-				buttons[i].setMaxHeight(sz);    	
-				buttons[i].setMaxWidth (sz);
+				buttons[i].setMaxHeight(anyRemote.protocol.cfIconSize);    	
+				buttons[i].setMaxWidth (anyRemote.protocol.cfIconSize);
+				buttons[i].setMinimumHeight(anyRemote.protocol.cfIconSize);    	
+				buttons[i].setMinimumWidth (anyRemote.protocol.cfIconSize);
+				
+				//buttons[i].setPadding(anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding, 
+	            //                      anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding);
 			}
+			
 			if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
 				buttons[anyRemote.protocol.cfInitFocus-1].requestFocus();
 				buttons[anyRemote.protocol.cfInitFocus-1].requestFocusFromTouch();
@@ -298,21 +313,24 @@ public class ControlScreen extends arActivity
 		}
 	}
 	
-	private void redraw() {
+	private void redraw(boolean reset) {
 		
 		anyRemote.protocol.setFullscreen(this);
 		
-		setTitle(anyRemote.protocol.cfCaption);
-		
-	    setSkinSimple();
-		setFont();
-		setTextColor();
-	    setBackground();
-	    
-		setTitleField();
-		setStatusField();
-		
-		setCover();
+		synchronized (anyRemote.protocol.cfTitle) {
+			
+			setTitle(anyRemote.protocol.cfCaption);
+			
+		    setSkinSimple(reset);
+			setFont();
+			setTextColor();
+		    setBackground();
+		    
+			setTitleField();
+			setStatusField();
+			
+			setCover();
+		}
 	}
 	
 	private void setBackground() {
