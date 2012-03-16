@@ -167,7 +167,7 @@ public class ControlScreen extends arActivity
 		    return;
 		}
 
-	    redraw((data.id != Dispatcher.CMD_PARAM));
+	    redraw((data.id == Dispatcher.CMD_SKIN));
     }
     
     private void setTitleField() {
@@ -197,6 +197,8 @@ public class ControlScreen extends arActivity
     }
     	
 	private void setSkinSimple(boolean reset) {
+		
+		//log("setSkinSimple "+reset);
 		
 		Display display = getWindowManager().getDefaultDisplay();
 		
