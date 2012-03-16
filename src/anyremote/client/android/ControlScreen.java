@@ -88,6 +88,7 @@ public class ControlScreen extends arActivity
     Dispatcher.ArHandler hdlLocalCopy;
     
     ImageButton [] buttons;
+    TableRow    [] buttonsLayout;
       
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +97,8 @@ public class ControlScreen extends arActivity
 		prefix = "ControlScreen"; // log stuff
 		log("onCreate");
 		
-		buttons = new ImageButton[NUM_ICONS];
+		buttons    = new ImageButton[NUM_ICONS];
+		buttonsLayout = new TableRow[NUM_ICONS];
 	  	
 	    hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new arHandler(this));
 	    anyRemote.protocol.addMessageHandler(hdlLocalCopy);	    
@@ -129,7 +131,7 @@ public class ControlScreen extends arActivity
         	doFinish("");
         }
  
-        redraw(false);
+        redraw((anyRemote.protocol.cfIconSize < 0));
 		popup();
 
 	}
@@ -247,6 +249,7 @@ public class ControlScreen extends arActivity
 				buttons[i].setMaxWidth (anyRemote.protocol.cfIconSize);
 				buttons[i].setMinimumHeight(anyRemote.protocol.cfIconSize);    	
 				buttons[i].setMinimumWidth (anyRemote.protocol.cfIconSize);
+				
 				//buttons[i].setPadding(anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding, 
 	            //                      anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding);
 			}
@@ -280,6 +283,19 @@ public class ControlScreen extends arActivity
 			buttons[10] = (ImageButton) findViewById(R.id.b0);
 			buttons[11] = (ImageButton) findViewById(R.id.b11);
 			
+			buttonsLayout[0]  = (TableRow) findViewById(R.id.tr_b1);
+			buttonsLayout[1]  = (TableRow) findViewById(R.id.tr_b2);
+			buttonsLayout[2]  = (TableRow) findViewById(R.id.tr_b3);
+			buttonsLayout[3]  = (TableRow) findViewById(R.id.tr_b4);
+			buttonsLayout[4]  = (TableRow) findViewById(R.id.tr_b5);
+			buttonsLayout[5]  = (TableRow) findViewById(R.id.tr_b6);
+			buttonsLayout[6]  = (TableRow) findViewById(R.id.tr_b7);
+			buttonsLayout[7]  = (TableRow) findViewById(R.id.tr_b8);
+			buttonsLayout[8]  = (TableRow) findViewById(R.id.tr_b9);
+			buttonsLayout[9]  = (TableRow) findViewById(R.id.tr_b10);
+			buttonsLayout[10] = (TableRow) findViewById(R.id.tr_b11);
+			buttonsLayout[11] = (TableRow) findViewById(R.id.tr_b12);
+			
 			if (reset) {
 				h = h/6;   // 4 rows with icons and 2 line of text + gaps
 				w = w/3;   // 3 columns with icons
@@ -302,8 +318,8 @@ public class ControlScreen extends arActivity
 				buttons[i].setMinimumHeight(anyRemote.protocol.cfIconSize);    	
 				buttons[i].setMinimumWidth (anyRemote.protocol.cfIconSize);
 				
-				//buttons[i].setPadding(anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding, 
-	            //                      anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding);
+				buttonsLayout[i].setPadding(anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding, 
+		                                    anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding);
 			}
 			
 			if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {

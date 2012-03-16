@@ -224,7 +224,7 @@ public class Dispatcher implements IConnectionListener {
 		cfCaption = "";		
 		cfCover = null;
 		cfPadding = 0;
-		cfIconSize = 64;
+		cfIconSize = -1;
 		cfFSize = SIZE_MEDIUM;
 		cfTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
 		cfMenu.clear();
@@ -498,7 +498,8 @@ public class Dispatcher implements IConnectionListener {
 			for (int i = 1; i < cmdTokens.size(); ) {
 				
 				String tag = (String) cmdTokens.elementAt(i);
-				/*if (tag.equals("icon_padding")) {
+				if (tag.equals("icon_padding")) {
+					
 					i++;
 					if (i >= cmdTokens.size()) return;
 					
@@ -515,7 +516,8 @@ public class Dispatcher implements IConnectionListener {
 						sendToActivity(anyRemote.CONTROL_FORM,id,stage);
 					} 
 					
-				} else*/ if (tag.equals("icon_size")) {
+				} else if (tag.equals("icon_size")) {
+					
 					i++;
 					if (i >= cmdTokens.size()) return;
 					
