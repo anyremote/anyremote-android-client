@@ -191,8 +191,6 @@ public final class Connection implements Runnable {
 
 		while (!closed) { // loop receiving messages
 
-			final String m;
-
 			try {
 				
 				receiveReplay();
@@ -859,7 +857,7 @@ public final class Connection implements Runnable {
 		dis.read(bufArray, 0, 1);
 		btoRead -= 2;
 
-		Bitmap im = im = BitmapFactory.decodeByteArray(rgbArray, 0, sz);
+		Bitmap im = BitmapFactory.decodeByteArray(rgbArray, 0, sz);
 
 		rgbArray = null;
 		return im;
@@ -879,7 +877,7 @@ public final class Connection implements Runnable {
 		dos.flush();
 	}
 
-	private void skip(int num) throws IOException {
+/*	private void skip(int num) throws IOException {
 
 		long rest = num;
 		while (rest > 0) {
@@ -895,7 +893,7 @@ public final class Connection implements Runnable {
 			}
 			rest -= dis.skip(Math.min(avail, 10240));
 		}
-	}
+	}*/
 
 	private int cmdId(String header) {
 		if (header.equals("Set(bg")) {

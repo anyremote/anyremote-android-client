@@ -39,7 +39,6 @@ import android.os.Vibrator;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
-import android.widget.Toast;
 import anyremote.client.android.Connection.IConnectionListener;
 import anyremote.client.android.util.Address;
 import anyremote.client.android.util.ISocket;
@@ -1088,7 +1087,6 @@ public class Dispatcher implements IConnectionListener {
             i++;
         }
         
-	    int newSkin = anyRemote.protocol.cfSkin;
 	    if (name.equals("default")) {
 	    	cfSkin = ControlScreen.SK_DEFAULT;
         } else if (name.equals("bottomline")) {
@@ -1330,8 +1328,6 @@ public class Dispatcher implements IConnectionListener {
 	}
 	
 	private void listSetFont(Vector defs) {
-
-		float size = Dispatcher.SIZE_MEDIUM; 
 
 		int start = 2;
 		while(start<defs.size()) {

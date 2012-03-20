@@ -1,42 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="app_name">anyRemote</string>
-	<string name="btnCancel">Cancel</string>
-	<string name="btnOk">Ok</string>
-	
-	<string name="searchFormUnconnected">Unconnected</string>
-	
-	<string name="exit_item">Exit</string>
-	<string name="connect_item">Connect</string>
-	<string name="disconnect_item">Disconnect</string>
-	<string name="search_item">Search</string>
-	<string name="searching">Searching ...</string>
-	<string name="cancel_search_item">Cancel Search</string>
-	<string name="enter_bt_item">Enter BT address</string>
-	<string name="enter_ip_item">Enter IP address</string>
-	<string name="enter_item_name">Change Name</string>
-	<string name="enter_item_pass">Change Password</string>
-	<string name="enter_pass">Enter Password</string>
-	<string name="label_pass">Password</string>
-	<string name="clean_item">Clean Address</string>
-	<string name="autoconnect_item">Autoconnect</string>
-	<string name="log_item">Log</string>
-	
-	<string name="default_bt">btspp://0008F4163049</string>
-	<string name="default_ip">socket://192.168.1.1:5000</string>
-	
-	<string name="connect_to">Connect To</string>
-	<string name="autoconnect_to">Auto-Connect To</string>
-	<string name="remove_address">Clean Address</string>
-	
-	<string name="connection_successful">Connected</string>
-	<string name="connection_failed">Disconnected</string>
-	
-	<string name="not_found">No anyRemote servers found</string>
-	<string name="bt_turning_on">"Bluetooth turning on"</string>
-	<string name="bt_turning_off">"Bluetooth turning off"</string>
-	<string name="bt_off">"Bluetooth off"</string>
-	<string name="bt_on">"Bluetooth on"</string>
-	
 
+    <string name="app_name">anyRemote</string>
+    <string name="btnCancel">Cancel</string>
+    <string name="btnOk">Ok</string>
+    <string name="searchFormUnconnected">Unconnected</string>
+    <string name="exit_item">Exit</string>
+    <string name="connect_item">Connect</string>
+    <string name="disconnect_item">Disconnect</string>
+    <string name="search_item">Search</string>
+    <string name="searching">Searching &#8230;</string>
+    <string name="cancel_search_item">Cancel Search</string>
+    <string name="enter_bt_item">Enter BT address</string>
+    <string name="enter_ip_item">Enter IP address</string>
+    <string name="enter_item_name">Change Name</string>
+    <string name="enter_item_pass">Change Password</string>
+    <string name="enter_pass">Enter Password</string>
+    <string name="label_pass">Password</string>
+    <string name="clean_item">Clean Address</string>
+    <string name="autoconnect_item">Autoconnect</string>
+    <string name="log_item">Log</string>
+    <string name="default_bt">btspp://0008F4163049</string>
+    <string name="default_ip">socket://192.168.1.1:5000</string>
+    <string name="connect_to">Connect To</string>
+    <string name="autoconnect_to">Auto-Connect To</string>
+    <string name="remove_address">Clean Address</string>
+    <string name="connection_successful">Connected</string>
+    <string name="connection_failed">Disconnected</string>
+    <string name="not_found">No anyRemote servers found</string>
+    <string name="bt_turning_on">"Bluetooth turning on"</string>
+    <string name="bt_turning_off">"Bluetooth turning off"</string>
+    <string name="bt_off">"Bluetooth off"</string>
+    <string name="bt_on">"Bluetooth on"</string>
+    
+    <string name="b1">"1"</string>
+    <string name="b2">"2"</string>
+    <string name="b3">"3"</string>
+    <string name="b4">"4"</string>
+    <string name="b5">"5"</string>
+    <string name="b6">"6"</string>
+    <string name="b7">"7"</string>
+    <string name="b8">"8"</string>
+    <string name="b9">"9"</string>
+    <string name="b10">"*"</string>
+    <string name="b11">"0"</string>
+    <string name="b12">"#"</string>
+    
 </resources>
