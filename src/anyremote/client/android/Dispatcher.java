@@ -83,6 +83,7 @@ public class Dispatcher implements IConnectionListener {
 	static final int CMD_GETPASS    = 57;
 	static final int CMD_GETPING    = 58;
 	static final int CMD_GETICSIZE  = 59;
+	static final int CMD_GETPADDING = 60;
 
 	static final int CMD_CLOSECONN  = 101;
 	//static final int CMD_EXIT       = 102;
@@ -624,6 +625,12 @@ public class Dispatcher implements IConnectionListener {
 			
 			synchronized (cfTitle) {
 			    queueCommand("IconSize("+cfIconSize+",)");
+			}
+			
+		case CMD_GETPADDING:
+			
+			synchronized (cfTitle) {
+			    queueCommand("IconPadding("+cfPadding+",)");
 			}
 			
 			break;

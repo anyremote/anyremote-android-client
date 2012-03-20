@@ -958,6 +958,8 @@ public final class Connection implements Runnable {
 			return Dispatcher.CMD_GETPASS;
 		} else if (header.equals("Get(icon_size")) {
 			return Dispatcher.CMD_GETICSIZE;
+		} else if (header.equals("Get(icon_padding")) {
+			return Dispatcher.CMD_GETPADDING;
 		} else if (header.equals("Set(disconnect")) {
 			return Dispatcher.CMD_CLOSECONN;
 			// } else if (header.equals("Set(exit")) {
