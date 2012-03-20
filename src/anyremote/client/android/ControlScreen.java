@@ -21,11 +21,9 @@
 
 package anyremote.client.android;
 
-import java.util.Vector;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -35,7 +33,7 @@ import android.widget.TableRow;
 import android.widget.Toast;
 import android.widget.TableLayout;
 import android.widget.TextView;
-import android.text.method.ScrollingMovementMethod;
+//import android.text.method.ScrollingMovementMethod;
 import android.view.Display;
 import android.view.MenuItem;
 import android.view.Surface;
@@ -87,8 +85,8 @@ public class ControlScreen extends arActivity
     boolean useJoystick = false;
     Dispatcher.ArHandler hdlLocalCopy;
     
-    ImageButton [] buttons;
-    TableRow    [] buttonsLayout;
+    ImageButton  [] buttons;
+    LinearLayout [] buttonsLayout;
       
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +96,7 @@ public class ControlScreen extends arActivity
 		log("onCreate");
 		
 		buttons    = new ImageButton[NUM_ICONS];
-		buttonsLayout = new TableRow[NUM_ICONS];
+		buttonsLayout = new LinearLayout[NUM_ICONS];
 	  	
 	    hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new arHandler(this));
 	    anyRemote.protocol.addMessageHandler(hdlLocalCopy);	    
@@ -198,7 +196,7 @@ public class ControlScreen extends arActivity
     	
 	private void setSkinSimple(boolean reset) {
 		
-		//log("setSkinSimple "+reset);
+		log("setSkinSimple "+reset);
 		
 		Display display = getWindowManager().getDefaultDisplay();
 		
@@ -206,7 +204,7 @@ public class ControlScreen extends arActivity
 		                   display.getOrientation() == Surface.ROTATION_270);
 		int h = (rotated ? display.getWidth()  : display.getHeight());
 		int w = (rotated ? display.getHeight() : display.getWidth());
-		//log("setSkin SCR "+rotated+" "+w+"x"+h);
+		log("setSkin SCR "+rotated+" "+w+"x"+h);
 
 		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 			
@@ -272,6 +270,8 @@ public class ControlScreen extends arActivity
 			
 		    setContentView(R.layout.control_form_default);
 
+		    log("setSkin SK_DEFAULT setContentView");
+
 			buttons[0]  = (ImageButton) findViewById(R.id.b1);
 			buttons[1]  = (ImageButton) findViewById(R.id.b2);
 			buttons[2]  = (ImageButton) findViewById(R.id.b3);
@@ -285,24 +285,25 @@ public class ControlScreen extends arActivity
 			buttons[10] = (ImageButton) findViewById(R.id.b0);
 			buttons[11] = (ImageButton) findViewById(R.id.b11);
 			
-			buttonsLayout[0]  = (TableRow) findViewById(R.id.tr_b1);
-			buttonsLayout[1]  = (TableRow) findViewById(R.id.tr_b2);
-			buttonsLayout[2]  = (TableRow) findViewById(R.id.tr_b3);
-			buttonsLayout[3]  = (TableRow) findViewById(R.id.tr_b4);
-			buttonsLayout[4]  = (TableRow) findViewById(R.id.tr_b5);
-			buttonsLayout[5]  = (TableRow) findViewById(R.id.tr_b6);
-			buttonsLayout[6]  = (TableRow) findViewById(R.id.tr_b7);
-			buttonsLayout[7]  = (TableRow) findViewById(R.id.tr_b8);
-			buttonsLayout[8]  = (TableRow) findViewById(R.id.tr_b9);
-			buttonsLayout[9]  = (TableRow) findViewById(R.id.tr_b10);
-			buttonsLayout[10] = (TableRow) findViewById(R.id.tr_b11);
-			buttonsLayout[11] = (TableRow) findViewById(R.id.tr_b12);
+			buttonsLayout[0]  = (LinearLayout) findViewById(R.id.tl_b1);
+			buttonsLayout[1]  = (LinearLayout) findViewById(R.id.tl_b2);
+			buttonsLayout[2]  = (LinearLayout) findViewById(R.id.tl_b3);
+			buttonsLayout[3]  = (LinearLayout) findViewById(R.id.tl_b4);
+			buttonsLayout[4]  = (LinearLayout) findViewById(R.id.tl_b5);
+			buttonsLayout[5]  = (LinearLayout) findViewById(R.id.tl_b6);
+			buttonsLayout[6]  = (LinearLayout) findViewById(R.id.tl_b7);
+			buttonsLayout[7]  = (LinearLayout) findViewById(R.id.tl_b8);
+			buttonsLayout[8]  = (LinearLayout) findViewById(R.id.tl_b9);
+			buttonsLayout[9]  = (LinearLayout) findViewById(R.id.tl_b10);
+			buttonsLayout[10] = (LinearLayout) findViewById(R.id.tl_b11);
+			buttonsLayout[11] = (LinearLayout) findViewById(R.id.tl_b12);
 			
 			if (reset) {
 				h = h/6;   // 4 rows with icons and 2 line of text + gaps
 				w = w/3;   // 3 columns with icons
 			    anyRemote.protocol.cfIconSize = (w > h ? h : w);
 			}
+
 			for (int i=0;i<NUM_ICONS;i++) {
 				
 				Bitmap ic = anyRemote.getIconBitmap(getResources(), anyRemote.protocol.cfIcons[i]);
@@ -354,10 +355,8 @@ public class ControlScreen extends arActivity
 	private void setBackground() {
 		
 		int id = R.id.skin_default;
-		int maxIcon = NUM_ICONS;
 		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 	        id = R.id.skin_bottomline;
-	        maxIcon = NUM_ICONS_BTM;
 	        
 	        ImageView cover = (ImageView) findViewById(R.id.cover);
 	        cover.setBackgroundColor(anyRemote.protocol.cfBkgr);

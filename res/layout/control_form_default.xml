@@ -50,45 +50,54 @@
             android:gravity="center_horizontal"
             android:orientation="horizontal" >
 
-            <TableLayout android:id="@+id/tl_b1" >
-               <TableRow android:id="@+id/tr_b1" >
-                  <ImageButton
-                        android:id="@+id/b1"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusDown="@+id/b4"
-                        android:nextFocusRight="@+id/b2"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+            <LinearLayout
+                android:id="@+id/tl_b1" >
 
-            <TableLayout android:id="@+id/tl_b2" >
-               <TableRow android:id="@+id/tr_b2" >
-                   <ImageButton
-                        android:id="@+id/b2"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusDown="@+id/b5"
-                        android:nextFocusLeft="@+id/b1"
-                        android:nextFocusRight="@+id/b3"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+                <ImageButton
+                    android:id="@+id/b1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b1"
+                    android:nextFocusDown="@+id/b4"
+                    android:nextFocusRight="@+id/b2"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
 
-            <TableLayout android:id="@+id/tl_b3" >
-                <TableRow android:id="@+id/tr_b3" >
-                    <ImageButton
-                        android:id="@+id/b3"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusDown="@+id/b6"
-                        android:nextFocusLeft="@+id/b2"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+            <LinearLayout
+                android:id="@+id/tl_b2" >
+
+                <ImageButton
+                    android:id="@+id/b2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b2"
+                    android:nextFocusDown="@+id/b5"
+                    android:nextFocusLeft="@+id/b1"
+                    android:nextFocusRight="@+id/b3"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tl_b3" >
+
+                <ImageButton
+                    android:id="@+id/b3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b3"
+                    android:nextFocusDown="@+id/b6"
+                    android:nextFocusLeft="@+id/b2"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
         </TableRow>
 
         <TableRow
@@ -98,48 +107,57 @@
             android:gravity="center_vertical|center_horizontal"
             android:orientation="horizontal" >
 
-            <TableLayout android:id="@+id/tl_b4" >
-                <TableRow android:id="@+id/tr_b4" >
-                    <ImageButton
-                        android:id="@+id/b4"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusDown="@+id/b7"
-                        android:nextFocusRight="@+id/b5"
-                        android:nextFocusUp="@+id/b1"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+            <LinearLayout
+                android:id="@+id/tl_b4" >
 
-            <TableLayout android:id="@+id/tl_b5" >
-                <TableRow android:id="@+id/tr_b5" >
-                    <ImageButton
-                        android:id="@+id/b5"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusDown="@+id/b8"
-                        android:nextFocusLeft="@+id/b4"
-                        android:nextFocusRight="@+id/b6"
-                        android:nextFocusUp="@+id/b2"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+                <ImageButton
+                    android:id="@+id/b4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b4"
+                    android:nextFocusDown="@+id/b7"
+                    android:nextFocusRight="@+id/b5"
+                    android:nextFocusUp="@+id/b1"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
 
-            <TableLayout android:id="@+id/tl_b6" >
-                <TableRow android:id="@+id/tr_b6" >
-                    <ImageButton
-                        android:id="@+id/b6"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusDown="@+id/b9"
-                        android:nextFocusLeft="@+id/b5"
-                        android:nextFocusUp="@+id/b3"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+            <LinearLayout
+                android:id="@+id/tl_b5" >
+
+                <ImageButton
+                    android:id="@+id/b5"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b5"
+                    android:nextFocusDown="@+id/b8"
+                    android:nextFocusLeft="@+id/b4"
+                    android:nextFocusRight="@+id/b6"
+                    android:nextFocusUp="@+id/b2"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tl_b6" >
+
+                <ImageButton
+                    android:id="@+id/b6"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b6"
+                    android:nextFocusDown="@+id/b9"
+                    android:nextFocusLeft="@+id/b5"
+                    android:nextFocusUp="@+id/b3"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
         </TableRow>
 
         <TableRow
@@ -149,50 +167,57 @@
             android:gravity="center_horizontal"
             android:orientation="horizontal" >
 
-            <TableLayout android:id="@+id/tl_b7" >
-                <TableRow android:id="@+id/tr_b7" >
-                    <ImageButton
-                        android:id="@+id/b7"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusDown="@+id/b10"
-                        android:nextFocusRight="@+id/b8"
-                        android:nextFocusUp="@+id/b4"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+            <LinearLayout
+                android:id="@+id/tl_b7" >
 
-            <TableLayout android:id="@+id/tl_b8" >
-                <TableRow android:id="@+id/tr_b8" >
-                    <ImageButton
-                        android:id="@+id/b8"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusDown="@+id/b0"
-                        android:nextFocusLeft="@+id/b7"
-                        android:nextFocusRight="@+id/b9"
-                        android:nextFocusUp="@+id/b5"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+                <ImageButton
+                    android:id="@+id/b7"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b7"
+                    android:nextFocusDown="@+id/b10"
+                    android:nextFocusRight="@+id/b8"
+                    android:nextFocusUp="@+id/b4"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
 
-            <TableLayout android:id="@+id/tl_b9" >
-                <TableRow android:id="@+id/tr_b9" >
-                    <ImageButton
-                        android:id="@+id/b9"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusDown="@+id/b11"
-                        android:nextFocusLeft="@+id/b8"
-                        android:nextFocusUp="@+id/b6"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+            <LinearLayout
+                android:id="@+id/tl_b8" >
+
+                <ImageButton
+                    android:id="@+id/b8"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b8"
+                    android:nextFocusDown="@+id/b0"
+                    android:nextFocusLeft="@+id/b7"
+                    android:nextFocusRight="@+id/b9"
+                    android:nextFocusUp="@+id/b5"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tl_b9" >
+
+                <ImageButton
+                    android:id="@+id/b9"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b9"
+                    android:nextFocusDown="@+id/b11"
+                    android:nextFocusLeft="@+id/b8"
+                    android:nextFocusUp="@+id/b6"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
         </TableRow>
 
         <TableRow
@@ -202,45 +227,54 @@
             android:gravity="center_horizontal"
             android:orientation="horizontal" >
 
-            <TableLayout android:id="@+id/tl_b10" >
-                <TableRow android:id="@+id/tr_b10" >
-                    <ImageButton
-                        android:id="@+id/b10"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusRight="@+id/b0"
-                        android:nextFocusUp="@+id/b7"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+            <LinearLayout
+                android:id="@+id/tl_b10" >
 
-            <TableLayout android:id="@+id/tl_b11" >
-                <TableRow android:id="@+id/tr_b11" >
-                   <ImageButton
-                        android:id="@+id/b0"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusLeft="@+id/b10"
-                        android:nextFocusRight="@+id/b11"
-                        android:nextFocusUp="@+id/b8"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+                <ImageButton
+                    android:id="@+id/b10"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b10"
+                    android:nextFocusRight="@+id/b0"
+                    android:nextFocusUp="@+id/b7"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
 
-            <TableLayout android:id="@+id/tl_b12" >
-                <TableRow android:id="@+id/tr_b12" >
-                    <ImageButton
-                        android:id="@+id/b11"
-                        android:adjustViewBounds="true"
-                        android:background="@drawable/btn_selector"
-                        android:nextFocusLeft="@+id/b0"
-                        android:nextFocusUp="@+id/b9"
-                        android:scaleType="centerInside" >
-                    </ImageButton>
-                </TableRow>
-            </TableLayout>
+            <LinearLayout
+                android:id="@+id/tl_b11" >
+
+                <ImageButton
+                    android:id="@+id/b0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b11"
+                    android:nextFocusLeft="@+id/b10"
+                    android:nextFocusRight="@+id/b11"
+                    android:nextFocusUp="@+id/b8"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tl_b12" >
+
+                <ImageButton
+                    android:id="@+id/b11"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b12"
+                    android:nextFocusLeft="@+id/b0"
+                    android:nextFocusUp="@+id/b9"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
         </TableRow>
 
         <!--
