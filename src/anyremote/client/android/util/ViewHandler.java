@@ -23,9 +23,7 @@ package anyremote.client.android.util;
 
 import android.os.Handler;
 import android.os.Message;
-import android.widget.Toast;
 import anyremote.client.android.anyRemote;
-import anyremote.client.android.R;
 
 public class ViewHandler extends Handler {
 	anyRemote client;

@@ -23,7 +23,6 @@ package anyremote.client.android.util;
 
 import android.os.Handler;
 import android.os.Message;
-import anyremote.client.android.ListScreen;
 import anyremote.client.android.arActivity;
 
 

@@ -26,7 +26,6 @@ import java.util.Vector;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.os.Bundle;
 import android.view.Menu;
 import anyremote.client.android.R;
 import anyremote.client.android.util.ProtocolMessage;

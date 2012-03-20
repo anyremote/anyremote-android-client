@@ -22,15 +22,12 @@
 package anyremote.client.android;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Vector;
 
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.AdapterView;
@@ -283,7 +280,9 @@ AdapterView.OnItemSelectedListener {
 	}
 
 	private void doDiscovery() {
-
+		if (mBtAdapter == null) {
+			return;
+		}
 		if (!mBtAdapter.isEnabled()) {
 			btUseFlag = BT_USE_SEARCH;
 			switchBluetoothOn();

@@ -188,9 +188,7 @@ public class anyRemote extends Activity {
 		currForm = which;
 
 		if (currForm != prevForm) {
-			
-			Vector ctokens;
-			
+						
 			// finish current form
 			switch (prevForm) { 
 			case SEARCH_FORM:

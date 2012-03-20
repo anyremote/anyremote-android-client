@@ -21,8 +21,6 @@
 
 package anyremote.client.android.util;
 
-import java.util.Vector;
-
 public class ProtocolMessage {
 	public static final int FULL     = 0;
 	public static final int FIRST    = 1;

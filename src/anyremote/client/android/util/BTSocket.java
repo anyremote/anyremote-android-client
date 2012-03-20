@@ -33,7 +33,6 @@ import anyremote.client.android.util.ISocket;
 import anyremote.client.android.util.UserException;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.UUID;
 
 
