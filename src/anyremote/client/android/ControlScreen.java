@@ -129,7 +129,7 @@ public class ControlScreen extends arActivity
         	doFinish("");
         }
  
-        redraw((anyRemote.protocol.cfIconSize < 0));
+        redraw();
 		popup();
 
 	}
@@ -165,7 +165,7 @@ public class ControlScreen extends arActivity
 		    return;
 		}
 
-	    redraw((data.id == Dispatcher.CMD_SKIN));
+	    redraw();
     }
     
     private void setTitleField() {
@@ -194,9 +194,9 @@ public class ControlScreen extends arActivity
     	status.setText(anyRemote.protocol.cfStatus);
     }
     	
-	private void setSkinSimple(boolean reset) {
+	private void setSkinSimple() {
 		
-		log("setSkinSimple "+reset);
+		//log("setSkinSimple ");
 		
 		Display display = getWindowManager().getDefaultDisplay();
 		
@@ -206,9 +206,11 @@ public class ControlScreen extends arActivity
 		int w = (rotated ? display.getHeight() : display.getWidth());
 		log("setSkin SCR "+rotated+" "+w+"x"+h);
 
+		int pd  = anyRemote.protocol.cfPadding;
+
 		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 			
-			//log("setSkin SK_BOTTOMLINE");
+			log("setSkin SK_BOTTOMLINE");
 			
 			setContentView(R.layout.control_form_bottomline);
 			
@@ -225,6 +227,19 @@ public class ControlScreen extends arActivity
 			buttons[10] = null;
 			buttons[11] = null;
 			
+			buttonsLayout[0]  = (LinearLayout) findViewById(R.id.tl_bb1);
+			buttonsLayout[1]  = (LinearLayout) findViewById(R.id.tl_bb2);
+			buttonsLayout[2]  = (LinearLayout) findViewById(R.id.tl_bb3);
+			buttonsLayout[3]  = (LinearLayout) findViewById(R.id.tl_bb4);
+			buttonsLayout[4]  = (LinearLayout) findViewById(R.id.tl_bb5);
+			buttonsLayout[5]  = (LinearLayout) findViewById(R.id.tl_bb6);
+			buttonsLayout[6]  = (LinearLayout) findViewById(R.id.tl_bb7);
+			buttonsLayout[7]  = null;
+			buttonsLayout[8]  = null;
+			buttonsLayout[9]  = null;
+			buttonsLayout[10] = null;
+			buttonsLayout[11] = null;
+			
 	        int realCnt = 0;
 			for (int i=0;i<NUM_ICONS_BTM;i++) {
 				Bitmap ic = anyRemote.getIconBitmap(getResources(), anyRemote.protocol.cfIcons[i]);
@@ -237,21 +252,22 @@ public class ControlScreen extends arActivity
 					buttons[i].setVisibility(View.VISIBLE);
 				    realCnt++;
 				}
-				//buttons[i].setOnTouchListener(this);
+
 				buttons[i].setOnClickListener(this);
 			}
 			
-			if (reset) {
-			    anyRemote.protocol.cfIconSize = w/realCnt;
-			}
+			anyRemote.protocol.cfIconSize = w/realCnt;
+			
+			int isz = (anyRemote.protocol.cfIconSizeOverride >= 0 ? anyRemote.protocol.cfIconSizeOverride : anyRemote.protocol.cfIconSize);
+
 			for (int i=0;i<NUM_ICONS_BTM;i++) {
-				buttons[i].setMaxHeight(anyRemote.protocol.cfIconSize);    	
-				buttons[i].setMaxWidth (anyRemote.protocol.cfIconSize);
-				buttons[i].setMinimumHeight(anyRemote.protocol.cfIconSize);    	
-				buttons[i].setMinimumWidth (anyRemote.protocol.cfIconSize);
 				
-				//buttons[i].setPadding(anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding, 
-	            //                      anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding);
+				buttons[i].setMaxHeight(isz);    	
+				buttons[i].setMaxWidth (isz);
+				buttons[i].setMinimumHeight(isz);    	
+				buttons[i].setMinimumWidth (isz);
+					
+				buttonsLayout[i].setPadding(pd, pd, pd, pd);
 			}
 				
 			int sz = (w > h ? h : w);
@@ -266,7 +282,7 @@ public class ControlScreen extends arActivity
 			}
 		} else {
 			
-			log("setSkin SK_DEFAULT "+reset);
+			log("setSkin SK_DEFAULT ");
 			
 		    setContentView(R.layout.control_form_default);
 
@@ -298,11 +314,11 @@ public class ControlScreen extends arActivity
 			buttonsLayout[10] = (LinearLayout) findViewById(R.id.tl_b11);
 			buttonsLayout[11] = (LinearLayout) findViewById(R.id.tl_b12);
 			
-			if (reset) {
-				h = h/6;   // 4 rows with icons and 2 line of text + gaps
-				w = w/3;   // 3 columns with icons
-			    anyRemote.protocol.cfIconSize = (w > h ? h : w);
-			}
+			h = h/6;   // 4 rows with icons and 2 line of text + gaps
+			w = w/3;   // 3 columns with icons
+		    anyRemote.protocol.cfIconSize = (w > h ? h : w);
+		    
+			int isz = (anyRemote.protocol.cfIconSizeOverride >= 0 ? anyRemote.protocol.cfIconSizeOverride : anyRemote.protocol.cfIconSize);
 
 			for (int i=0;i<NUM_ICONS;i++) {
 				
@@ -316,13 +332,12 @@ public class ControlScreen extends arActivity
 				buttons[i].setVisibility(View.VISIBLE);
 				buttons[i].setOnClickListener(this);
 				
-				buttons[i].setMaxHeight(anyRemote.protocol.cfIconSize);    	
-				buttons[i].setMaxWidth (anyRemote.protocol.cfIconSize);
-				buttons[i].setMinimumHeight(anyRemote.protocol.cfIconSize);    	
-				buttons[i].setMinimumWidth (anyRemote.protocol.cfIconSize);
+				buttons[i].setMaxHeight(isz);    	
+				buttons[i].setMaxWidth (isz);
+				buttons[i].setMinimumHeight(isz);    	
+				buttons[i].setMinimumWidth (isz);
 				
-				buttonsLayout[i].setPadding(anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding, 
-		                                    anyRemote.protocol.cfPadding, anyRemote.protocol.cfPadding);
+				buttonsLayout[i].setPadding(pd, pd, pd, pd);
 			}
 			
 			if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
@@ -332,7 +347,7 @@ public class ControlScreen extends arActivity
 		}
 	}
 	
-	private void redraw(boolean reset) {
+	private void redraw() {
 		
 		anyRemote.protocol.setFullscreen(this);
 		
@@ -340,7 +355,7 @@ public class ControlScreen extends arActivity
 			
 			setTitle(anyRemote.protocol.cfCaption);
 			
-		    setSkinSimple(reset);
+		    setSkinSimple();
 			setFont();
 			setTextColor();
 		    setBackground();

@@ -144,6 +144,7 @@ public class Dispatcher implements IConnectionListener {
 	String cfVolume;
 	int cfPadding;
 	int cfIconSize;
+	int cfIconSizeOverride;
 
 	// List Screen stuff
 	String listTitle;
@@ -223,7 +224,8 @@ public class Dispatcher implements IConnectionListener {
 		cfStatus  = "";
 		cfCaption = "";		
 		cfCover = null;
-		cfPadding = 0;
+		cfIconSizeOverride = -1;
+		cfPadding  = 0;
 		cfIconSize = -1;
 		cfFSize = SIZE_MEDIUM;
 		cfTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
@@ -397,15 +399,16 @@ public class Dispatcher implements IConnectionListener {
 		case CMD_VOLUME:
 		case CMD_COVER:
 			
-			controlDataProcess(cmdTokens);
-
-			// Create activity with (possibly) empty list
-			if (anyRemote.getCurScreen() != anyRemote.CONTROL_FORM) {
-				context.setCurrentView(anyRemote.CONTROL_FORM, "");
-			} 
-			
-		    sendToActivity(anyRemote.CONTROL_FORM,id,stage);
-
+			synchronized (cfTitle) {
+				controlDataProcess(cmdTokens);
+	
+				// Create activity with (possibly) empty list
+				if (anyRemote.getCurScreen() != anyRemote.CONTROL_FORM) {
+					context.setCurrentView(anyRemote.CONTROL_FORM, "");
+				} 
+				
+			    sendToActivity(anyRemote.CONTROL_FORM,id,stage);
+			}
 		    break;
 
 		case CMD_EFIELD:
@@ -505,7 +508,7 @@ public class Dispatcher implements IConnectionListener {
 					
 					log("icon_padding "+((String) cmdTokens.elementAt(i)));
 					
-					cfPadding = Integer.parseInt(((String) cmdTokens.elementAt(i)));
+					cfPadding= Integer.parseInt(((String) cmdTokens.elementAt(i)));
 					
 					if (cfPadding < 0) cfPadding = 0;
 					
@@ -521,12 +524,12 @@ public class Dispatcher implements IConnectionListener {
 					i++;
 					if (i >= cmdTokens.size()) return;
 					
-					cfIconSize = Integer.parseInt(((String) cmdTokens.elementAt(i)));
+					cfIconSizeOverride = Integer.parseInt(((String) cmdTokens.elementAt(i)));
 					
-					if (cfIconSize < 16) cfIconSize = 16;
+					if (cfIconSizeOverride < 0) cfIconSizeOverride = -1;   // == do not use
 					
 					Display display = context.getWindowManager().getDefaultDisplay(); 
-					if (cfIconSize >= display.getWidth()/3) cfIconSize = display.getWidth()/3;
+					if (cfIconSizeOverride >= display.getWidth()/3) cfIconSizeOverride = display.getWidth()/3;
 					
 					if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
 						sendToActivity(anyRemote.CONTROL_FORM,id,stage);
@@ -623,7 +626,7 @@ public class Dispatcher implements IConnectionListener {
 		case CMD_GETICSIZE:
 			
 			synchronized (cfTitle) {
-			    queueCommand("IconSize("+cfIconSize+",)");
+			    queueCommand("IconSize("+(cfIconSizeOverride >= 0 ? cfIconSizeOverride : cfIconSize)+",)");
 			}
 			
 		case CMD_GETPADDING:
