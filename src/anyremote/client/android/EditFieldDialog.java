@@ -78,7 +78,7 @@ public class EditFieldDialog extends Dialog implements OnClickListener {
     	}
 	}
 	
-	@Override
+	//@Override
 	public void onClick(View v) {
 		
 		if (v == okButton) {

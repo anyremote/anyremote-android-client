@@ -108,7 +108,7 @@ public class ListScreen extends arActivity
 	   	super.onDestroy();
 	}
 
-	@Override
+	//@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {	
 		//log("onItemClick "+arg2);
 		//list.setSelection(arg2);
@@ -157,13 +157,13 @@ public class ListScreen extends arActivity
 	}*/
 
 	// Selection handlers
-	@Override
+	//@Override
 	public void onItemSelected(AdapterView<?> parentView, View childView, int position, long id) {
 		anyRemote.protocol.listSelectPos = position;
 		selectUpdate();
 	}
 
-	@Override
+	//@Override
 	public void onNothingSelected(AdapterView<?> parentView) {
 		//log("onNothingSelected");
 		//select(-1);
