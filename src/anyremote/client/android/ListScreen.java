@@ -209,7 +209,9 @@ public class ListScreen extends arActivity
 				
 			// get info about data update
 			if (data.id == Dispatcher.CMD_LIST_UPDATE) {
+				log("handleEvent UPDATE DATA SOURCE");
 				dataSource.update(anyRemote.protocol.listContent);
+				log("handleEvent notifyDataSetChanged");
 				dataSource.notifyDataSetChanged();
 			}
 			
@@ -238,12 +240,12 @@ public class ListScreen extends arActivity
 		    dataSource.setFont(anyRemote.protocol.listFSize);
 		}
 		if (anyRemote.protocol.listCustomBackColor) {
-			log("handleEvent setBackColor "+anyRemote.protocol.listBkgr);
+			//log("handleEvent setBackColor "+anyRemote.protocol.listBkgr);
 			dataSource.setBackColor(anyRemote.protocol.listBkgr);
 			list.setBackgroundColor(anyRemote.protocol.listBkgr);			
 		}
 		if (anyRemote.protocol.listCustomTextColor) {
-			log("handleEvent setTextColor "+anyRemote.protocol.listText);
+			//log("handleEvent setTextColor "+anyRemote.protocol.listText);
 			dataSource.setTextColor(anyRemote.protocol.listText);
 		}
 		selectUpdate();
