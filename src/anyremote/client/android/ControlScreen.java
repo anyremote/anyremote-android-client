@@ -210,7 +210,7 @@ public class ControlScreen extends arActivity
 
 		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 			
-			log("setSkin SK_BOTTOMLINE");
+			//log("setSkin SK_BOTTOMLINE");
 			
 			setContentView(R.layout.control_form_bottomline);
 			
@@ -282,11 +282,11 @@ public class ControlScreen extends arActivity
 			}
 		} else {
 			
-			log("setSkin SK_DEFAULT ");
+			//log("setSkin SK_DEFAULT ");
 			
 		    setContentView(R.layout.control_form_default);
 
-		    log("setSkin SK_DEFAULT setContentView");
+		    //log("setSkin SK_DEFAULT setContentView");
 
 			buttons[0]  = (ImageButton) findViewById(R.id.b1);
 			buttons[1]  = (ImageButton) findViewById(R.id.b2);

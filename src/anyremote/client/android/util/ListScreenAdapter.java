@@ -59,11 +59,14 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 	   	for(ListItem item : data) {
     	    items.add(item);
         }
+	   	anyRemote._log("ListScreenAdapter","update #"+items.size());
 	}
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
- 
+    	
+    	anyRemote._log("ListScreenAdapter","getView "+position);
+    	
       	final View v;
     	if (convertView == null) {
     		LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -95,9 +98,11 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 	     	        im.setBackgroundColor(bColor);
 	     	    }
 	    	}
-	
+	    	anyRemote._log("ListScreenAdapter","getView "+items.get(position).text);
 	    	
 	    	txt.setText(items.get(position).text);
+	    	txt.setVisibility(View.VISIBLE);
+	    	v.setVisibility(View.VISIBLE);
     	}
     	
     	if (fSize > 0) {

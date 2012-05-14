@@ -161,6 +161,7 @@ public final class Connection implements Runnable {
 	 * 
 	 */
 	public void close() {
+		anyRemote._log("Connection", "do close");
 		connectionListenerNotifiedAboutError = true;
 		downPrivate();
 	}
@@ -243,8 +244,10 @@ public final class Connection implements Runnable {
 	}
 
 	private void downPrivate() {
+		anyRemote._log("Connection", "downPrivate");
 		closed = true;
 		sock.close();
+		anyRemote._log("Connection", "downPrivate DONE");
 	}
 
 	/** See {@link #notifyDisconnected(UserException)}. */
