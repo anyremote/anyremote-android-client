@@ -1323,6 +1323,8 @@ public class Dispatcher implements IConnectionListener {
 	}	
 
 	public void listClean() {
+		log("listClean");
+		
 		listSelectPos = -1;
 		synchronized (listContent) {
 		    listContent.clear();

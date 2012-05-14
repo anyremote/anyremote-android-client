@@ -50,22 +50,25 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 	public ListScreenAdapter(Context context, int textViewResourceId, ArrayList<ListItem> items) {
 		super(context, textViewResourceId, items);
 		this.context = context;
-		this.items   = items;
+		synchronized (items) {
+			this.items   = items;
+		}
 	}
 	
 	public void update(ArrayList<ListItem> data) {
 		clear();
-		
-	   	for(ListItem item : data) {
-    	    items.add(item);
-        }
-	   	anyRemote._log("ListScreenAdapter","update #"+items.size());
+		synchronized (items) {
+		   	for(ListItem item : data) {
+	    	    items.add(item);
+	        }
+		}
+	   	//anyRemote._log("ListScreenAdapter","update #"+items.size());
 	}
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
     	
-    	anyRemote._log("ListScreenAdapter","getView "+position);
+    	//anyRemote._log("ListScreenAdapter","getView "+position);
     	
       	final View v;
     	if (convertView == null) {
@@ -98,7 +101,7 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 	     	        im.setBackgroundColor(bColor);
 	     	    }
 	    	}
-	    	anyRemote._log("ListScreenAdapter","getView "+items.get(position).text);
+	    	//anyRemote._log("ListScreenAdapter","getView "+items.get(position).text);
 	    	
 	    	txt.setText(items.get(position).text);
 	    	txt.setVisibility(View.VISIBLE);
@@ -135,6 +138,8 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
     }
   
     public void clear() {
-    	items.clear();
+    	synchronized (items) {
+     	    items.clear();
+    	}
     }
 }
