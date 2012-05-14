@@ -74,7 +74,7 @@ public class IPSocket implements ISocket {
 
 	}
 
-	@Override
+	//@Override
 	public void close() {
 		try {
 			sock.close();
@@ -90,12 +90,12 @@ public class IPSocket implements ISocket {
 		}
 	}
 
-	@Override
+	//@Override
 	public InputStream getInputStream() {
 		return is;
 	}
 
-	@Override
+	//@Override
 	public OutputStream getOutputStream() {
 		return os;
 	}

@@ -99,7 +99,7 @@ public class arActivity extends Activity
 	}
 
 	// Got result from EditForm dialog ("Ok"/"Cancel" was pressed)
-	@Override
+	//@Override
 	public void onDismiss (DialogInterface dialog) {
 
 		log("onDismiss");
@@ -114,7 +114,7 @@ public class arActivity extends Activity
 	}
 
 	// Handle "Cancel" press in EditFieldDialog
-	@Override
+	//@Override
 	public void onCancel(DialogInterface dialog) { 
 		log("onCancel");
 

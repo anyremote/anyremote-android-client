@@ -124,7 +124,7 @@ AdapterView.OnItemSelectedListener {
 		}
 	}
 
-	@Override
+	//@Override
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {		
 		doConnect(dataSource.getItem(arg2),anyRemote.CONNECT_TO);
 	}
@@ -401,12 +401,12 @@ AdapterView.OnItemSelectedListener {
 	}
 
 	// Selection handlers
-	@Override
+	//@Override
 	public void onItemSelected(AdapterView<?> parentView, View childView, int position, long id) {
 		setSelected(position);
 	}
 
-	@Override
+	//@Override
 	public void onNothingSelected(AdapterView<?> parentView) {
 		setSelected(-1);
 	}

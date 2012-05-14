@@ -346,7 +346,7 @@ public class Dispatcher implements IConnectionListener {
 		disconnect(false);
 	}
 
-	@Override
+	//@Override
 	public void notifyConnected(Connection conn) { 
 		log("notifyConnected");
 
@@ -365,7 +365,7 @@ public class Dispatcher implements IConnectionListener {
 		notifyHandlers(anyRemote.CONNECTED, "");
 	}
 
-	@Override
+	//@Override
 	public void notifyDisconnected(ISocket sock, UserException reason) {
 		log("notifyDisconnected " + reason.getDetails());
 		
@@ -374,7 +374,7 @@ public class Dispatcher implements IConnectionListener {
 		setDefValues();		
 	}
 
-	@Override
+	//@Override
 	public void notifyMessage(int id, Vector cmdTokens, int stage) {
 
 		log("notifyMessage got:" + id + " " + cmdTokens+"(cur screen is "+anyRemote.getCurScreen()+")");

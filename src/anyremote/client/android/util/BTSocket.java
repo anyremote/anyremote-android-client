@@ -130,7 +130,7 @@ public class BTSocket implements ISocket {
 		anyRemote._log("BTSocket","CONNECTED");
 	}
 
-	@Override
+	//@Override
 	public void close() {
         if (isClosed) return;
         isClosed = true;
@@ -148,12 +148,12 @@ public class BTSocket implements ISocket {
 		}
 	}
 
-	@Override
+	//@Override
 	public InputStream getInputStream() {
 		return is;
 	}
 
-	@Override
+	//@Override
 	public OutputStream getOutputStream() {
 		return os;
 	}
