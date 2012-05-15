@@ -612,19 +612,19 @@ public class ControlScreen extends arActivity
 			case KeyEvent.KEYCODE_VOLUME_UP:   return "VOL+";
 			case KeyEvent.KEYCODE_VOLUME_DOWN: return "VOL-";
 			case KeyEvent.KEYCODE_DPAD_UP:     
-				    return (useJoystick || 
+				    return (!useJoystick || 
 				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? 
 				    				 anyRemote.protocol.cfUpEvent : "");   // do not process them if joystick_only param was set
 			case KeyEvent.KEYCODE_DPAD_DOWN:   
-				    return (useJoystick || 
+				    return (!useJoystick || 
 				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? 
 				    				anyRemote.protocol.cfDownEvent : "");
 			case KeyEvent.KEYCODE_DPAD_LEFT:   
-				    return (useJoystick ? "LEFT" : "");   // do not process them if joystick_only param was set 
+				    return (!useJoystick ? "LEFT" : "");   // do not process them if joystick_only param was set 
 			case KeyEvent.KEYCODE_DPAD_RIGHT:  
-				    return (useJoystick ? "RIGHT": "");
+				    return (!useJoystick ? "RIGHT": "");
 			case KeyEvent.KEYCODE_DPAD_CENTER: 
-				    return (useJoystick ? "FIRE" : "");
+				    return (!useJoystick ? "FIRE" : "");
 			case KeyEvent.KEYCODE_SEARCH:      return "SEARCH";
 			default: 
 				if (keyCode >= 0 && keyCode < 10) {

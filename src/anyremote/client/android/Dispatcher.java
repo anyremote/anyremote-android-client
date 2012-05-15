@@ -1033,7 +1033,7 @@ public class Dispatcher implements IConnectionListener {
         //boolean newVolume = false;
     	//int     newSize   = icSize;
         
-        cfUseJoystick = false;
+        cfUseJoystick = true;
         cfUpEvent   = "UP";
         cfDownEvent = "DOWN";
         cfInitFocus = 5;
