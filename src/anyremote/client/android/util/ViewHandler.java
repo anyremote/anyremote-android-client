@@ -49,6 +49,11 @@ public class ViewHandler extends Handler {
 			anyRemote._log("ViewHandler", "handleMessage: DISCONNECTED!");
 			//Toast.makeText(client, R.string.connection_failed, Toast.LENGTH_SHORT).show();
 			client.handleEvent(anyRemote.DISCONNECTED);
+			break;	
+			
+		case anyRemote.COMMAND:
+			
+			client.handleCommand((String) msg.obj);
 			break;			
 		}
 	}

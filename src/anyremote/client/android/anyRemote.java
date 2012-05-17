@@ -47,6 +47,7 @@ public class anyRemote extends Activity {
 
 	public static final int  DISCONNECTED = 0;
 	public static final int  CONNECTED    = 1;
+	public static final int  COMMAND      = 2;
 
 	static final int  NO_FORM      = 0;
 	static final int  SEARCH_FORM  = 1;
@@ -385,8 +386,15 @@ public class anyRemote extends Activity {
 		//cScreen.commandAction(item.getTitle().toString());
 		return true;
 	}
-
+	
+	
+	public void handleCommand(String command) {
+		
+		
+	}
+	
 	public void handleEvent(int what) {
+		
 		_log("handleEvent");
 		switch (what) {
 		case CONNECTED:
@@ -525,6 +533,22 @@ public class anyRemote extends Activity {
 
 	public static int getCurScreen() {
 		return currForm;
+	}
+	
+	public static String getScreenStr(int form) {
+		switch (form) {
+            case NO_FORM:      return "NO";
+            case SEARCH_FORM:  return "SEARCH";
+            case CONTROL_FORM: return "CONTROL";
+            case FMGR_FORM:    return "FMGR";
+            case TEXT_FORM:    return "TEXT";
+            case LIST_FORM:    return "LIST";
+            case EDIT_FORM:    return "EDIT";
+            case WMAN_FORM:    return "WMAN";
+            case LOG_FORM:     return "LOG";
+            case DUMMY_FORM:   return "DUMMY";
+		}
+		return "UNKNOWN";
 	}
 	
 	public static void popup(Activity cxt, boolean show, String msg) {

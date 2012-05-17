@@ -100,6 +100,13 @@ public class Dispatcher implements IConnectionListener {
 	static final int SIZE_MEDIUM   = 22;
 	static final int SIZE_LARGE    = 36;
 	
+	/*
+	static final int NOTUPDATE_NOTSWITCH = 1;
+	static final int NOTUPDATE_SWITCH    = 2;
+	static final int UPDATE_SWITCH       = 3;
+	static final int UPDATE_NOTSWITCH    = 4;
+	*/
+	
     public static class ArHandler {
     	
     	public ArHandler(int a,Handler h) {
@@ -373,11 +380,56 @@ public class Dispatcher implements IConnectionListener {
 		
 		setDefValues();		
 	}
-
+	
+	public String cmdStr(int cmd) {
+		switch (cmd) {
+	        case CMD_NO:       return "CMD_NO";
+	        case CMD_BG :      return "Set(bg)";
+	        case CMD_EFIELD:   return "Set(editfield)";
+	        case CMD_FG:       return "Set(fg)";
+	        case CMD_FMAN:     return "Set(filemanager)";
+	        case CMD_FONT:     return "Set(font)";
+	        case CMD_FSCREEN:  return "Set(fullscreen)";
+	        case CMD_ICONLIST: return "Set(iconlist)";
+	        case CMD_ICONS:    return "Set(icons)";
+	        case CMD_LIST:     return "Set(list)";
+	        case CMD_MENU:     return "Set(menu)";
+	        case CMD_PARAM:    return "Set(param)";
+	        case CMD_REPAINT:  return "Set(repaint)";
+	        case CMD_SKIN:     return "Set(skin)";
+	        case CMD_STATUS:   return "Set(status)";
+	        case CMD_TEXT:     return "Set(text)";
+	        case CMD_TITLE:    return "Set(title)";
+	        case CMD_IMAGE:    return "Set(image)";
+	        case CMD_VIBRATE:  return "Set(vibrate)";
+	        case CMD_VOLUME:   return "Set(volume)";
+	        case CMD_COVER:      return "Set(cover)";
+	        case CMD_POPUP:      return "Set(popup)";
+	        case CMD_GETSCRSIZE: return "Get(screen_size)";
+	        case CMD_GETPLTF:    return "Get(model)";
+	        case CMD_GETICON:    return "Get(icon)";
+	        case CMD_GETCVRSIZE: return "Get(cover_size)";
+	        case CMD_GETVER:     return "Get(version)";
+	        case CMD_GETCURSOR:  return "Get(cursor)";
+	        case CMD_GETPASS:    return "Get(password)";
+	        case CMD_GETPING:    return "Get(ping)";
+	        case CMD_GETICSIZE:  return "Get(icon_size)";
+	        case CMD_GETPADDING: return "Get(icon_padding)";
+	        case CMD_CLOSECONN:  return "CMD_CLOSECONN";
+		    //case CMD_EXIT:     return "CMD_EXIT";
+	        case CMD_EDIT_FORM_IP:   return "CMD_EDIT_FORM_IP";
+	        case CMD_EDIT_FORM_BT:   return "CMD_EDIT_FORM_BT";
+	        case CMD_EDIT_FORM_NAME: return "CMD_EDIT_FORM_NAME";
+	        case CMD_EDIT_FORM_PASS: return "CMD_EDIT_FORM_PASS";
+	        case CMD_LIST_UPDATE:    return "CMD_LIST_UPDATE";
+	        case CMD_CLOSE:          return "CMD_CLOSE";
+		}
+		return "UNKNOWN";
+	}
 	//@Override
 	public void notifyMessage(int id, Vector cmdTokens, int stage) {
 
-		log("notifyMessage got:" + id + " " + cmdTokens+"(cur screen is "+anyRemote.getCurScreen()+")");
+		log("notifyMessage got:" + cmdStr(id) + " " + cmdTokens+"(cur screen is "+anyRemote.getScreenStr(anyRemote.getCurScreen())+")");
 
 		switch (id) {
 
@@ -422,12 +474,13 @@ public class Dispatcher implements IConnectionListener {
 			
 			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
 			// CMD_EFIELD: result will be handled in handleEditFieldResult()
+			break; 
 			
 		case CMD_FSCREEN:
 			
 			anyRemote.protocol.setFullscreen((String) cmdTokens.elementAt(1));
-			
 			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
+			break; 
 
 		case CMD_POPUP:
 			
@@ -449,6 +502,7 @@ public class Dispatcher implements IConnectionListener {
 			}
 			
 			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
+			break; 
 			
 		case CMD_MENU:
 
@@ -603,7 +657,6 @@ public class Dispatcher implements IConnectionListener {
 			}
 			
 			sendToActivity(anyRemote.WMAN_FORM,id,stage);		
-
 			break;    
 
 		case CMD_GETSCRSIZE:
@@ -628,16 +681,17 @@ public class Dispatcher implements IConnectionListener {
 			synchronized (cfTitle) {
 			    queueCommand("IconSize("+(cfIconSizeOverride >= 0 ? cfIconSizeOverride : cfIconSize)+",)");
 			}
+			break; 
 			
 		case CMD_GETPADDING:
 			
 			synchronized (cfTitle) {
 			    queueCommand("IconPadding("+cfPadding+",)");
-			}
-			
+			}			
 			break;
 
 		case CMD_GETVER:
+			
 			try {
 				ComponentName comp = new ComponentName(context, this.getClass());
 				PackageInfo pinfo = context.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
@@ -648,6 +702,7 @@ public class Dispatcher implements IConnectionListener {
 			break;
 
 		case CMD_GETPING:
+			
 			sendMessage("Ping");
 			break;
 
@@ -675,12 +730,14 @@ public class Dispatcher implements IConnectionListener {
 			break;
 
 		case CMD_GETCURSOR:
+			
 			/*if (controller.cScreen.wm != null) {
              			controller.cScreen.wm.sendCursorPos();
             }*/
 			break;
 
 		case CMD_GETPLTF:
+			
 			sendMessage("Model("+android.os.Build.MODEL+"/Android-"+android.os.Build.VERSION.RELEASE+")");
 			break;
 
@@ -709,12 +766,15 @@ public class Dispatcher implements IConnectionListener {
 			break;
 
 		default:
+			
 			log("notifyMessage: Command or handler unknown");
 		}
 	}
 	
 	public void sendToActivity(int activity, int id, int stage) {
-
+		
+		log("sendToActivity to "+anyRemote.getScreenStr(activity)+" "+cmdStr(id));
+		
 		ProtocolMessage pm = new ProtocolMessage();
 		pm.id     = id;
 		pm.stage  = stage;
@@ -722,7 +782,8 @@ public class Dispatcher implements IConnectionListener {
 		int num = 0;
 		boolean sent = false;
 		while (!sent) {
-						
+			
+			//log("sendToActivity attempt "+num);	
 			final Iterator<ArHandler> itr = actHandlers.iterator();
 			while (itr.hasNext()) {
 				try {
@@ -730,7 +791,7 @@ public class Dispatcher implements IConnectionListener {
 					if (activity < 0 || 					// send to all
 						handler.actId == activity) {
 						
-				        log("sendToActivity "+activity+" SEND ");
+				        log("sendToActivity "+anyRemote.getScreenStr(activity)+" "+cmdStr(id)+" SENT (attempt "+num+")");
 				    
 			     	    Message msg = handler.hdl.obtainMessage(id, pm);
 				        msg.sendToTarget();
@@ -738,6 +799,7 @@ public class Dispatcher implements IConnectionListener {
 				        sent = true;
 					}
 				} catch (Exception e) {
+					log("sendToActivity exception "+e.getMessage());
 			    }
 			}
 			
@@ -755,7 +817,7 @@ public class Dispatcher implements IConnectionListener {
 					Thread.yield();
 				}
 				if (num > 8) {
-					log("sendToActivity "+activity+" SKIP EVENT");
+					log("sendToActivity "+anyRemote.getScreenStr(activity)+" "+cmdStr(id)+" SKIP EVENT");
 					return;
 				}
 				num++;
@@ -843,7 +905,7 @@ public class Dispatcher implements IConnectionListener {
 
 	public void queueCommand(int keycode, boolean pressed) {
 
-		//log("queueCommand "+keycode +" " + pressed);
+		log("queueCommand "+keycode +" " + pressed);
 
 		String key = "";
 
@@ -1201,6 +1263,10 @@ public class Dispatcher implements IConnectionListener {
 	// 
 	// Set(list,close) does NOT processed here !
 	//
+	// returns 0 - do not update data source, do not switch to list screen
+	//         1 - need update data source + switch to list screen
+	//         2 - need update data, do not switch to list screen
+	// 
 	public boolean listDataProcess(int id, Vector vR, int stage) {	
 		log("listDataProcess "+id+" "+vR); 
 

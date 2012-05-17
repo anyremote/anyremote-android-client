@@ -82,7 +82,6 @@ public class ControlScreen extends arActivity
     static final int NUM_ICONS_BTM = 7;
     
     boolean fullscreen  = false;
-    boolean useJoystick = false;
     Dispatcher.ArHandler hdlLocalCopy;
     
     ImageButton  [] buttons;
@@ -497,7 +496,7 @@ public class ControlScreen extends arActivity
 			  return;
 		}
     	
-    	keyReleased(key);
+    	clickOn(key);
     }
     
 	/*public boolean onTouch(View v, MotionEvent me) {  
@@ -612,19 +611,19 @@ public class ControlScreen extends arActivity
 			case KeyEvent.KEYCODE_VOLUME_UP:   return "VOL+";
 			case KeyEvent.KEYCODE_VOLUME_DOWN: return "VOL-";
 			case KeyEvent.KEYCODE_DPAD_UP:     
-				    return (!useJoystick || 
+				    return (!anyRemote.protocol.cfUseJoystick || 
 				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? 
 				    				 anyRemote.protocol.cfUpEvent : "");   // do not process them if joystick_only param was set
 			case KeyEvent.KEYCODE_DPAD_DOWN:   
-				    return (!useJoystick || 
+				    return (!anyRemote.protocol.cfUseJoystick || 
 				    		anyRemote.protocol.cfSkin == SK_BOTTOMLINE ? 
 				    				anyRemote.protocol.cfDownEvent : "");
 			case KeyEvent.KEYCODE_DPAD_LEFT:   
-				    return (!useJoystick ? "LEFT" : "");   // do not process them if joystick_only param was set 
+				    return (!anyRemote.protocol.cfUseJoystick ? "LEFT" : "");   // do not process them if joystick_only param was set 
 			case KeyEvent.KEYCODE_DPAD_RIGHT:  
-				    return (!useJoystick ? "RIGHT": "");
+				    return (!anyRemote.protocol.cfUseJoystick ? "RIGHT": "");
 			case KeyEvent.KEYCODE_DPAD_CENTER: 
-				    return (!useJoystick ? "FIRE" : "");
+				    return (!anyRemote.protocol.cfUseJoystick ? "FIRE" : "");
 			case KeyEvent.KEYCODE_SEARCH:      return "SEARCH";
 			default: 
 				if (keyCode >= 0 && keyCode < 10) {
@@ -636,8 +635,7 @@ public class ControlScreen extends arActivity
 	
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) { 
-		log("onKeyUp "+keyCode);
-		
+		//log("onKeyUp "+keyCode);
 		String key = key2str(keyCode); 
 		if (key.length() > 0) {
             anyRemote.protocol.queueCommand(key, false);
@@ -648,9 +646,7 @@ public class ControlScreen extends arActivity
 	
 	@Override
 	public boolean onKeyDown (int keyCode, KeyEvent event) { 
-		
-		log("onKeyDown "+keyCode);
-
+		//log("onKeyDown "+keyCode);
 		String key = key2str(keyCode);
 		if (key.length() > 0) {
             anyRemote.protocol.queueCommand(key, true);
@@ -659,20 +655,22 @@ public class ControlScreen extends arActivity
 	    return false;
     }
 
-	public void keyPressed(int keyCode) {
+	/*public void keyPressed(int keyCode) {
 
 	}
 	
 	public void keyPressed(String key) {
 
-	}
+	}*/
 	
 	public void keyReleased(int keyCode) {
+		//log("keyReleased "+keyCode);
 		anyRemote.protocol.queueCommand(keyCode, true);
 		anyRemote.protocol.queueCommand(keyCode, false);
  	}
 	
-	public void keyReleased(String key) {
+	public void clickOn(String key) {
+		//log("clickOn "+key);
 		anyRemote.protocol.queueCommand(key, true);
 		anyRemote.protocol.queueCommand(key, false);
  	}

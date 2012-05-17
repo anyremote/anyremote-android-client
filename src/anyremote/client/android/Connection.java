@@ -283,8 +283,7 @@ public final class Connection implements Runnable {
 	}
 
 	private void notifyMessage(final int id, final Vector tokens, final int stage) {
-		
-		anyRemote._log("Connection", "notifyMessage " + tokens);
+		//anyRemote._log("Connection", "notifyMessage " + tokens);
 		MainLoop.schedule(new TimerTask() {
 			public void run() {
 				connectionListener.notifyMessage(id, tokens, stage);
@@ -293,8 +292,11 @@ public final class Connection implements Runnable {
 	}
 
 	public boolean streamedCmd(int id) {
-		return (id == Dispatcher.CMD_ICONLIST || id == Dispatcher.CMD_LIST
-				|| id == Dispatcher.CMD_TEXT || id == Dispatcher.CMD_IMAGE || id == Dispatcher.CMD_COVER);
+		return (id == Dispatcher.CMD_ICONLIST || 
+				id == Dispatcher.CMD_LIST     || 
+				id == Dispatcher.CMD_TEXT     || 
+				id == Dispatcher.CMD_IMAGE    || 
+				id == Dispatcher.CMD_COVER);
 	}
 
 	private String bytes2String(int nBytes) {
@@ -974,7 +976,7 @@ public final class Connection implements Runnable {
 		if (cmdTokens.size() <= 0) {
 			return;
 		}
-		anyRemote._log("Connection", "execCommand " + id + " " + cmdTokens);
+		anyRemote._log("Connection", "execCommand " + anyRemote.protocol.cmdStr(id) + " " + cmdTokens);
 
 		final Vector tokens = new Vector(cmdTokens);
 
