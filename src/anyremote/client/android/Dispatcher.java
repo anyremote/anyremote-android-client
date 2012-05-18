@@ -612,7 +612,7 @@ public class Dispatcher {
 
 		case CMD_TEXT:	
 			
-			textDataProcess(cmdTokens, stage); 
+			boolean needSwitch = textDataProcess(cmdTokens, stage); 
 			
 			boolean doCloset = ((String) cmdTokens.elementAt(1)).equals("close");
 			
@@ -630,11 +630,14 @@ public class Dispatcher {
 			}
 		
 			// Create activity with (possibly) empty list
-			if (anyRemote.getCurScreen() != anyRemote.TEXT_FORM) {
+			int scr = anyRemote.getCurScreen();
+			if (needSwitch && scr != anyRemote.TEXT_FORM) {
 				context.setCurrentView(anyRemote.TEXT_FORM, "");
 			}
-				
-			sendToActivity(anyRemote.TEXT_FORM,id,stage);		
+			
+			if (needSwitch || scr == anyRemote.TEXT_FORM) {
+			    sendToActivity(anyRemote.TEXT_FORM,id,stage);	
+			}
 			break;       
 
 		case CMD_VIBRATE:
@@ -1468,13 +1471,13 @@ public class Dispatcher {
 	//
 	// Set(list,close) does NOT processed here !			2
 	//
-	public void textDataProcess(Vector vR, int stage) {   // message = add|replace|show|clear,title,long_text
+	public boolean textDataProcess(Vector vR, int stage) {   // message = add|replace|show|clear,title,long_text
 		
 		if (stage == ProtocolMessage.INTERMED ||
 		    stage == ProtocolMessage.LAST) {
 			
 			    textContent.append((String) vR.elementAt(3));
-				return;
+				return true;
 		}
 
 		String oper = (String) vR.elementAt(1);
@@ -1482,7 +1485,8 @@ public class Dispatcher {
 		if (oper.equals("clear")) {
 
 			textContent.delete(0, textContent.length());
-
+			return true;
+			
 		} else if (oper.equals("add") || 
                   oper.equals("replace")) {
 
@@ -1494,28 +1498,33 @@ public class Dispatcher {
 				textContent.delete(0, textContent.length());
 			}
 			textContent.append((String) vR.elementAt(3));
-
+			return true;
+			
 		} else if (oper.equals("fg")) {
 
 			textFrgr = anyRemote.parseColor(
 					(String) vR.elementAt(2),
 					(String) vR.elementAt(3),
 					(String) vR.elementAt(4));
-
+			return false;
+			
 		} else if (oper.equals("bg")) {
 
 			textBkgr = anyRemote.parseColor(
 					(String) vR.elementAt(2),
 					(String) vR.elementAt(3),
 					(String) vR.elementAt(4));
+			return false;
 
 		} else if (oper.equals("font")) {
 
 			textFontParams(vR);
+			return false;
 
 		} else if (oper.equals("wrap")) {
 
 			// not supported
+			return false;
 
 		} else if (oper.equals("close")) {
 
@@ -1524,8 +1533,9 @@ public class Dispatcher {
 			}
 
 		} else if (!oper.equals("show")) {
-			return; // seems command improperly formed
+			return false; // seems command improperly formed
 		}
+		return true;
 	}	
 	
 	private void textFontParams(Vector defs) {
