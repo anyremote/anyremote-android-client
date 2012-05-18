@@ -35,7 +35,7 @@ import java.util.Vector;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
-import anyremote.client.android.MainLoop;
+import android.os.Message;
 import anyremote.client.android.util.ISocket;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.util.UserException;
@@ -72,45 +72,14 @@ public final class Connection implements Runnable {
 	Vector cmdQueue;
 	StringBuilder dataQueue;
 
-	/**
-	 * Interface for classes interested in the state of a {@link Connection}.
-	 */
-	public interface IConnectionListener {
-
-		/**
-		 * Notifies a successful connection.
-		 * 
-		 * @param player
-		 *            the connected player
-		 */
-		public void notifyConnected(Connection conn);
-
-		/**
-		 * Notifies a disconnection.
-		 * 
-		 * @param sock
-		 *            the socket used by the broken connection - if it is worth
-		 *            trying to reconnect, otherwise <code>null</code>
-		 * @param reason
-		 *            the user exception describing the reason for disconnecting
-		 */
-		public void notifyDisconnected(ISocket sock, UserException reason);
-
-		public void notifyMessage(int commandId, Vector commandTokens, int stage);
-
-	}
-
 	private boolean closed = false;
 
-	private final IConnectionListener connectionListener;
+	private final Dispatcher connectionListener;
 
 	private boolean connectionListenerNotifiedAboutError = false;
 
 	private final DataInputStream dis;
 	private final DataOutputStream dos;
-
-	/** Flag indicating if a reconnect has chance to succeed. */
-	private boolean reconnect = true;
 
 	private final ISocket sock;
 
@@ -119,26 +88,19 @@ public final class Connection implements Runnable {
 	 * <p>
 	 * A new thread for receiving data is created automatically. Once this
 	 * thread has set up a connection to the server, it notifies the listener
-	 * using {@link IConnectionListener#notifyConnected(Player)}. If setting up
+	 * using {@link Dispatcher}. If setting up
 	 * the connection fails the listener is notified using
-	 * {@link IConnectionListener#notifyDisconnected(ISocket, UserException)}.
+	 * Handler.
 	 * <p>
-	 * If the connection has been set up, a {@link Player} object is created and
-	 * received messages are passed to that player.
+	 * If the connection has been set up received messages are passed to that {@link Dispatcher}.
 	 * <p>
-	 * Notifications and messages are passed via the {@link MainLoop} thread to
-	 * decouple their handling from the receiver thread used by this connection.
 	 * 
 	 * @param sock
 	 *            socket providing streams for the connection
 	 * @param listener
-	 *            connection event listener
-	 * @param ci
-	 *            initial client info to send to the server (client info updates
-	 *            can be sent using {@link #send(ClientInfo)})
+	 *            {@link Dispatcher} connection event listener
 	 */
-	public Connection(ISocket sock, IConnectionListener listener,
-			String ci) {
+	public Connection(ISocket sock, Dispatcher listener) {
 
 		this.sock = sock;
 		this.connectionListener = listener;
@@ -157,7 +119,7 @@ public final class Connection implements Runnable {
 	/**
 	 * Close the connection. If the connection is already closed, this method
 	 * has no effect. There will be no connection events for a
-	 * {@link IConnectionListener} after a call to this method.
+	 * {@link Dispatcher} after a call to this method.
 	 * 
 	 */
 	public void close() {
@@ -183,12 +145,9 @@ public final class Connection implements Runnable {
 		 */
 
 		final Connection c = this;
-
-		MainLoop.schedule(new TimerTask() {
-			public void run() {
-				connectionListener.notifyConnected(c);
-			}
-		});
+		
+		Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.CONNECTED,c);
+		msg.sendToTarget();
 
 		while (!closed) { // loop receiving messages
 
@@ -200,19 +159,17 @@ public final class Connection implements Runnable {
 			} catch (EOFException e) {
 				anyRemote._log("Connection", "run -> EOFException");
 				downPrivate();
-				notifyDisconnected(new UserException("Connection broken",
-						"Connection closed by other side.", e));
+				notifyDisconnected("Connection broken", "Connection closed by other side.", e);
 				return;
 			} catch (IOException e) {
 				anyRemote._log("Connection", "run -> IOException");
 				downPrivate();
-				notifyDisconnected(new UserException("Connection broken",
-						"IO error while receiving data.", e));
+				notifyDisconnected("Connection broken", "IO error while receiving data.", e);
 				return;
 			} catch (Exception e) {
 				anyRemote._log("Connection", "run -> Exception " + e);
-				notifyDisconnected(new UserException("Connection broken",
-						"Exception", e));
+				downPrivate();
+				notifyDisconnected("Connection broken", "Exception", e);
 				return;
 			}
 		}
@@ -220,10 +177,6 @@ public final class Connection implements Runnable {
 
 	/**
 	 * Sends a message.
-	 * <p>
-	 * If sending fails, the listener set in
-	 * {@link #Connection(ISocket, IConnectionListener, int)} is notified using
-	 * {@link IConnectionListener#notifyDisconnected(ISocket, UserException)}.
 	 * 
 	 * @param m
 	 *            The message to send. Content does not get changed.
@@ -237,23 +190,18 @@ public final class Connection implements Runnable {
 				sendPrivate(m);
 			} catch (IOException e) {
 				downPrivate();
-				notifyDisconnected("Connection broken",
-						"IO Error while sending data.", e);
+				notifyDisconnected("Connection broken", "IO Error while sending data", e);
 			}
 		}
 	}
 
 	private void downPrivate() {
-		anyRemote._log("Connection", "downPrivate");
 		closed = true;
 		sock.close();
-		anyRemote._log("Connection", "downPrivate DONE");
 	}
 
 	/** See {@link #notifyDisconnected(UserException)}. */
 	private void notifyDisconnected(String error, String details, Exception e) {
-		anyRemote._log("Connection", "notifyDisconnected/3 " + error + " : "
-				+ details);
 		notifyDisconnected(new UserException(error, details, e));
 	}
 
@@ -261,34 +209,21 @@ public final class Connection implements Runnable {
 	 * Notifies the connection listener that the connection is
 	 * down/broken/disconnected (but only if the listener has not yet been
 	 * notified).
-	 * <p>
-	 * Notification is done via the global timer thread.
 	 * 
 	 * @param ue
 	 *            the user exception describing the disconnect reason
 	 */
 	private void notifyDisconnected(final UserException ue) {
-		anyRemote._log("Connection", "notifyDisconnected/1 " + ue);
+		
+		anyRemote._log("Connection", "notifyDisconnected " + ue.getDetails());
+		
 		if (!connectionListenerNotifiedAboutError) {
 
 			connectionListenerNotifiedAboutError = true;
 
-			MainLoop.schedule(new TimerTask() {
-				public void run() {
-					connectionListener.notifyDisconnected(reconnect ? sock
-							: null, ue);
-				}
-			});
+			Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED);
+			msg.sendToTarget();
 		}
-	}
-
-	private void notifyMessage(final int id, final Vector tokens, final int stage) {
-		//anyRemote._log("Connection", "notifyMessage " + tokens);
-		MainLoop.schedule(new TimerTask() {
-			public void run() {
-				connectionListener.notifyMessage(id, tokens, stage);
-			}
-		});
 	}
 
 	public boolean streamedCmd(int id) {
@@ -971,31 +906,56 @@ public final class Connection implements Runnable {
 		return Dispatcher.CMD_NO;
 	}
 
+	/*private void notifyMessage(ProtocolMessage pm) {
+		Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.COMMAND,pm);
+		msg.sendToTarget();
+	}*/
+
 	private void execCommand(Vector cmdTokens, final int id, final int stage) {
 
 		if (cmdTokens.size() <= 0) {
 			return;
 		}
 		anyRemote._log("Connection", "execCommand " + anyRemote.protocol.cmdStr(id) + " " + cmdTokens);
-
-		final Vector tokens = new Vector(cmdTokens);
-
+	
+		final ProtocolMessage pm = new ProtocolMessage();
+		pm.id     = id;
+		pm.stage  = stage;
+		pm.tokens = new Vector(cmdTokens);
+		
+		/*
 		MainLoop.schedule(new TimerTask() {
-			public void run() {
-				try {
-					notifyMessage(id, tokens, stage);
-				} catch (Exception e) {
-					anyRemote._log("Connection", "execCommand Exception");
-					notifyDisconnected("Connection Error",
-							"Received malformed data.", e);
-				} catch (OutOfMemoryError e) {
-					anyRemote
-							._log("Connection", "execCommand OutOfMemoryError");
-					notifyDisconnected("Memory Error",
-							"Received data too big.", null);
-				}
-			}
-		});
+                public void run() {
+                        try {
+                                notifyMessage(pm);
+                        } catch (Exception e) {
+                                anyRemote._log("Connection", "execCommand Exception");
+                                notifyDisconnected("Connection Error", "Received malformed data.", e);
+                        } catch (OutOfMemoryError e) {
+                                anyRemote._log("Connection", "execCommand OutOfMemoryError");
+                                notifyDisconnected("Memory Error",  "Received data too big.", null);
+                        }
+                }
+        }, 1000);*/
+        
+		try {
+			
+			Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.COMMAND,pm);
+			msg.sendToTarget();
+		
+		} catch (Exception e) {
+			
+			anyRemote._log("Connection", "execCommand Exception");
+			downPrivate();
+			notifyDisconnected("Connection Error", "Received malformed data.", e);
+			
+		} catch (OutOfMemoryError e) {
+			
+			anyRemote ._log("Connection", "execCommand OutOfMemoryError");
+			downPrivate();
+			notifyDisconnected("Memory Error", "Received data too big.", null);
+		}
+
 		cmdTokens.removeAllElements();
 	}
 }

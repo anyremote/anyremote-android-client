@@ -24,8 +24,8 @@ package anyremote.client.android;
 
 import java.util.TimerTask;
 
+import android.os.Message;
 import anyremote.client.android.Connection;
-import anyremote.client.android.Connection.IConnectionListener;
 import anyremote.client.android.util.BTSocket;
 import anyremote.client.android.util.IPSocket;
 import anyremote.client.android.util.ISocket;
@@ -38,10 +38,10 @@ public class ConnectTask extends TimerTask {
 
 	private int type;
 	private String host;
-	private IConnectionListener connectionListener;
+	private Dispatcher connectionListener;
 
 
-	public ConnectTask(int type, String host, IConnectionListener connectionListener) {
+	public ConnectTask(int type, String host, Dispatcher connectionListener) {
 		this.type               = type;
 		this.host               = host;
 		this.connectionListener = connectionListener;
@@ -56,7 +56,7 @@ public class ConnectTask extends TimerTask {
 			/*
 			 * Create a socket (note that WifiSocket is a wrapper around java.net.Socket
 			 * which implements ISocket - this is because we need a uniform socket
-			 * interface for JavaME and Android clients). The socket parameters are
+			 * interface for JAndroid client). The socket parameters are
 			 * for connecting to localhost from an emulated Android device. The
 			 * socket creation should be done in an extra thread (e.g. using the
 			 * MainLoop) to not block the UI.
@@ -87,7 +87,10 @@ public class ConnectTask extends TimerTask {
 			} catch (UserException e) {
 
 				// tell the view that we have no connection
-				connectionListener.notifyDisconnected(s, e);
+				anyRemote._log("ConnectTask", "run UserException " + e.getDetails());
+				
+				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED);
+			    msg.sendToTarget();
 
 				return;
 			}
@@ -97,26 +100,26 @@ public class ConnectTask extends TimerTask {
 			/*
 			 * Create a socket (note that BluetoothSocket is a wrapper around android.bluetooth.BluetoothSocket
 			 * which implements ISocket - this is because we need a uniform socket
-			 * interface for JavaME and Android clients). The socket parameters are
+			 * interface for Android client). The socket parameters are
 			 * for connecting to localhost from an emulated Android device. The
 			 * socket creation should be done in an extra thread (e.g. using the
 			 * MainLoop) to not block the UI.
 			 */
 
 			try {
-				//anyRemote._log("ConnectTask", "run: BT "+host);
 				s = new BTSocket(host.substring(8)); // strip btspp://
 			} catch (UserException e) {
 
 				// tell the view that we have no connection
-				anyRemote._log("ConnectTask", "run: UserException "+e);
-				connectionListener.notifyDisconnected(s, e);
+				anyRemote._log("ConnectTask", "run UserException " + e.getDetails());
+				
+				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED);
+			    msg.sendToTarget();
 
 				return;
 			}
 		}
 
-		//anyRemote._log("ConnectTask", "run: do setup");
 		if (s == null) return;
 
 		//anyRemote._log("ConnectTask", "run: get connection");
@@ -128,7 +131,7 @@ public class ConnectTask extends TimerTask {
 		 * connection automatically creates it's own thread, so this call
 		 * returns immediately.
 		 */
-		new Connection(s, connectionListener, "");
+		new Connection(s, connectionListener);
 	}
 
 }

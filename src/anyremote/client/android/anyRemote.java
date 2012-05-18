@@ -22,6 +22,7 @@
 package anyremote.client.android;
 
 import java.io.File;
+import java.util.TimerTask;
 import java.util.TreeMap;
 import java.util.Vector;
 import android.content.Intent;
@@ -33,6 +34,8 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,10 +43,10 @@ import android.view.MenuItem;
 import android.view.Window;
 import anyremote.client.android.util.Address;
 import anyremote.client.android.util.ProtocolMessage;
-import anyremote.client.android.util.ViewHandler;
 import anyremote.client.android.R;
 
-public class anyRemote extends Activity {
+public class anyRemote extends Activity 
+                       implements Handler.Callback {
 
 	public static final int  DISCONNECTED = 0;
 	public static final int  CONNECTED    = 1;
@@ -73,12 +76,13 @@ public class anyRemote extends Activity {
 	private static int  currForm;
 	static int         status;
 	static Dispatcher  protocol;
+	
 	Vector<Address>    addressesA;
 	public static boolean  finishFlag = false;
 	
 	private static TreeMap iconMap = new TreeMap(); //String.CASE_INSENSITIVE_ORDER);
 
-	private ViewHandler viewHandler;
+	private Handler viewHandler;
 
 	// Logging stuff
 	public static StringBuilder logData;
@@ -105,7 +109,8 @@ public class anyRemote extends Activity {
 		currForm        = DUMMY_FORM;
 		status          = DISCONNECTED;
 
-		viewHandler     = new ViewHandler(this);
+		viewHandler = new Handler(this);
+		
 		protocol.addHandler(viewHandler);
 
 		MainLoop.enable();
@@ -174,7 +179,7 @@ public class anyRemote extends Activity {
 	//}
 
 	public void setCurrentView(int which, String subCommand) {
-		_log("setCurrentView " + which + " (was " + currForm + ") finish="+finishFlag);
+		_log("setCurrentView " + getScreenStr(which) + " (was " + getScreenStr(currForm) + ") finish="+finishFlag);
 
 		if (finishFlag == true) return; // on destroy
 
@@ -202,7 +207,8 @@ public class anyRemote extends Activity {
 			case WMAN_FORM:
 				_log("setCurrentView stop "+prevForm);
 				protocol.sendToActivity(prevForm, Dispatcher.CMD_CLOSE,ProtocolMessage.FULL);
-				break;
+				
+	            break;
 	
 			case LOG_FORM:
 			case DUMMY_FORM:
@@ -387,10 +393,36 @@ public class anyRemote extends Activity {
 		return true;
 	}
 	
-	
-	public void handleCommand(String command) {
+	@Override
+	public boolean handleMessage(Message msg) {
+
+		switch(msg.what){
 		
-		
+		case anyRemote.CONNECTED:
+			
+			anyRemote._log("handleMessage: CONNECTED");
+			//Toast.makeText(client, R.string.connection_successful, Toast.LENGTH_SHORT).show();
+			
+			protocol.connected((Connection) msg.obj);
+			handleEvent(anyRemote.CONNECTED);
+			break;
+			
+		case anyRemote.DISCONNECTED:
+			
+			anyRemote._log("handleMessage: DISCONNECTED");
+			//Toast.makeText(client, R.string.connection_failed, Toast.LENGTH_SHORT).show();
+			
+			protocol.disconnected();
+			handleEvent(anyRemote.DISCONNECTED);
+			break;	
+			
+		case anyRemote.COMMAND:
+			
+			//anyRemote._log("handleMessage: COMMAND");
+			protocol.handleCommand((ProtocolMessage) msg.obj);
+			break;			
+		}
+		return true;
 	}
 	
 	public void handleEvent(int what) {
@@ -571,7 +603,6 @@ public class anyRemote extends Activity {
 	public static boolean logVisible() {
 		return (currForm == LOG_FORM);
 	}
-
 
 	private static void _log(String log) {
 		_log("anyRemote", log);	

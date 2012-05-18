@@ -25,19 +25,28 @@ import java.util.Vector;
 
 import android.app.Activity;
 import android.app.Dialog;
+import android.os.Handler;
+import android.os.Message;
 import android.content.DialogInterface;
 import android.view.Menu;
 import anyremote.client.android.R;
-import anyremote.client.android.util.ProtocolMessage;
+import anyremote.client.android.util.InfoMessage;
 
 public class arActivity extends Activity 
 		implements DialogInterface.OnDismissListener,
-				   DialogInterface.OnCancelListener {
+				   DialogInterface.OnCancelListener,
+				   Handler.Callback {
 
 	//protected Vector<String> menuItems;
 	protected String prefix = "";	
 	private boolean skipDismissEditDialog = false;
-
+	
+	@Override
+	public boolean handleMessage(Message msg) {
+		handleEvent((InfoMessage) msg.obj);
+		return true;
+	}
+	
 	/*@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -47,7 +56,7 @@ public class arActivity extends Activity
 		anyRemote._log(prefix,msg);
 	}
 	
-	public void handleEvent(ProtocolMessage data) {
+	public void handleEvent(InfoMessage data) {
 		log("handleEvent "+" "+data.stage+" "+ data.id);
 	}
 	

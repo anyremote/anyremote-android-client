@@ -25,11 +25,11 @@ package anyremote.client.android;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TableRow;
 import android.widget.Toast;
 import android.widget.TableLayout;
 import android.widget.TextView;
@@ -39,8 +39,8 @@ import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
 import android.view.KeyEvent;
+import anyremote.client.android.util.InfoMessage;
 import anyremote.client.android.util.ProtocolMessage;
-import anyremote.client.android.util.arHandler;
 
 public class ControlScreen extends arActivity 
                            implements View.OnClickListener,
@@ -97,7 +97,7 @@ public class ControlScreen extends arActivity
 		buttons    = new ImageButton[NUM_ICONS];
 		buttonsLayout = new LinearLayout[NUM_ICONS];
 	  	
-	    hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new arHandler(this));
+	    hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new Handler(this));
 	    anyRemote.protocol.addMessageHandler(hdlLocalCopy);	    
 	}
 	
@@ -146,9 +146,9 @@ public class ControlScreen extends arActivity
 		super.onDestroy();
 	}
 
-    public void handleEvent(ProtocolMessage data) {
+    public void handleEvent(InfoMessage data) {
 	   
-    	log("handleEvent "+ data.id);
+    	log("handleEvent " + Dispatcher.cmdStr(data.id));
 		
 		if (data.stage != ProtocolMessage.FULL &&	// process only full commands
 		    data.stage == ProtocolMessage.FIRST) {

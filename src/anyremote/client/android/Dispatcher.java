@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TimerTask;
 import java.util.Vector;
 import android.content.ComponentName;
 import android.content.Context;
@@ -39,16 +40,14 @@ import android.os.Vibrator;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
-import anyremote.client.android.Connection.IConnectionListener;
 import anyremote.client.android.util.Address;
-import anyremote.client.android.util.ISocket;
+import anyremote.client.android.util.InfoMessage;
 import anyremote.client.android.util.ListItem;
 import anyremote.client.android.util.ProtocolMessage;
-import anyremote.client.android.util.UserException;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 
-public class Dispatcher implements IConnectionListener {
+public class Dispatcher {
 
 	static final int CMD_NO       	= 0;	// commands
 	static final int CMD_BG     	= 1;
@@ -99,6 +98,8 @@ public class Dispatcher implements IConnectionListener {
 	static final int SIZE_SMALL    = 12;
 	static final int SIZE_MEDIUM   = 22;
 	static final int SIZE_LARGE    = 36;
+
+	static final int MAX_ATTEMPTS  = 100;
 	
 	/*
 	static final int NOTUPDATE_NOTSWITCH = 1;
@@ -117,10 +118,21 @@ public class Dispatcher implements IConnectionListener {
         public int actId   = anyRemote.NO_FORM;
         public Handler hdl = null;
     }
+    
+    public static class QueueMessage {
+    	
+    	public int activity;
+       	public int id;
+    	public int stage;
+    	public int attemptsToSend;
+    }
 
 	ArrayList<Handler> handlers;
+	Handler messageHandler;
 	
 	ArrayList<ArHandler> actHandlers = new ArrayList<ArHandler>();
+	
+	ArrayList<QueueMessage> msgQueue = new ArrayList<QueueMessage>();
 	
 	Connection   connection = null;
 	anyRemote    context    = null;
@@ -201,6 +213,8 @@ public class Dispatcher implements IConnectionListener {
 		log("Dispatcher::Dispatcher"); 
 
 		handlers = new ArrayList<Handler>();
+		
+		messageHandler = new Handler(ctx);
 		context = ctx;
 
 		listContent = new ArrayList<ListItem>();
@@ -323,19 +337,24 @@ public class Dispatcher implements IConnectionListener {
 	public void disconnect(boolean full) {
 
 		log("disconnect");
-
-		if (connection != null){
-			connection.close();
-			autoPass = false;
-		}
+		
+		disconnected();
 
 		if (full) {         // real close
 			currentConnection = "";
-			setDefValues();
 		} // else           // pause connection
 		notifyHandlers(anyRemote.DISCONNECTED);
 	}
 
+	public void disconnected() {
+
+		if (connection != null) {
+			connection.close();
+			autoPass = false;
+		}
+		setDefValues();
+	}
+	
 	public void resumeConnection(){
 
 		log("resumeConnection");
@@ -353,9 +372,8 @@ public class Dispatcher implements IConnectionListener {
 		disconnect(false);
 	}
 
-	//@Override
-	public void notifyConnected(Connection conn) { 
-		log("notifyConnected");
+	public void connected(Connection conn) { 
+		log("connected");
 
 		// check BT connection
 		if (connectBT) {
@@ -368,20 +386,10 @@ public class Dispatcher implements IConnectionListener {
 			}
 		}
 
-		connection = conn;		
-		notifyHandlers(anyRemote.CONNECTED, "");
-	}
-
-	//@Override
-	public void notifyDisconnected(ISocket sock, UserException reason) {
-		log("notifyDisconnected " + reason.getDetails());
-		
-		notifyHandlers(anyRemote.DISCONNECTED);
-		
-		setDefValues();		
+		connection = conn;
 	}
 	
-	public String cmdStr(int cmd) {
+	public static String cmdStr(int cmd) {
 		switch (cmd) {
 	        case CMD_NO:       return "CMD_NO";
 	        case CMD_BG :      return "Set(bg)";
@@ -426,10 +434,14 @@ public class Dispatcher implements IConnectionListener {
 		}
 		return "UNKNOWN";
 	}
-	//@Override
-	public void notifyMessage(int id, Vector cmdTokens, int stage) {
+	
+	public void handleCommand(ProtocolMessage msg) {
 
-		log("notifyMessage got:" + cmdStr(id) + " " + cmdTokens+"(cur screen is "+anyRemote.getScreenStr(anyRemote.getCurScreen())+")");
+		int id           = msg.id; 
+		Vector cmdTokens = msg.tokens; 
+		int stage        = msg.stage;
+		
+		log("handleCommand got:" + cmdStr(id) + " " + cmdTokens+"(cur screen is "+anyRemote.getScreenStr(anyRemote.getCurScreen())+")");
 
 		switch (id) {
 
@@ -767,61 +779,92 @@ public class Dispatcher implements IConnectionListener {
 
 		default:
 			
-			log("notifyMessage: Command or handler unknown");
+			log("handleCommand: Command or handler unknown");
 		}
 	}
 	
-	public void sendToActivity(int activity, int id, int stage) {
+	public synchronized void sendToActivity(int activity, int id, int stage) {
 		
 		log("sendToActivity to "+anyRemote.getScreenStr(activity)+" "+cmdStr(id));
 		
-		ProtocolMessage pm = new ProtocolMessage();
-		pm.id     = id;
-		pm.stage  = stage;
-
-		int num = 0;
-		boolean sent = false;
-		while (!sent) {
+		QueueMessage pm = new QueueMessage();
+		pm.activity       = activity;
+		pm.id             = id;
+		pm.stage          = stage;
+		pm.attemptsToSend = 0;
+		
+		msgQueue.add(0,pm);
+		
+		processMessageQueue();
+	}
+		
+	private synchronized void processMessageQueue() {
+		
+		final Iterator<QueueMessage> msgItr = msgQueue.iterator();
+		
+		while (msgItr.hasNext()) {
 			
-			//log("sendToActivity attempt "+num);	
+			final QueueMessage pm = msgItr.next();
+			
+			boolean sent = false;
+
 			final Iterator<ArHandler> itr = actHandlers.iterator();
+			log("processMessageQueue MSG " + cmdStr(pm.id) + " handlers #" + actHandlers.size());
+
 			while (itr.hasNext()) {
 				try {
 					final ArHandler handler = itr.next();
-					if (activity < 0 || 					// send to all
-						handler.actId == activity) {
+					if (pm.activity < 0 || // send to all
+					    handler.actId == pm.activity) {
+
+						log("processMessageQueue MSG " + cmdStr(pm.id) + 
+						    " to " + anyRemote.getScreenStr(pm.activity) + 
+						    " SENT (attempt " + pm.attemptsToSend + ")");
+												
+						InfoMessage im = new InfoMessage();
+						im.id    = pm.id;
+						im.stage = pm.stage;
 						
-				        log("sendToActivity "+anyRemote.getScreenStr(activity)+" "+cmdStr(id)+" SENT (attempt "+num+")");
-				    
-			     	    Message msg = handler.hdl.obtainMessage(id, pm);
-				        msg.sendToTarget();
-				        
-				        sent = true;
+						Message msg = handler.hdl.obtainMessage(im.id, im);
+						msg.sendToTarget();
+
+						sent = true;
 					}
 				} catch (Exception e) {
-					log("sendToActivity exception "+e.getMessage());
-			    }
+					log("processMessageQueue exception " + e.getMessage());
+				}
 			}
+
+			if (sent) {
+				
+				// just drop it from queue
+				msgItr.remove();
+				break;
+				
+			} else {
+				
+				log("processMessageQueue MSG " + cmdStr(pm.id) + " to " + anyRemote.getScreenStr(pm.activity) + " WAIT");
+				pm.attemptsToSend++;
+				
+				if (pm.attemptsToSend > MAX_ATTEMPTS) {
+					// just drop it from queue
+					log("processMessageQueue MSG " + cmdStr(pm.id) + " to " + anyRemote.getScreenStr(pm.activity) + " DROP");					
+					msgItr.remove();
+					break;
+				}
+			}
+		}
+		
+		if (msgQueue.size() > 0) {
+			// Schedule new attempts to send
 			
-			if (!sent) {
-				
-				if (activity == anyRemote.CONTROL_FORM) { 	// does it needed ?
-					if (id == CMD_CLOSE) {  // skip
-						return;
-					}
-				}
-				
-				try {
-					Thread.sleep(1000);
-				} catch(Exception e) {
-					Thread.yield();
-				}
-				if (num > 8) {
-					log("sendToActivity "+anyRemote.getScreenStr(activity)+" "+cmdStr(id)+" SKIP EVENT");
-					return;
-				}
-				num++;
-			}
+			log("processMessageQueue schedule next iteration (have " + msgQueue.size() + " events)");
+			
+			MainLoop.schedule(new TimerTask() {
+                public void run() {
+                     processMessageQueue();
+                }
+            });			
 		}
 	}
 
@@ -943,13 +986,6 @@ public class Dispatcher implements IConnectionListener {
 		sendMessage("Msg:" + message);
 	}
 
-	private void notifyHandlers(int what, Object obj){
-		for(Handler h : handlers){
-			Message msg = h.obtainMessage(what, obj);
-			msg.sendToTarget();
-		}
-	}
-
 	private void notifyHandlers(int what){
 		for(Handler h : handlers){
 			Message msg = h.obtainMessage(what);
@@ -1004,7 +1040,9 @@ public class Dispatcher implements IConnectionListener {
 	}
 	
 	public synchronized void addMessageHandler(ArHandler h) {
+		log("addMessageHandler");
 		if (!actHandlers.contains(h)) {
+			log("addMessageHandler DONE");
 			actHandlers.add(h);
 		}
 	}

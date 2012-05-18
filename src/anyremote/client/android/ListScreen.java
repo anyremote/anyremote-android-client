@@ -24,6 +24,7 @@ package anyremote.client.android;
 import java.util.ArrayList;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -36,8 +37,8 @@ import android.view.MenuItem;
 import android.view.View;
 import anyremote.client.android.util.ListScreenAdapter;
 import anyremote.client.android.util.ListItem;
+import anyremote.client.android.util.InfoMessage;
 import anyremote.client.android.util.ProtocolMessage;
-import anyremote.client.android.util.arHandler;
 import anyremote.client.android.R;
 
 public class ListScreen extends arActivity 
@@ -63,7 +64,7 @@ public class ListScreen extends arActivity
 		listItems  = new ArrayList<ListItem>();
 		dataSource = new ListScreenAdapter(this, R.layout.list_form_item, listItems);
 		
-		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.LIST_FORM, new arHandler(this));
+		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.LIST_FORM, new Handler(this));
 		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
 
 		setContentView(R.layout.list_form);
@@ -96,6 +97,11 @@ public class ListScreen extends arActivity
         	log("onResume no connection");	
         	doFinish("");
         }
+        
+		log("onResume UPDATE DATA SOURCE");
+		dataSource.update(anyRemote.protocol.listContent);
+		log("onResume notifyDataSetChanged");
+		dataSource.notifyDataSetChanged();
         
 		redraw();
 		popup();
@@ -197,9 +203,9 @@ public class ListScreen extends arActivity
 				"(" + String.valueOf(pos+1) + "," + value + ")");
 	}
 
-	public void handleEvent(ProtocolMessage data) {
+	public void handleEvent(InfoMessage data) {
 
-		log("handleEvent "+" "+data.stage+" "+ data.id);
+		log("handleEvent " + Dispatcher.cmdStr(data.id) + " " + data.stage);
 
 		if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
 			

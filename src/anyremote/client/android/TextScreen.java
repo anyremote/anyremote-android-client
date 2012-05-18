@@ -24,14 +24,15 @@ package anyremote.client.android;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.method.ScrollingMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import anyremote.client.android.util.InfoMessage;
 import anyremote.client.android.util.ProtocolMessage;
-import anyremote.client.android.util.arHandler;
 import anyremote.client.android.R;
 
 public class TextScreen extends arActivity  {
@@ -60,7 +61,7 @@ public class TextScreen extends arActivity  {
 			
 		} else {
 			
-			hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.TEXT_FORM, new arHandler(this));
+			hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.TEXT_FORM, new Handler(this));
 			anyRemote.protocol.addMessageHandler(hdlLocalCopy);
 
 			prefix = "TextScreen"; // log stuff
@@ -205,9 +206,9 @@ public class TextScreen extends arActivity  {
 	// Set(text,close[,clear])		2 or 3
 	// Set(text,wrap,on|off)		3
 	// Set(text,show)			2
-	public void handleEvent(ProtocolMessage data) {
+	public void handleEvent(InfoMessage data) {
 		
-		log("handleEvent");
+		log("handleEvent " + Dispatcher.cmdStr(data.id) + " " + data.stage);
 		
 		if (isLog) return; 
 

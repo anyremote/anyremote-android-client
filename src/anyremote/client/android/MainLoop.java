@@ -53,7 +53,7 @@ public class MainLoop {
 	}
 
 	/** See {@link Timer#schedule(TimerTask, long)}. */
-/*	private static void schedule(TimerTask task, long delay) {
+	/*public static void schedule(TimerTask task, long delay) {
 		if (timer == null) return;
 		timer.schedule(task, delay);
 	}*/
