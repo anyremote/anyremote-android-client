@@ -101,12 +101,9 @@ public class Dispatcher {
 
 	static final int MAX_ATTEMPTS  = 100;
 	
-	/*
 	static final int NOTUPDATE_NOTSWITCH = 1;
 	static final int NOTUPDATE_SWITCH    = 2;
 	static final int UPDATE_SWITCH       = 3;
-	static final int UPDATE_NOTSWITCH    = 4;
-	*/
 	
     public static class ArHandler {
     	
@@ -467,11 +464,15 @@ public class Dispatcher {
 				controlDataProcess(cmdTokens);
 	
 				// Create activity with (possibly) empty list
-				if (anyRemote.getCurScreen() != anyRemote.CONTROL_FORM) {
+				boolean isActive = (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM);
+				if (!(id == CMD_BG || id == CMD_FG ||  id == CMD_FONT) &&
+					!isActive) {
 					context.setCurrentView(anyRemote.CONTROL_FORM, "");
 				} 
 				
-			    sendToActivity(anyRemote.CONTROL_FORM,id,stage);
+				if (isActive || !(id == CMD_BG || id == CMD_FG ||  id == CMD_FONT)) {
+			        sendToActivity(anyRemote.CONTROL_FORM,id,stage);
+			    }
 			}
 		    break;
 
@@ -535,7 +536,8 @@ public class Dispatcher {
 				listCustomTextColor = false;
 			}
 			
-			boolean needUpdateDataSource = listDataProcess(id, cmdTokens, stage); 
+			int switchTo = listDataProcess(id, cmdTokens, stage); 
+			log("handleCommand listDataProcess:" + switchTo);
 			
 			boolean doClose = ((String) cmdTokens.elementAt(1)).equals("close");
 			
@@ -551,15 +553,20 @@ public class Dispatcher {
 				context.setCurrentView(anyRemote.CONTROL_FORM, "");
 				return;
 			}
-		
+			
+			boolean isActive = (anyRemote.getCurScreen() == anyRemote.LIST_FORM);
+			
 			// Create activity with (possibly) empty list
-			if (anyRemote.getCurScreen() != anyRemote.LIST_FORM) {
+			if ((switchTo == NOTUPDATE_SWITCH || switchTo == UPDATE_SWITCH) &&
+			    !isActive) {
 				context.setCurrentView(anyRemote.LIST_FORM, "");
 			}
 			
-			int lid = (needUpdateDataSource ? CMD_LIST_UPDATE : id);
+			int lid = (switchTo == UPDATE_SWITCH ? CMD_LIST_UPDATE : id);
 			
-			sendToActivity(anyRemote.LIST_FORM,lid,stage);		
+			if (isActive || (switchTo == NOTUPDATE_SWITCH || switchTo == UPDATE_SWITCH)) {
+			    sendToActivity(anyRemote.LIST_FORM,lid,stage);
+			}
 			break;  
 
 		case CMD_PARAM:
@@ -1308,14 +1315,14 @@ public class Dispatcher {
 	//         1 - need update data source + switch to list screen
 	//         2 - need update data, do not switch to list screen
 	// 
-	public boolean listDataProcess(int id, Vector vR, int stage) {	
+	public int listDataProcess(int id, Vector vR, int stage) {	
 		log("listDataProcess "+id+" "+vR); 
 
 		if (stage == ProtocolMessage.INTERMED ||
 	        stage == ProtocolMessage.LAST) {
 			// get next portion of Set(list,add/replace ...)
 			listAdd(id, vR, 0, false);
-			return true;
+			return UPDATE_SWITCH;
 		}
 		
 		String oper  = (String) vR.elementAt(1); 
@@ -1324,6 +1331,7 @@ public class Dispatcher {
 		if (oper.equals("clear")) {
 
 			listClean();
+			return UPDATE_SWITCH;
 
 		} else if (oper.equals("close")) {
             
@@ -1331,6 +1339,7 @@ public class Dispatcher {
 			if (vR.size() > 2 && ((String) vR.elementAt(2)).equals("clear")) {
 				listClean();
 			}
+			return NOTUPDATE_NOTSWITCH;
 			
 		} else if (oper.equals("fg")) {
 
@@ -1340,6 +1349,7 @@ public class Dispatcher {
 					(String) vR.elementAt(4));
 			listText = color;
 			listCustomTextColor = true;
+			return NOTUPDATE_NOTSWITCH;
 			
 		} else if (oper.equals("bg")) {
 
@@ -1349,10 +1359,12 @@ public class Dispatcher {
 					(String) vR.elementAt(4));
 			listBkgr = color;
 			listCustomBackColor = true;
+			return NOTUPDATE_NOTSWITCH;
 	
 		} else if (oper.equals("font")) {
 
 			listSetFont(vR);
+			return NOTUPDATE_NOTSWITCH;
 
 		} else if (oper.equals("select")) {
 
@@ -1364,6 +1376,7 @@ public class Dispatcher {
 			} catch(Exception z) { 
 				listSelectPos = -1;	
 			}
+			return UPDATE_SWITCH;
 
 		} else if (oper.equals("add") || oper.equals("replace")) {
 
@@ -1376,14 +1389,16 @@ public class Dispatcher {
 				listTitle = title;
 			}
 			listAdd(id, vR, 3, (stage == ProtocolMessage.FULL));
+			return UPDATE_SWITCH;
 						
 		} else if (oper.equals("show")) {
 			// nothing to do
 			needUpdataDataSource = false;
+			return  NOTUPDATE_SWITCH;
 		} else {
 	    	log("processList: ERROR improper command >"+oper+"<");
 		}
-		return needUpdataDataSource;
+		return NOTUPDATE_NOTSWITCH;
 	}
 
 	public void listAdd(int id, Vector vR, int start, boolean fullCmd) {

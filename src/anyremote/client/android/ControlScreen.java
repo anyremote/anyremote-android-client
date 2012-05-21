@@ -591,7 +591,9 @@ public class ControlScreen extends arActivity
     }*/
 	
 	private String key2str(int keyCode) { 
-
+		
+		log("key2str "+keyCode);
+		
 		switch (keyCode) {
 		    case KeyEvent.KEYCODE_1:     return "1";
 			case KeyEvent.KEYCODE_2:     return "2";
@@ -646,7 +648,7 @@ public class ControlScreen extends arActivity
 	
 	@Override
 	public boolean onKeyDown (int keyCode, KeyEvent event) { 
-		//log("onKeyDown "+keyCode);
+		log("onKeyDown "+keyCode);
 		String key = key2str(keyCode);
 		if (key.length() > 0) {
             anyRemote.protocol.queueCommand(key, true);
@@ -655,16 +657,17 @@ public class ControlScreen extends arActivity
 	    return false;
     }
 
-	/*public void keyPressed(int keyCode) {
+	public void keyPressed(int keyCode) {
 
 	}
 	
+	/*
 	public void keyPressed(String key) {
 
 	}*/
 	
 	public void keyReleased(int keyCode) {
-		//log("keyReleased "+keyCode);
+		log("keyReleased "+keyCode);
 		anyRemote.protocol.queueCommand(keyCode, true);
 		anyRemote.protocol.queueCommand(keyCode, false);
  	}
@@ -710,4 +713,5 @@ public class ControlScreen extends arActivity
         setResult(RESULT_OK, intent);
         finish();  	
     }
+
 }

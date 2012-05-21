@@ -131,13 +131,6 @@ public class WinManager extends arActivity  {
 		anyRemote.protocol.queueCommand(command);
 	}
 
-	// Set(text,add,title,_text_)		3+text
-	// Set(text,replace,title,_text_)	3+text
-	// Set(text,fg|bg,r,g,b)		6
-	// Set(text,font,small|medium|large)	3
-	// Set(text,close[,clear])		2 or 3
-	// Set(text,wrap,on|off)		3
-	// Set(text,show)			2
 	public void handleEvent(InfoMessage data) {
 		
 		log("handleEvent " + Dispatcher.cmdStr(data.id) + " " + data.stage);

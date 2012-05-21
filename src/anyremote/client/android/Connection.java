@@ -702,10 +702,9 @@ public final class Connection implements Runnable {
 
 					File file = new File(arDir, iName + ".png");
 
-					anyRemote
-							._log("Connection",
+					anyRemote._log("Connection",
 									"getBinaryImage going to save it to /sdcard/Android/data/anyremote.client.android/files/"
-											+ iName + ".png");
+								    + iName + ".png");
 
 					try {
 
