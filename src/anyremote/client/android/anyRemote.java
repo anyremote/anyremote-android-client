@@ -392,8 +392,7 @@ public class anyRemote extends Activity
 		//cScreen.commandAction(item.getTitle().toString());
 		return true;
 	}
-	
-	@Override
+
 	public boolean handleMessage(Message msg) {
 
 		switch(msg.what){

@@ -41,7 +41,6 @@ public class arActivity extends Activity
 	protected String prefix = "";	
 	private boolean skipDismissEditDialog = false;
 	
-	@Override
 	public boolean handleMessage(Message msg) {
 		handleEvent((InfoMessage) msg.obj);
 		return true;
