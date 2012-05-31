@@ -72,8 +72,8 @@ public class anyRemote extends Activity
 	static final String  ACTION         = "ACT";
 	static final String  SWITCHTO       = "SWT";
 
-	int         prevForm;
-	private static int  currForm;
+	int         prevForm = NO_FORM;
+	private static int  currForm = NO_FORM;
 	static int         status;
 	static Dispatcher  protocol;
 	

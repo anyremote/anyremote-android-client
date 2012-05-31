@@ -856,7 +856,8 @@ public class Dispatcher {
 				log("processMessageQueue MSG " + cmdStr(pm.id) + " to " + anyRemote.getScreenStr(pm.activity) + " WAIT");
 				pm.attemptsToSend++;
 				
-				if (pm.attemptsToSend > MAX_ATTEMPTS) {
+				if ((pm.id == CMD_CLOSE && (pm.activity == anyRemote.NO_FORM || pm.activity == -1)) ||
+				    pm.attemptsToSend > MAX_ATTEMPTS) {
 					// just drop it from queue
 					log("processMessageQueue MSG " + cmdStr(pm.id) + " to " + anyRemote.getScreenStr(pm.activity) + " DROP");					
 					msgItr.remove();
