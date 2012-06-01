@@ -46,4 +46,6 @@
     <string name="b11">"0"</string>
     <string name="b12">"#"</string>
     
+    <string name="cover_description">"Cover Image"</string>
+    
 </resources>

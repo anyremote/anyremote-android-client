@@ -15,41 +15,61 @@
         android:text="" >
     </TextView>
 
-    <TextView
-        android:id="@+id/cf_btitle"
-        style="?android:attr/textAppearanceMedium"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/cf_bdummy_up"
-        android:editable="false"
-        android:ellipsize="marquee"
-        android:gravity="center_horizontal"
-        android:singleLine="true" >
-    </TextView>
-
+     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/cf_btitle_wrapper"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center_vertical|center_horizontal"
+	    android:orientation="vertical" 
+	    android:layout_below="@+id/cf_bdummy_up">
+	    
+	    <TextView
+	        android:id="@+id/cf_btitle"
+	        style="?android:attr/textAppearanceMedium"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:editable="false"
+	        android:ellipsize="marquee"
+	        android:marqueeRepeatLimit="marquee_forever"
+	        android:scrollHorizontally="true"
+	        android:lines="1">
+	    </TextView>
+    </LinearLayout>
+    
     <ImageButton
         android:id="@+id/cover"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/cf_bstatus"
-        android:layout_below="@+id/cf_btitle"
+        android:layout_above="@+id/cf_bstatus_wrapper"
+        android:layout_below="@+id/cf_btitle_wrapper"
         android:layout_centerInParent="true"
         android:adjustViewBounds="true"
         android:gravity="center_horizontal"
+        android:contentDescription="@string/cover_description"
         android:scaleType="centerInside" >
     </ImageButton>
 
-    <TextView
-        android:id="@+id/cf_bstatus"
-        style="?android:attr/textAppearanceMedium"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/cf_bdummy_dn"
-        android:layout_gravity="center_horizontal"
-        android:ellipsize="marquee"
-        android:gravity="center_horizontal" >
-    </TextView>
-
+     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/cf_bstatus_wrapper"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center_vertical|center_horizontal"
+	    android:orientation="vertical" 
+	    android:layout_above="@+id/cf_bdummy_dn">
+	    
+	    <TextView
+	        android:id="@+id/cf_bstatus"
+	        style="?android:attr/textAppearanceMedium"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:editable="false"
+	        android:ellipsize="marquee"
+	        android:marqueeRepeatLimit="marquee_forever"
+	        android:scrollHorizontally="true"
+	        android:lines="1">
+	    </TextView>
+    </LinearLayout>
+    
     <TextView
         android:id="@+id/cf_bdummy_dn"
         android:layout_width="fill_parent"
@@ -82,7 +102,8 @@
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_selector"
                 android:nextFocusRight="@+id/bb2"
-                android:scaleType="centerInside" >
+                android:scaleType="centerInside"
+                android:contentDescription="@string/b1" >
             </ImageButton>
         </LinearLayout>
 
@@ -99,7 +120,8 @@
                 android:background="@drawable/btn_selector"
                 android:nextFocusLeft="@+id/bb1"
                 android:nextFocusRight="@+id/bb3"
-                android:scaleType="centerInside" >
+                android:scaleType="centerInside" 
+                android:contentDescription="@string/b2" >
             </ImageButton>
         </LinearLayout>
 
@@ -116,7 +138,8 @@
                 android:background="@drawable/btn_selector"
                 android:nextFocusLeft="@+id/bb2"
                 android:nextFocusRight="@+id/bb4"
-                android:scaleType="centerInside" >
+                android:scaleType="centerInside" 
+                android:contentDescription="@string/b3" >
             </ImageButton>
         </LinearLayout>
 
@@ -133,7 +156,8 @@
                 android:background="@drawable/btn_selector"
                 android:nextFocusLeft="@+id/bb3"
                 android:nextFocusRight="@+id/bb5"
-                android:scaleType="centerInside" >
+                android:scaleType="centerInside" 
+                android:contentDescription="@string/b4" >
             </ImageButton>
         </LinearLayout>
 
@@ -150,7 +174,8 @@
                 android:background="@drawable/btn_selector"
                 android:nextFocusLeft="@+id/bb4"
                 android:nextFocusRight="@+id/bb6"
-                android:scaleType="centerInside" >
+                android:scaleType="centerInside"
+                android:contentDescription="@string/b5" >
             </ImageButton>
         </LinearLayout>
 
@@ -167,7 +192,8 @@
                 android:background="@drawable/btn_selector"
                 android:nextFocusLeft="@+id/bb5"
                 android:nextFocusRight="@+id/bb7"
-                android:scaleType="centerInside" >
+                android:scaleType="centerInside"
+                android:contentDescription="@string/b6" >
             </ImageButton>
         </LinearLayout>
 
@@ -183,7 +209,8 @@
                 android:adjustViewBounds="true"
                 android:background="@drawable/btn_selector"
                 android:nextFocusLeft="@+id/bb6"
-                android:scaleType="centerInside" >
+                android:scaleType="centerInside"
+                android:contentDescription="@string/b7" >
             </ImageButton>
         </LinearLayout>
     </LinearLayout>

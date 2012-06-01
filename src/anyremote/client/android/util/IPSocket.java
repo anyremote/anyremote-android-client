@@ -46,7 +46,7 @@ public class IPSocket implements ISocket {
 					"Not allowed to connect.");
 		} catch (IOException e) {
 			throw new UserException("Connection Error",
-					"IO error while setting up the connection");
+					"IO error while setting up the connection "+e.getMessage());
 		}
 
 		try {

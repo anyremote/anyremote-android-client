@@ -34,6 +34,7 @@ import android.widget.Toast;
 import android.widget.TableLayout;
 import android.widget.TextView;
 //import android.text.method.ScrollingMovementMethod;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Display;
 import android.view.MenuItem;
 import android.view.Surface;
@@ -176,8 +177,8 @@ public class ControlScreen extends arActivity
         } 
 	    TextView title = (TextView) findViewById(id);
 	    
-	    //title.setMovementMethod(new ScrollingMovementMethod());
 	    title.setText(anyRemote.protocol.cfTitle);
+	    title.setSelected(true);    
     }
     
     private void setStatusField() {
@@ -188,9 +189,9 @@ public class ControlScreen extends arActivity
         	id = R.id.cf_bstatus;
         } 
         TextView status = (TextView) findViewById(id);
-        //status.setMovementMethod(new ScrollingMovementMethod());
         
     	status.setText(anyRemote.protocol.cfStatus);
+    	status.setSelected(true);  
     }
     	
 	private void setSkinSimple() {
