@@ -49,6 +49,18 @@ public class arActivity extends Activity
 	/*@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+	}
+	
+	@Override
+	protected void onPause() {
+		anyRemote.runningCount--;
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		anyRemote.runningCount++;
+		super.onResume();
 	}*/
 
 	public void log(String msg) {

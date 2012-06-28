@@ -76,6 +76,7 @@ public class anyRemote extends Activity
 	private static int  currForm = NO_FORM;
 	static int         status;
 	static Dispatcher  protocol;
+	//public static int runningCount = 0;
 	
 	Vector<Address>    addressesA;
 	public static boolean  finishFlag = false;
@@ -135,6 +136,7 @@ public class anyRemote extends Activity
 		_log("onPause "+currForm);		
 		//protocol.pauseConnection();
 		super.onPause();
+		//runningCount--;
 	}
 
 	@Override
@@ -143,6 +145,7 @@ public class anyRemote extends Activity
 		_log("onResume "+currForm);	
 		super.onResume();
 		//protocol.resumeConnection();
+		//runningCount++;
 	}
 	
 	@Override

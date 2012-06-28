@@ -859,8 +859,9 @@ public final class Connection implements Runnable {
 			return Dispatcher.CMD_PARAM;
 		} else if (header.equals("Set(repaint")) {
 			return Dispatcher.CMD_REPAINT;
-		} else if (header.equals("Set(skin")) {
-			return Dispatcher.CMD_SKIN;
+		} else if (header.equals("Set(skin") ||
+		           header.equals("Set(layout")) {
+			return Dispatcher.CMD_LAYOUT;
 		} else if (header.equals("Set(status")) {
 			return Dispatcher.CMD_STATUS;
 		} else if (header.equals("Set(text")) {
@@ -956,5 +957,6 @@ public final class Connection implements Runnable {
 		}
 
 		cmdTokens.removeAllElements();
-	}
+		//anyRemote._log("Connection", "Active count " + anyRemote.runningCount);
+	}	
 }

@@ -62,7 +62,7 @@ public class Dispatcher {
 	static final int CMD_MENU     	= 10;
 	static final int CMD_PARAM      = 11;
 	static final int CMD_REPAINT    = 12;
-	static final int CMD_SKIN     	= 13;
+	static final int CMD_LAYOUT  	= 13;
 	static final int CMD_STATUS     = 14;
 	static final int CMD_TEXT     	= 15;
 	static final int CMD_TITLE      = 16;
@@ -104,6 +104,7 @@ public class Dispatcher {
 	static final int NOTUPDATE_NOTSWITCH = 1;
 	static final int NOTUPDATE_SWITCH    = 2;
 	static final int UPDATE_SWITCH       = 3;
+	static final int UPDATE_NOTSWITCH    = 4;
 	
     public static class ArHandler {
     	
@@ -401,7 +402,7 @@ public class Dispatcher {
 	        case CMD_MENU:     return "Set(menu)";
 	        case CMD_PARAM:    return "Set(param)";
 	        case CMD_REPAINT:  return "Set(repaint)";
-	        case CMD_SKIN:     return "Set(skin)";
+	        case CMD_LAYOUT:   return "Set(layout)";
 	        case CMD_STATUS:   return "Set(status)";
 	        case CMD_TEXT:     return "Set(text)";
 	        case CMD_TITLE:    return "Set(title)";
@@ -454,7 +455,7 @@ public class Dispatcher {
 		case CMD_FG:
 		case CMD_FONT:
 		case CMD_ICONS:
-		case CMD_SKIN:
+		case CMD_LAYOUT:
 		case CMD_STATUS:
 		case CMD_TITLE:
 		case CMD_VOLUME:
@@ -530,14 +531,14 @@ public class Dispatcher {
 		case CMD_LIST:
             
 			// setup List Screen activity persistent data			
-			if (anyRemote.getCurScreen() != anyRemote.LIST_FORM) {
+			//if (anyRemote.getCurScreen() != anyRemote.LIST_FORM) {
 				// by default do not change system colors
-				listCustomBackColor = false;
-				listCustomTextColor = false;
-			}
+			//	listCustomBackColor = false;
+			//	listCustomTextColor = false;
+			//}
 			
 			int switchTo = listDataProcess(id, cmdTokens, stage); 
-			log("handleCommand listDataProcess:" + switchTo);
+			//log("handleCommand listDataProcess:" + switchTo);
 			
 			boolean doClose = ((String) cmdTokens.elementAt(1)).equals("close");
 			
@@ -562,7 +563,7 @@ public class Dispatcher {
 				context.setCurrentView(anyRemote.LIST_FORM, "");
 			}
 			
-			int lid = (switchTo == UPDATE_SWITCH ? CMD_LIST_UPDATE : id);
+			int lid = ((switchTo == UPDATE_SWITCH || switchTo == UPDATE_NOTSWITCH) ? CMD_LIST_UPDATE : id);
 			
 			if (isActive || (switchTo == NOTUPDATE_SWITCH || switchTo == UPDATE_SWITCH)) {
 			    sendToActivity(anyRemote.LIST_FORM,lid,stage);
@@ -1076,7 +1077,7 @@ public class Dispatcher {
    
 		switch (id) {
 		
-		    case CMD_SKIN:
+		    case CMD_LAYOUT:
 		    	
 		    	controlSetSkin(vR); 
 			    break;
@@ -1201,9 +1202,11 @@ public class Dispatcher {
             i++;
         }
         
-	    if (name.equals("default")) {
+	    if (name.equals("default") ||
+	        name.equals("3x4")) {
 	    	cfSkin = ControlScreen.SK_DEFAULT;
-        } else if (name.equals("bottomline")) {
+        } else if (name.equals("7x1") ||
+        		   name.equals("bottomline")) {
         	cfSkin = ControlScreen.SK_BOTTOMLINE;
         }
     }
@@ -1332,7 +1335,7 @@ public class Dispatcher {
 		if (oper.equals("clear")) {
 
 			listClean();
-			return UPDATE_SWITCH;
+			return UPDATE_NOTSWITCH;
 
 		} else if (oper.equals("close")) {
             
@@ -1350,7 +1353,7 @@ public class Dispatcher {
 					(String) vR.elementAt(4));
 			listText = color;
 			listCustomTextColor = true;
-			return NOTUPDATE_NOTSWITCH;
+			return UPDATE_NOTSWITCH;
 			
 		} else if (oper.equals("bg")) {
 
@@ -1360,12 +1363,12 @@ public class Dispatcher {
 					(String) vR.elementAt(4));
 			listBkgr = color;
 			listCustomBackColor = true;
-			return NOTUPDATE_NOTSWITCH;
+			return UPDATE_NOTSWITCH;
 	
 		} else if (oper.equals("font")) {
 
 			listSetFont(vR);
-			return NOTUPDATE_NOTSWITCH;
+			return UPDATE_NOTSWITCH;
 
 		} else if (oper.equals("select")) {
 
@@ -1395,7 +1398,7 @@ public class Dispatcher {
 		} else if (oper.equals("show")) {
 			// nothing to do
 			needUpdataDataSource = false;
-			return  NOTUPDATE_SWITCH;
+			return NOTUPDATE_SWITCH;
 		} else {
 	    	log("processList: ERROR improper command >"+oper+"<");
 		}
@@ -1501,7 +1504,7 @@ public class Dispatcher {
 		if (oper.equals("clear")) {
 
 			textContent.delete(0, textContent.length());
-			return true;
+			return false;
 			
 		} else if (oper.equals("add") || 
                   oper.equals("replace")) {
