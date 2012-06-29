@@ -1,3 +1,7 @@
+* Fri Jun 29 2012 Mikhail Fedotov <anyremote at mail.ru> - 1.0
+- Do not switch screen on Set(*,close) commands. Allow Set(layout,3x4|7x1)
+  syntax instead of Set(skin,default|bottomline).
+
 * Mon Jun 04 2012 Mikhail Fedotov <anyremote at mail.ru> - 0.9.9
 - Do not switch screen on Set(*fg|bg|font*) commands. Fix inter-threading
   issues.
