@@ -1,3 +1,6 @@
+* Fri Aug 16 2012 Mikhail Fedotov <anyremote at mail.ru> - 1.1
+- Support Set(vibrate,duration) command.
+
 * Fri Jun 29 2012 Mikhail Fedotov <anyremote at mail.ru> - 1.0
 - Do not switch screen on Set(*,close) commands. Allow Set(layout,3x4|7x1)
   syntax instead of Set(skin,default|bottomline). 

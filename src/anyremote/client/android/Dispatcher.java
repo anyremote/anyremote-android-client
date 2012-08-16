@@ -649,8 +649,22 @@ public class Dispatcher {
 			break;       
 
 		case CMD_VIBRATE:
+			
+			int vi = 2;
+			if (cmdTokens.size() > 1) {				
+			    try {
+			    	vi = Integer.parseInt((String) cmdTokens.elementAt(1));
+				} catch (Exception e) {
+				}          
+				if (vi <= 0) {					
+					break;
+				}
+				if (vi > 300) {
+					vi = 300;
+				}
+			}
 			Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-			v.vibrate(500);
+			v.vibrate(vi*100);
 			break;
 
 		case CMD_IMAGE:
