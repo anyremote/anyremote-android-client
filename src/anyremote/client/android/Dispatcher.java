@@ -654,7 +654,7 @@ public class Dispatcher {
 			if (cmdTokens.size() > 1) {				
 			    try {
 			    	vi = Integer.parseInt((String) cmdTokens.elementAt(1));
-				} catch (Exception e) {
+				} catch (NumberFormatException e) {
 				}          
 				if (vi <= 0) {					
 					break;
