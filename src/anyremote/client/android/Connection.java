@@ -46,7 +46,6 @@ import anyremote.client.android.util.UserException;
  */
 public final class Connection implements Runnable {
 
-	static final int SLEEP_TIME = 100; // 1/10 of second
 	static final int BUFFER_SIZE = 4096;
 
 	static final int ENDS_AT_CEND = 1;
@@ -139,10 +138,6 @@ public final class Connection implements Runnable {
 			Thread.sleep(200);
 		} catch (InterruptedException e) {
 		}
-
-		/*
-		 * try { Looper.prepare(); } catch (RuntimeException e) {}
-		 */
 
 		final Connection c = this;
 		

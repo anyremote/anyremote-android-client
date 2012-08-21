@@ -27,14 +27,12 @@ import java.io.OutputStream;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-//import android.os.Looper;
 import anyremote.client.android.anyRemote;
 import anyremote.client.android.util.ISocket;
 import anyremote.client.android.util.UserException;
 
 import java.io.IOException;
 import java.util.UUID;
-
 
 public class BTSocket implements ISocket {
 
@@ -59,50 +57,50 @@ public class BTSocket implements ISocket {
 	 */
 	public BTSocket(String host) throws UserException {
 
-        anyRemote._log("BTSocket",host);
-        
-		//try {
-        //    Looper.prepare();
-		//} catch (RuntimeException e) {}
+        anyRemote._log("BTSocket start ",host);
 	     
-		anyRemote._log("BTSocket","start");
 		int attempts = 0;
 		
 		while (true) {
 		  try {
+	        anyRemote._log("BTSocket","connection preparations");
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             anyRemote._log("BTSocket","got BluetoothAdapter");
             BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(host);
             anyRemote._log("BTSocket","got BluetoothDevice");
 			this.sock = device.createRfcommSocketToServiceRecord(USE_UUID);
-			
-			//Method m = device.getClass().getMethod("createRfcommSocket", new Class[] {int.class});
-			//this.sock = (BluetoothSocket) m.invoke(device, 1);
-
             anyRemote._log("BTSocket","got createRfcommSocketToServiceRecord");
+            
             this.sock.connect();
             anyRemote._log("BTSocket","connected");
+            
             isClosed = false;
 		  } catch (SecurityException e) {
+			  
 			anyRemote._log("BTSocket","SecurityException "+e);
-			throw new UserException("Connection Error",
-					"Not allowed to connect to " + host);
+			throw new UserException("Connection Error", "Not allowed to connect to " + host);
+		  
 		  } catch (IOException e) {
 			anyRemote._log("BTSocket","IOException "+e);
 			if (attempts > 10) {
-			    throw new UserException("Connection Error",
-					"IO error while setting up the connection to " + host);
+			    throw new UserException("Connection Error", "IO error while setting up the connection to " + host);
 			}
-			attempts++;
 		  } catch (Exception e) {
 			anyRemote._log("BTSocket","Exception "+e);
 			if (attempts > 10) {
-		     	throw new UserException("Connection Error",
-					"Error while setting up the connection to " + host);
+		     	throw new UserException("Connection Error", "Error while setting up the connection to " + host);
+			}
+	      }
+		  if (isClosed) {
+			anyRemote._log("BTSocket","Attempt "+attempts);
+			try {
+				Thread.sleep(50);
+			} catch (InterruptedException e) {
 			}
 			attempts++;
-	      }
-		  if (!isClosed) break;
+		  } else {
+			break;
+		  }
 		}
 		anyRemote._log("BTSocket","setup streams");
 		try {
@@ -110,10 +108,8 @@ public class BTSocket implements ISocket {
 		} catch (IOException e) {
 			try {
 				sock.close();
-			} catch (IOException e1) {
-			}
-			throw new UserException("Connecting failed",
-					"IO Error while opening streams.", e);
+			} catch (IOException e1) { }
+			throw new UserException("Connecting failed", "IO Error while opening input stream.", e);
 		}
 
 		try {
@@ -122,10 +118,8 @@ public class BTSocket implements ISocket {
 			try {
 				is.close();
 				sock.close();
-			} catch (IOException e1) {
-			}
-			throw new UserException("Connecting failed",
-					"IO Error while opening streams.", e);
+			} catch (IOException e1) { }
+			throw new UserException("Connecting failed", "IO Error while opening output stream.", e);
 		}
 		anyRemote._log("BTSocket","CONNECTED");
 	}
@@ -134,18 +128,18 @@ public class BTSocket implements ISocket {
 	public void close() {
         if (isClosed) return;
         isClosed = true;
-		try {
+		
+        try {
 			sock.close();
-		} catch (IOException e) {
-		}
+		} catch (IOException e) { }
+		
 		try {
 			os.close();
-		} catch (IOException e) {
-		}
+		} catch (IOException e) { }
+		
 		try {
 			is.close();
-		} catch (IOException e) {
-		}
+		} catch (IOException e) { }
 	}
 
 	//@Override

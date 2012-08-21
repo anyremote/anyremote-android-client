@@ -23,6 +23,9 @@ package anyremote.client.android;
 
 import java.io.File;
 import java.util.TimerTask;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.TreeMap;
 import java.util.Vector;
 import android.content.Intent;
@@ -84,7 +87,10 @@ public class anyRemote extends Activity
 	private static TreeMap iconMap = new TreeMap(); //String.CASE_INSENSITIVE_ORDER);
 
 	private Handler viewHandler;
-
+	
+	private static DateFormat now_format = new SimpleDateFormat("HH:mm:ss");
+	private static Date teraz = new Date();
+	
 	// Logging stuff
 	public static StringBuilder logData;
 	
@@ -614,7 +620,9 @@ public class anyRemote extends Activity
 		if (logData.length() > LOG_CAPACITY) {
 			logData.delete(0,LOG_CAPACITY);		
 		}
-		logData.append("\n" + "["+prefix+"] "+msg);
+		
+		teraz.setTime(java.lang.System.currentTimeMillis());
+		logData.append("\n" + "[" + now_format.format(teraz) + "] ["+prefix+"] "+msg);
 		Log.i(prefix,msg);
 	}
 }
