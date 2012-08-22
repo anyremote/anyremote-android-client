@@ -252,8 +252,13 @@ AdapterView.OnItemSelectedListener {
 
 			doConnect(address,anyRemote.AUTOCONNECT_TO);
 			break;
+			
+		case R.id.enter_item_name:
 
-		case R.id.remove_address:
+			renameAddress(address);
+			break;
+
+		case R.id.clean_item:
 
 			cleanAddress(address);
 			dataSource.remove(address);
@@ -465,23 +470,7 @@ AdapterView.OnItemSelectedListener {
 
 			if (selected >= 0) {
 				final String address = dataSource.getItem(selected);
-
-				// get URL by device name
-				String url = getURL(address);
-				if (url == null) {
-					log("onOptionsItemSelected: enter_item_name can not get URL for "+address);
-					return true;
-				}
-
-				connectPass = getPass(address);
-				if (connectPass == null) {
-					connectPass = "";
-				}
-
-				connectTo   = url;
-				connectName = address;
-
-				setupEditField(Dispatcher.CMD_EDIT_FORM_NAME, null, null, address);
+                renameAddress(address);
 			}			    
 			break;
 
@@ -615,6 +604,25 @@ AdapterView.OnItemSelectedListener {
 		
 		log("SearchForm::doRealConnect: finish");
 		finish();
+	}
+	
+	public void renameAddress(String address) {
+		// get URL by device name
+		String url = getURL(address);
+		if (url == null) {
+			log("onOptionsItemSelected: enter_item_name can not get URL for "+address);
+			return;
+		}
+	
+		connectPass = getPass(address);
+		if (connectPass == null) {
+			connectPass = "";
+		}
+	
+		connectTo   = url;
+		connectName = address;
+	
+		setupEditField(Dispatcher.CMD_EDIT_FORM_NAME, null, null, address);
 	}
 
 	public void cleanAddress(String name) {

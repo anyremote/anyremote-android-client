@@ -13,7 +13,7 @@
     <string name="cancel_search_item">Cancel Search</string>
     <string name="enter_bt_item">Enter BT address</string>
     <string name="enter_ip_item">Enter IP address</string>
-    <string name="enter_item_name">Change Name</string>
+    <string name="enter_item_name">Change Friendly Name</string>
     <string name="enter_item_pass">Change Password</string>
     <string name="enter_pass">Enter Password</string>
     <string name="label_pass">Password</string>
@@ -24,7 +24,6 @@
     <string name="default_ip">socket://192.168.1.1:5000</string>
     <string name="connect_to">Connect To</string>
     <string name="autoconnect_to">Auto-Connect To</string>
-    <string name="remove_address">Clean Address</string>
     <string name="connection_successful">Connected</string>
     <string name="connection_failed">Disconnected</string>
     <string name="not_found">No anyRemote servers found</string>
