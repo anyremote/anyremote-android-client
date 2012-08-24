@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">anyRemote</string>
+    <string name="btnCancel">Wróć</string>
+    <string name="btnOk">OK</string>
+    <string name="searchFormUnconnected">Rozłączony</string>
+    <string name="exit_item">Zakończ</string>
+    <string name="connect_item">Połącz</string>
+    <string name="disconnect_item">Rozłącz</string>
+    <string name="search_item">Wyszukaj</string>
+    <string name="searching">Wyszukiwanie &#8230;</string>
+    <string name="cancel_search_item">Zatrzymaj wyszukiwanie</string>
+    <string name="enter_bt_item">Podaj adres BT</string>
+    <string name="enter_ip_item">Podaj adres IP</string>
+    <string name="enter_item_name">Zmień przyjazną nazwę</string>
+    <string name="enter_item_pass">Zmień hasło</string>
+    <string name="enter_pass">Podaj hasło</string>
+    <string name="label_pass">Hasło</string>
+    <string name="clean_item">Wyczyść adres</string>
+    <string name="autoconnect_item">Połączenie automatyczne</string>
+    <string name="log_item">Log</string>
+    <string name="default_bt">btspp://0008F4163049</string>
+    <string name="default_ip">socket://192.168.2.5:5000</string>
+    <string name="connect_to">Połącz z</string>
+    <string name="autoconnect_to">Połącz automatycznie z</string>
+    <string name="remove_address">Wyczyść adres</string>
+    <string name="connection_successful">Połączony</string>
+    <string name="connection_failed">Rozłączony</string>
+    <string name="not_found">Nie znaleziono serwerów anyRemote</string>
+    <string name="bt_turning_on">"Włączanie Bluetooth"</string>
+    <string name="bt_turning_off">"Wyłączanie Bluetooth"</string>
+    <string name="bt_off">"Bluetooth wyłączony"</string>
+    <string name="bt_on">"Bluetooth włączony"</string>
+    
+    <string name="b1">"1"</string>
+    <string name="b2">"2"</string>
+    <string name="b3">"3"</string>
+    <string name="b4">"4"</string>
+    <string name="b5">"5"</string>
+    <string name="b6">"6"</string>
+    <string name="b7">"7"</string>
+    <string name="b8">"8"</string>
+    <string name="b9">"9"</string>
+    <string name="b10">"*"</string>
+    <string name="b11">"0"</string>
+    <string name="b12">"#"</string>
+    
+</resources>
