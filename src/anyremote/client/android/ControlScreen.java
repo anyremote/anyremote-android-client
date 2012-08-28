@@ -202,8 +202,8 @@ public class ControlScreen extends arActivity
 		
 		boolean rotated = (display.getOrientation() == Surface.ROTATION_90 ||
 		                   display.getOrientation() == Surface.ROTATION_270);
-		int h = (rotated ? display.getWidth()  : display.getHeight());
-		int w = (rotated ? display.getHeight() : display.getWidth());
+		int h = display.getHeight();
+		int w = display.getWidth();
 		log("setSkin SCR "+rotated+" "+w+"x"+h);
 
 		int pd  = anyRemote.protocol.cfPadding;
@@ -259,7 +259,9 @@ public class ControlScreen extends arActivity
 			anyRemote.protocol.cfIconSize = w/realCnt;
 			
 			int isz = (anyRemote.protocol.cfIconSizeOverride >= 0 ? anyRemote.protocol.cfIconSizeOverride : anyRemote.protocol.cfIconSize);
-
+			
+			log("setSkin set iconn size to "+isz);
+			
 			for (int i=0;i<NUM_ICONS_BTM;i++) {
 				
 				buttons[i].setMaxHeight(isz);    	
