@@ -79,7 +79,7 @@ public class TextScreen extends arActivity  {
 		
 		if (isLog) {
 			text.setText(anyRemote.logData); 
-			setTitle("Log");
+			setTitle(anyRemote.protocol.context.getString(R.string.log_item));
 		} else {
 			
 			anyRemote.protocol.setFullscreen(this);
@@ -168,7 +168,7 @@ public class TextScreen extends arActivity  {
 
 	@Override
 	public void onBackPressed() { 
-		commandAction("Back");
+		commandAction(anyRemote.protocol.context.getString(R.string.back_item));
 	}
 
 	@Override
@@ -179,12 +179,12 @@ public class TextScreen extends arActivity  {
 
 	public void commandAction(String command) {
 		if (isLog) {
-			if (command.equals("Back")) {
+			if (command.equals(anyRemote.protocol.context.getString(R.string.back_item))) {
 				doFinish("log");  // just close Log form
-			} else if (command.equals("Clear Log")) {
+			} else if (command.equals(anyRemote.protocol.context.getString(R.string.clear_log_item))) {
 				anyRemote.logData.delete(0,anyRemote.logData.length());
 				text.setText("");
-			} else if (command.equals("Report Bug")) {
+			} else if (command.equals(anyRemote.protocol.context.getString(R.string.report_bug_item))) {
 
 				Intent mailIntent = new Intent(Intent.ACTION_SEND);
 				mailIntent.setType("text/plain");
@@ -195,6 +195,9 @@ public class TextScreen extends arActivity  {
 				startActivity(Intent.createChooser(mailIntent, "Bug report"));
 			}
 		} else {
+			if (command.equals(anyRemote.protocol.context.getString(R.string.back_item))) {
+				command = "Back";  // avoid national alphabets
+			}
 			anyRemote.protocol.queueCommand(command);
 		}
 	}

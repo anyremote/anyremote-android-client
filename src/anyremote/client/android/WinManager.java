@@ -118,7 +118,7 @@ public class WinManager extends arActivity  {
 
 	@Override
 	public void onBackPressed() { 
-		commandAction("Back");
+		commandAction(anyRemote.protocol.context.getString(R.string.back_item));
 	}
 
 	@Override
@@ -128,6 +128,9 @@ public class WinManager extends arActivity  {
 	}
 
 	public void commandAction(String command) {
+		if (command.equals(anyRemote.protocol.context.getString(R.string.back_item))) {
+			command = "Back";  // avoid national alphabets
+		}
 		anyRemote.protocol.queueCommand(command);
 	}
 

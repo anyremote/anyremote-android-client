@@ -687,18 +687,20 @@ public class ControlScreen extends arActivity
 	
 	@Override
 	public void onBackPressed() { 
-		commandAction("Exit");
+		commandAction(anyRemote.protocol.context.getString(R.string.exit_item));
 	}
 	
 	public void commandAction(String command) {
 		log("commandAction "+command);
 		
-        if (command.equals("Exit")) {	
+        if (command.equals(anyRemote.protocol.context.getString(R.string.exit_item))) {	
         	doFinish("exit");		  
-        } else if (command.equals("Disconnect")) {
+        } else if (command.equals(anyRemote.protocol.context.getString(R.string.disconnect_item))) {
         	doFinish("disconnect");	
-        } else if (command.equals("Log")) {
+        } else if (command.equals(anyRemote.protocol.context.getString(R.string.log_item))) {
         	doFinish("log");	
+        } else if (command.equals(anyRemote.protocol.context.getString(R.string.back_item))) {
+        	anyRemote.protocol.queueCommand("Back");  // avoid national alphabets	
 	    } else {
 	        anyRemote.protocol.queueCommand(command);
         }

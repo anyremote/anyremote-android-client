@@ -159,7 +159,7 @@ public class ListScreen extends arActivity
 	/*@Override
 	public void onBackPressed() {  	
 		final String itemText = (selectedPosition == -1 ? "" : dataSource.getItem(selectedPosition).text);
-	    commandAction("Back", itemText, selectedPosition);
+	    commandAction(anyRemote.protocol.context.getString(R.string.back_item), itemText, selectedPosition);
 	}*/
 
 	// Selection handlers
@@ -198,6 +198,10 @@ public class ListScreen extends arActivity
 	}
 
 	public void commandAction(String command, String value, int pos) {
+		
+		if (command.equals(anyRemote.protocol.context.getString(R.string.back_item))) {
+			command = "Back";  // avoid national alphabets
+		}
 
 		anyRemote.protocol.queueCommand(command + 
 				"(" + String.valueOf(pos+1) + "," + value + ")");

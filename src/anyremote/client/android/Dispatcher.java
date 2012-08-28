@@ -1695,23 +1695,23 @@ public class Dispatcher {
 	void menuAddDefault(int screen) {   	
 		switch(screen) {
 			case anyRemote.CONTROL_FORM:
-				cfMenu.add("Disconnect");
-				cfMenu.add("Exit");
-				cfMenu.add("Log");	
+				cfMenu.add(context.getString(R.string.disconnect_item));
+				cfMenu.add(context.getString(R.string.exit_item));
+				cfMenu.add(context.getString(R.string.log_item));	
 				break;
 			case anyRemote.TEXT_FORM:
-				textMenu.add("Back");
+				textMenu.add(context.getString(R.string.back_item));
 				break;
 			case anyRemote.LIST_FORM:
-				listMenu.add("Back");
+				listMenu.add(context.getString(R.string.back_item));
 				break;
 			case anyRemote.WMAN_FORM:
-				winMenu.add("Back");
+				winMenu.add(context.getString(R.string.back_item));
 				break;
 			case anyRemote.LOG_FORM:
-				textMenu.add("Clear Log");
-				textMenu.add("Report Bug");
-				textMenu.add("Back");
+				textMenu.add(context.getString(R.string.clear_log_item));
+				textMenu.add(context.getString(R.string.report_bug_item));
+				textMenu.add(context.getString(R.string.back_item));
 				break;
 		}
 	}

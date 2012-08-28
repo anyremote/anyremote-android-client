@@ -20,6 +20,9 @@
     <string name="clean_item">Wyczyść adres</string>
     <string name="autoconnect_item">Połączenie automatyczne</string>
     <string name="log_item">Log</string>
+    <string name="clear_log_item">Clear Log</string>
+    <string name="back_item">Z powrotem</string>
+    <string name="report_bug_item">"Report Bug"</string>
     <string name="default_bt">btspp://0008F4163049</string>
     <string name="default_ip">socket://192.168.2.5:5000</string>
     <string name="connect_to">Połącz z</string>
