@@ -622,7 +622,7 @@ public class Dispatcher {
 			
 			boolean needSwitch = textDataProcess(cmdTokens, stage); 
 			
-			boolean doCloset = ((String) cmdTokens.elementAt(1)).equals("close");
+			boolean doCloset = (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close"));
 			
 			if (anyRemote.logVisible()) {
 				if (doCloset) {
