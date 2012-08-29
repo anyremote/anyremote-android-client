@@ -1508,8 +1508,10 @@ public class Dispatcher {
 		
 		if (stage == ProtocolMessage.INTERMED ||
 		    stage == ProtocolMessage.LAST) {
-			
-			    textContent.append((String) vR.elementAt(3));
+			    
+			    if (vR.size() > 2) {
+			        textContent.append((String) vR.elementAt(3));
+			    }
 				return true;
 		}
 
