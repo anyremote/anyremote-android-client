@@ -1502,9 +1502,13 @@ public class Dispatcher {
 	// Set(text,wrap,on|off)		3
 	// Set(text,show)
 	//
-	// Set(list,close) does NOT processed here !			2
+	// Set(list,close) does NOT processed here !
 	//
 	public boolean textDataProcess(Vector vR, int stage) {   // message = add|replace|show|clear,title,long_text
+		
+		if (vR.size() == 0) {
+			return false;	
+		}
 		
 		if (stage == ProtocolMessage.INTERMED ||
 		    stage == ProtocolMessage.LAST) {
