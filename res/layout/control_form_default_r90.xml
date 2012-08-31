@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/skin_default_r90"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical|center_horizontal"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/cf_dummy_up_r90"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:editable="false"
+        android:gravity="center_horizontal"
+        android:singleLine="true"
+        android:text="" >
+    </TextView>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/cf_title_wrapper_r90"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center_vertical|center_horizontal"
+	    android:orientation="vertical" >
+    
+	    <TextView
+	        android:id="@+id/cf_title_r90"
+	        style="?android:attr/textAppearanceMedium"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:editable="false"
+	        android:ellipsize="marquee"
+	        android:marqueeRepeatLimit="marquee_forever"
+	        android:scrollHorizontally="true"
+	        android:lines="1" >
+	    </TextView>
+    
+    </LinearLayout>
+
+    <TableLayout
+        android:id="@+id/icons_r90"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|center_horizontal" >
+
+        <TableRow
+            android:id="@+id/row1_r90"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:id="@+id/tl_b3_r90" >
+
+                <ImageButton
+                    android:id="@+id/b3_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b3"
+                    android:nextFocusDown="@+id/b2_r90"
+                    android:nextFocusRight="@+id/b6_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tl_b6_r90" >
+
+                <ImageButton
+                    android:id="@+id/b6_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b6"
+                    android:nextFocusDown="@+id/b5_r90"
+                    android:nextFocusLeft="@+id/b3_r90"
+                    android:nextFocusRight="@+id/b9_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+           <LinearLayout
+                android:id="@+id/tl_b9_r90" >
+
+                <ImageButton
+                    android:id="@+id/b9_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b9"
+                    android:nextFocusDown="@+id/b8_r90"
+                    android:nextFocusLeft="@+id/b6_r90"
+                    android:nextFocusRight="@+id/b12_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+            <LinearLayout
+                android:id="@+id/tl_b12_r90" >
+
+                <ImageButton
+                    android:id="@+id/b12_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b12"
+                    android:nextFocusDown="@+id/b11_r90"
+                    android:nextFocusLeft="@+id/b9_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/row2_r90"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|center_horizontal"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:id="@+id/tl_b2_r90" >
+
+                <ImageButton
+                    android:id="@+id/b2_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b2"
+                    android:nextFocusDown="@+id/b1_r90"
+                    android:nextFocusRight="@+id/b5_r90"
+                    android:nextFocusUp="@+id/b3_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tl_b5_r90" >
+
+                <ImageButton
+                    android:id="@+id/b5_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b5"
+                    android:nextFocusDown="@+id/b4_r90"
+                    android:nextFocusLeft="@+id/b2_r90"
+                    android:nextFocusRight="@+id/b8_r90"
+                    android:nextFocusUp="@+id/b6_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+           <LinearLayout
+                android:id="@+id/tl_b8_r90" >
+
+                <ImageButton
+                    android:id="@+id/b8_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b8"
+                    android:nextFocusDown="@+id/b7_r90"
+                    android:nextFocusLeft="@+id/b5_r90"
+                    android:nextFocusRight="@+id/b11_r90"
+                    android:nextFocusUp="@+id/b9_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+            <LinearLayout
+                android:id="@+id/tl_b11_r90" >
+
+                <ImageButton
+                    android:id="@+id/b11_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b11"
+                    android:nextFocusDown="@+id/b10_r90"
+                    android:nextFocusLeft="@+id/b8_r90"
+                    android:nextFocusUp="@+id/b12_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/row3_r90"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:id="@+id/tl_b1_r90" >
+
+                <ImageButton
+                    android:id="@+id/b1_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b1"
+                    android:nextFocusRight="@+id/b4_r90"
+                    android:nextFocusUp="@+id/b2_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tl_b4_r90" >
+
+                <ImageButton
+                    android:id="@+id/b4_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b4"
+                    android:nextFocusLeft="@+id/b1_r90"
+                    android:nextFocusRight="@+id/b7_r90"
+                    android:nextFocusUp="@+id/b5_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+          <LinearLayout
+                android:id="@+id/tl_b7_r90" >
+
+                <ImageButton
+                    android:id="@+id/b7_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b7"
+                    android:nextFocusLeft="@+id/b4_r90"
+                    android:nextFocusRight="@+id/b10_r90"
+                    android:nextFocusUp="@+id/b8_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+            <LinearLayout
+                android:id="@+id/tl_b10_r90" >
+
+                <ImageButton
+                    android:id="@+id/b10_r90"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b10"
+                    android:nextFocusLeft="@+id/b7_r90"
+                    android:nextFocusUp="@+id/b11_r90"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+        </TableRow>
+
+ 
+    </TableLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/cf_status_wrapper_r90"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center_vertical|center_horizontal"
+	    android:orientation="vertical" >
+	    <TextView
+	        android:id="@+id/cf_status_r90"
+	        style="?android:attr/textAppearanceMedium"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:editable="false"
+	        android:ellipsize="marquee"
+	        android:marqueeRepeatLimit="marquee_forever"
+	        android:scrollHorizontally="true"
+	        android:lines="1">
+	     </TextView>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/cf_dummy_dn_r90"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:editable="false"
+        android:gravity="center_horizontal"
+        android:singleLine="true"
+        android:text="" >
+    </TextView>
+
+</LinearLayout>

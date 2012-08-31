@@ -170,26 +170,14 @@ public class ControlScreen extends arActivity
     
     private void setTitleField() {
     	//log("setTitleField "+anyRemote.protocol.cfTitle);
-    	
-    	int id = R.id.cf_title;
-        if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
-	        id = R.id.cf_btitle;
-        } 
-	    TextView title = (TextView) findViewById(id);
-	    
+     	TextView title = (TextView) findViewById(getTitleId());
 	    title.setText(anyRemote.protocol.cfTitle);
 	    title.setSelected(true);    
     }
     
     private void setStatusField() {
     	//log("setStatusField "+anyRemote.protocol.cfStatus);
-    	
-    	int id = R.id.cf_status;
-        if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
-        	id = R.id.cf_bstatus;
-        } 
-        TextView status = (TextView) findViewById(id);
-        
+     	TextView status = (TextView) findViewById(getStatusId());
     	status.setText(anyRemote.protocol.cfStatus);
     	status.setSelected(true);  
     }
@@ -200,11 +188,8 @@ public class ControlScreen extends arActivity
 		
 		Display display = getWindowManager().getDefaultDisplay();
 		
-		boolean rotated = (display.getOrientation() == Surface.ROTATION_90 ||
-		                   display.getOrientation() == Surface.ROTATION_270);
 		int h = display.getHeight();
 		int w = display.getWidth();
-		log("setSkin SCR "+rotated+" "+w+"x"+h);
 
 		int pd  = anyRemote.protocol.cfPadding;
 
@@ -285,39 +270,106 @@ public class ControlScreen extends arActivity
 		} else {
 			
 			//log("setSkin SK_DEFAULT ");
+			boolean  landscape = false;
 			
-		    setContentView(R.layout.control_form_default);
+			if (display.getOrientation() == Surface.ROTATION_90) {
+				
+			    setContentView(R.layout.control_form_default_r90);
+			    
+			    landscape = true;
 
-		    //log("setSkin SK_DEFAULT setContentView");
+				buttons[0]  = (ImageButton) findViewById(R.id.b1_r90);
+				buttons[1]  = (ImageButton) findViewById(R.id.b2_r90);
+				buttons[2]  = (ImageButton) findViewById(R.id.b3_r90);
+				buttons[3]  = (ImageButton) findViewById(R.id.b4_r90);
+				buttons[4]  = (ImageButton) findViewById(R.id.b5_r90);
+				buttons[5]  = (ImageButton) findViewById(R.id.b6_r90);
+				buttons[6]  = (ImageButton) findViewById(R.id.b7_r90);
+				buttons[7]  = (ImageButton) findViewById(R.id.b8_r90);
+				buttons[8]  = (ImageButton) findViewById(R.id.b9_r90);
+				buttons[9]  = (ImageButton) findViewById(R.id.b10_r90);
+				buttons[10] = (ImageButton) findViewById(R.id.b11_r90);
+				buttons[11] = (ImageButton) findViewById(R.id.b12_r90);
+				
+				buttonsLayout[0]  = (LinearLayout) findViewById(R.id.tl_b1_r90);
+				buttonsLayout[1]  = (LinearLayout) findViewById(R.id.tl_b2_r90);
+				buttonsLayout[2]  = (LinearLayout) findViewById(R.id.tl_b3_r90);
+				buttonsLayout[3]  = (LinearLayout) findViewById(R.id.tl_b4_r90);
+				buttonsLayout[4]  = (LinearLayout) findViewById(R.id.tl_b5_r90);
+				buttonsLayout[5]  = (LinearLayout) findViewById(R.id.tl_b6_r90);
+				buttonsLayout[6]  = (LinearLayout) findViewById(R.id.tl_b7_r90);
+				buttonsLayout[7]  = (LinearLayout) findViewById(R.id.tl_b8_r90);
+				buttonsLayout[8]  = (LinearLayout) findViewById(R.id.tl_b9_r90);
+				buttonsLayout[9]  = (LinearLayout) findViewById(R.id.tl_b10_r90);
+				buttonsLayout[10] = (LinearLayout) findViewById(R.id.tl_b11_r90);
+				buttonsLayout[11] = (LinearLayout) findViewById(R.id.tl_b12_r90);
+				
+			} else if (display.getOrientation() == Surface.ROTATION_270) {
+	        	
+			    setContentView(R.layout.control_form_default_r270);
+			    
+			    landscape = true;
 
-			buttons[0]  = (ImageButton) findViewById(R.id.b1);
-			buttons[1]  = (ImageButton) findViewById(R.id.b2);
-			buttons[2]  = (ImageButton) findViewById(R.id.b3);
-			buttons[3]  = (ImageButton) findViewById(R.id.b4);
-			buttons[4]  = (ImageButton) findViewById(R.id.b5);
-			buttons[5]  = (ImageButton) findViewById(R.id.b6);
-			buttons[6]  = (ImageButton) findViewById(R.id.b7);
-			buttons[7]  = (ImageButton) findViewById(R.id.b8);
-			buttons[8]  = (ImageButton) findViewById(R.id.b9);
-			buttons[9]  = (ImageButton) findViewById(R.id.b10);
-			buttons[10] = (ImageButton) findViewById(R.id.b0);
-			buttons[11] = (ImageButton) findViewById(R.id.b11);
+				buttons[0]  = (ImageButton) findViewById(R.id.b1_r270);
+				buttons[1]  = (ImageButton) findViewById(R.id.b2_r270);
+				buttons[2]  = (ImageButton) findViewById(R.id.b3_r270);
+				buttons[3]  = (ImageButton) findViewById(R.id.b4_r270);
+				buttons[4]  = (ImageButton) findViewById(R.id.b5_r270);
+				buttons[5]  = (ImageButton) findViewById(R.id.b6_r270);
+				buttons[6]  = (ImageButton) findViewById(R.id.b7_r270);
+				buttons[7]  = (ImageButton) findViewById(R.id.b8_r270);
+				buttons[8]  = (ImageButton) findViewById(R.id.b9_r270);
+				buttons[9]  = (ImageButton) findViewById(R.id.b10_r270);
+				buttons[10] = (ImageButton) findViewById(R.id.b11_r270);
+				buttons[11] = (ImageButton) findViewById(R.id.b12_r270);
+				
+				buttonsLayout[0]  = (LinearLayout) findViewById(R.id.tl_b1_r270);
+				buttonsLayout[1]  = (LinearLayout) findViewById(R.id.tl_b2_r270);
+				buttonsLayout[2]  = (LinearLayout) findViewById(R.id.tl_b3_r270);
+				buttonsLayout[3]  = (LinearLayout) findViewById(R.id.tl_b4_r270);
+				buttonsLayout[4]  = (LinearLayout) findViewById(R.id.tl_b5_r270);
+				buttonsLayout[5]  = (LinearLayout) findViewById(R.id.tl_b6_r270);
+				buttonsLayout[6]  = (LinearLayout) findViewById(R.id.tl_b7_r270);
+				buttonsLayout[7]  = (LinearLayout) findViewById(R.id.tl_b8_r270);
+				buttonsLayout[8]  = (LinearLayout) findViewById(R.id.tl_b9_r270);
+				buttonsLayout[9]  = (LinearLayout) findViewById(R.id.tl_b10_r270);
+				buttonsLayout[10] = (LinearLayout) findViewById(R.id.tl_b11_r270);
+				buttonsLayout[11] = (LinearLayout) findViewById(R.id.tl_b12_r270);
+	        	
+	        } else {
 			
-			buttonsLayout[0]  = (LinearLayout) findViewById(R.id.tl_b1);
-			buttonsLayout[1]  = (LinearLayout) findViewById(R.id.tl_b2);
-			buttonsLayout[2]  = (LinearLayout) findViewById(R.id.tl_b3);
-			buttonsLayout[3]  = (LinearLayout) findViewById(R.id.tl_b4);
-			buttonsLayout[4]  = (LinearLayout) findViewById(R.id.tl_b5);
-			buttonsLayout[5]  = (LinearLayout) findViewById(R.id.tl_b6);
-			buttonsLayout[6]  = (LinearLayout) findViewById(R.id.tl_b7);
-			buttonsLayout[7]  = (LinearLayout) findViewById(R.id.tl_b8);
-			buttonsLayout[8]  = (LinearLayout) findViewById(R.id.tl_b9);
-			buttonsLayout[9]  = (LinearLayout) findViewById(R.id.tl_b10);
-			buttonsLayout[10] = (LinearLayout) findViewById(R.id.tl_b11);
-			buttonsLayout[11] = (LinearLayout) findViewById(R.id.tl_b12);
+			    setContentView(R.layout.control_form_default);
+	
+				buttons[0]  = (ImageButton) findViewById(R.id.b1);
+				buttons[1]  = (ImageButton) findViewById(R.id.b2);
+				buttons[2]  = (ImageButton) findViewById(R.id.b3);
+				buttons[3]  = (ImageButton) findViewById(R.id.b4);
+				buttons[4]  = (ImageButton) findViewById(R.id.b5);
+				buttons[5]  = (ImageButton) findViewById(R.id.b6);
+				buttons[6]  = (ImageButton) findViewById(R.id.b7);
+				buttons[7]  = (ImageButton) findViewById(R.id.b8);
+				buttons[8]  = (ImageButton) findViewById(R.id.b9);
+				buttons[9]  = (ImageButton) findViewById(R.id.b10);
+				buttons[10] = (ImageButton) findViewById(R.id.b0);
+				buttons[11] = (ImageButton) findViewById(R.id.b11);
+				
+				buttonsLayout[0]  = (LinearLayout) findViewById(R.id.tl_b1);
+				buttonsLayout[1]  = (LinearLayout) findViewById(R.id.tl_b2);
+				buttonsLayout[2]  = (LinearLayout) findViewById(R.id.tl_b3);
+				buttonsLayout[3]  = (LinearLayout) findViewById(R.id.tl_b4);
+				buttonsLayout[4]  = (LinearLayout) findViewById(R.id.tl_b5);
+				buttonsLayout[5]  = (LinearLayout) findViewById(R.id.tl_b6);
+				buttonsLayout[6]  = (LinearLayout) findViewById(R.id.tl_b7);
+				buttonsLayout[7]  = (LinearLayout) findViewById(R.id.tl_b8);
+				buttonsLayout[8]  = (LinearLayout) findViewById(R.id.tl_b9);
+				buttonsLayout[9]  = (LinearLayout) findViewById(R.id.tl_b10);
+				buttonsLayout[10] = (LinearLayout) findViewById(R.id.tl_b11);
+				buttonsLayout[11] = (LinearLayout) findViewById(R.id.tl_b12);
+	        }
 			
-			h = h/6;   // 4 rows with icons and 2 line of text + gaps
-			w = w/3;   // 3 columns with icons
+			h = landscape ? h/5 : h/6;   // 3 or 4 rows with icons and 2 line of text + gaps
+			w = landscape ? w/4 : w/3;   // 3 or 4 columns with icons
+			
 		    anyRemote.protocol.cfIconSize = (w > h ? h : w);
 		    
 			int isz = (anyRemote.protocol.cfIconSizeOverride >= 0 ? anyRemote.protocol.cfIconSizeOverride : anyRemote.protocol.cfIconSize);
@@ -371,35 +423,28 @@ public class ControlScreen extends arActivity
 	
 	private void setBackground() {
 		
-		int id = R.id.skin_default;
 		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
-	        id = R.id.skin_bottomline;
-	        
+			
 	        ImageView cover = (ImageView) findViewById(R.id.cover);
 	        cover.setBackgroundColor(anyRemote.protocol.cfBkgr);
 	        
-	        RelativeLayout ll = (RelativeLayout) findViewById(id);
+	        RelativeLayout ll = (RelativeLayout) findViewById(R.id.skin_bottomline);
 		    ll.setBackgroundColor(anyRemote.protocol.cfBkgr);
 
 		} else {
-            LinearLayout ll = (LinearLayout) findViewById(id);
+            LinearLayout ll = (LinearLayout) findViewById(getLayoutId());
 	        ll.setBackgroundColor(anyRemote.protocol.cfBkgr);
 	        
-	        TableLayout tl = (TableLayout) findViewById(R.id.icons);
+	        TableLayout tl = (TableLayout) findViewById(getIconLayoutId());
 	        tl.setBackgroundColor(anyRemote.protocol.cfBkgr);
 		}
 	}
 	
+	
 	private void setTextColor() {
-		
-		int t = R.id.cf_title;
-		int s = R.id.cf_status;
-		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
-	       t = R.id.cf_btitle;
-	       s = R.id.cf_bstatus;
-		} 		
-		TextView title  = (TextView) findViewById(t);
-		TextView status = (TextView) findViewById(s);
+			
+		TextView title  = (TextView) findViewById(getTitleId());
+		TextView status = (TextView) findViewById(getStatusId());
 		
 	    title.setTextColor (anyRemote.protocol.cfFrgr);
 	    status.setTextColor(anyRemote.protocol.cfFrgr);
@@ -414,15 +459,9 @@ public class ControlScreen extends arActivity
 	}
 		
     private void setFont() {
-       	
-		int t = R.id.cf_title;
-		int s = R.id.cf_status;
-		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
-	       t = R.id.cf_btitle;
-	       s = R.id.cf_bstatus;
-		} 		
-		TextView title  = (TextView) findViewById(t);
-		TextView status = (TextView) findViewById(s);
+ 		
+		TextView title  = (TextView) findViewById(getTitleId());
+		TextView status = (TextView) findViewById(getStatusId());
 
 		title.setTypeface (anyRemote.protocol.cfTFace);
 	    status.setTypeface(anyRemote.protocol.cfTFace);
@@ -440,57 +479,81 @@ public class ControlScreen extends arActivity
     	switch (v.getId()) {
 		
 		  case R.id.b1: 
+		  case R.id.b1_r90: 
+		  case R.id.b1_r270: 
 		  case R.id.bb1: 
 	    	  key = STR_NUM1;	
 			  break;
 			  
 		  case R.id.b2: 
+		  case R.id.b2_r90: 
+		  case R.id.b2_r270: 
 		  case R.id.bb2: 
 	    	  key = STR_NUM2;	
 			  break;
 			  
 		  case R.id.b3: 
+		  case R.id.b3_r90: 
+		  case R.id.b3_r270: 
 		  case R.id.bb3: 
 	    	  key = STR_NUM3;	
 			  break;
 			  
 		  case R.id.b4: 
+		  case R.id.b4_r90: 
+		  case R.id.b4_r270: 
 		  case R.id.bb4: 
 			  key = STR_NUM4;
 			  break;
 			  
 		  case R.id.b5: 
+		  case R.id.b5_r90: 
+		  case R.id.b5_r270: 
 		  case R.id.bb5: 
 			  key = STR_NUM5;
 			  break;
 			  
 		  case R.id.b6: 
+		  case R.id.b6_r90: 
+		  case R.id.b6_r270: 
 		  case R.id.bb6: 
 			  key = STR_NUM6;
 			  break;
 				
 		  case R.id.b7: 
+		  case R.id.b7_r90: 
+		  case R.id.b7_r270: 
 		  case R.id.bb7: 
 			  key = STR_NUM7;
 		      break;
 				
 		  case R.id.b8: 
+		  case R.id.b8_r90: 
+		  case R.id.b8_r270: 
 			  key = STR_NUM8;
 			  break;
 				
 		  case R.id.b9: 
+		  case R.id.b9_r90: 
+		  case R.id.b9_r270: 
 			  key = STR_NUM9;
 			  break;
 			  
 		  case R.id.b10: 
+		  case R.id.b10_r90: 
+		  case R.id.b10_r270: 
 			  key = STR_STAR;
 			  break;
 		 
 		  case R.id.b0: 
+		  case R.id.b11_r90: 
+		  case R.id.b11_r270: 
 			  key = STR_NUM0;
 			  break;
 			 
 		  case R.id.b11: 
+		  case R.id.b12_r90: 
+		  case R.id.b12_r270: 
 			  key = STR_POUND;
 		      break;
       
@@ -718,5 +781,64 @@ public class ControlScreen extends arActivity
         setResult(RESULT_OK, intent);
         finish();  	
     }
-
+	
+	private int getLayoutId() {
+		
+		Display display = getWindowManager().getDefaultDisplay();
+		
+		int id = R.id.skin_default;
+		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
+	        id = R.id.skin_bottomline;
+		} else if (display.getOrientation() == Surface.ROTATION_90) {
+			id = R.id.skin_default_r90;
+		} else if (display.getOrientation() == Surface.ROTATION_270) {
+			id = R.id.skin_default_r270;
+		}
+		return id;
+	}
+	
+	private int getTitleId() {
+		
+		Display display = getWindowManager().getDefaultDisplay();
+		
+	   	int t = R.id.cf_title;
+		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
+	       t = R.id.cf_btitle;
+		} else if (display.getOrientation() == Surface.ROTATION_90) {
+			t = R.id.cf_title_r90;
+		} else if (display.getOrientation() == Surface.ROTATION_270) {
+			t = R.id.cf_title_r270;
+		}
+		return t;
+	}
+	
+	private int getStatusId() {
+		
+		Display display = getWindowManager().getDefaultDisplay();
+		
+	   	int t = R.id.cf_status;
+		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
+	       t = R.id.cf_bstatus;
+		} else if (display.getOrientation() == Surface.ROTATION_90) {
+			t = R.id.cf_status_r90;
+		} else if (display.getOrientation() == Surface.ROTATION_270) {
+			t = R.id.cf_status_r270;
+		}
+		return t;
+	}
+	
+	private int getIconLayoutId() {
+		
+		Display display = getWindowManager().getDefaultDisplay();
+		
+		int id = R.id.icons;
+		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
+	        // no such element
+		} else if (display.getOrientation() == Surface.ROTATION_90) {
+			id = R.id.icons_r90;
+		} else if (display.getOrientation() == Surface.ROTATION_270) {
+			id = R.id.icons_r270;
+		}
+		return id;
+	}
 }

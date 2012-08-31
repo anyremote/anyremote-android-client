@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/skin_default_r270"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_vertical|center_horizontal"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/cf_dummy_up_r270"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:editable="false"
+        android:gravity="center_horizontal"
+        android:singleLine="true"
+        android:text="" >
+    </TextView>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/cf_title_wrapper_r270"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center_vertical|center_horizontal"
+	    android:orientation="vertical" >
+    
+	    <TextView
+	        android:id="@+id/cf_title_r270"
+	        style="?android:attr/textAppearanceMedium"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:editable="false"
+	        android:ellipsize="marquee"
+	        android:marqueeRepeatLimit="marquee_forever"
+	        android:scrollHorizontally="true"
+	        android:lines="1" >
+	    </TextView>
+    
+    </LinearLayout>
+
+    <TableLayout
+        android:id="@+id/icons_r270"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical|center_horizontal" >
+
+        <TableRow
+            android:id="@+id/row1_r270"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:id="@+id/tl_b10_r270" >
+
+                <ImageButton
+                    android:id="@+id/b10_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b10"
+                    android:nextFocusDown="@+id/b11_r270"
+                    android:nextFocusRight="@+id/b7_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tl_b7_r270" >
+
+                <ImageButton
+                    android:id="@+id/b7_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b7"
+                    android:nextFocusDown="@+id/b8_r270"
+                    android:nextFocusLeft="@+id/b10_r270"
+                    android:nextFocusRight="@+id/b4_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+           <LinearLayout
+                android:id="@+id/tl_b4_r270" >
+
+                <ImageButton
+                    android:id="@+id/b4_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b4"
+                    android:nextFocusDown="@+id/b5_r270"
+                    android:nextFocusLeft="@+id/b7_r270"
+                    android:nextFocusRight="@+id/b1_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+            <LinearLayout
+                android:id="@+id/tl_b1_r270" >
+
+                <ImageButton
+                    android:id="@+id/b1_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b1"
+                    android:nextFocusDown="@+id/b2_r270"
+                    android:nextFocusLeft="@+id/b4_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/row2_r270"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical|center_horizontal"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:id="@+id/tl_b11_r270" >
+
+                <ImageButton
+                    android:id="@+id/b11_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b11"
+                    android:nextFocusDown="@+id/b12_r270"
+                    android:nextFocusRight="@+id/b8_r270"
+                    android:nextFocusUp="@+id/b10_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tl_b8_r270" >
+
+                <ImageButton
+                    android:id="@+id/b8_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b8"
+                    android:nextFocusDown="@+id/b9_r270"
+                    android:nextFocusLeft="@+id/b11_r270"
+                    android:nextFocusRight="@+id/b5_r270"
+                    android:nextFocusUp="@+id/b7_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+           <LinearLayout
+                android:id="@+id/tl_b5_r270" >
+
+                <ImageButton
+                    android:id="@+id/b5_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b5"
+                    android:nextFocusDown="@+id/b6_r270"
+                    android:nextFocusLeft="@+id/b8_r270"
+                    android:nextFocusRight="@+id/b2_r270"
+                    android:nextFocusUp="@+id/b4_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+            <LinearLayout
+                android:id="@+id/tl_b2_r270" >
+
+                <ImageButton
+                    android:id="@+id/b2_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b2"
+                    android:nextFocusDown="@+id/b3_r270"
+                    android:nextFocusLeft="@+id/b5_r270"
+                    android:nextFocusUp="@+id/b1_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/row3_r270"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal" >
+
+            <LinearLayout
+                android:id="@+id/tl_b12_r270" >
+
+                <ImageButton
+                    android:id="@+id/b12_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b12"
+                    android:nextFocusRight="@+id/b9_r270"
+                    android:nextFocusUp="@+id/b11_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/tl_b9_r270" >
+
+                <ImageButton
+                    android:id="@+id/b9_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b9"
+                    android:nextFocusLeft="@+id/b6_r270"
+                    android:nextFocusRight="@+id/b12_r270"
+                    android:nextFocusUp="@+id/b8_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+          <LinearLayout
+                android:id="@+id/tl_b6_r270" >
+
+                <ImageButton
+                    android:id="@+id/b6_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b6"
+                    android:nextFocusLeft="@+id/b9_r270"
+                    android:nextFocusRight="@+id/b3_r270"
+                    android:nextFocusUp="@+id/b5_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+            
+            <LinearLayout
+                android:id="@+id/tl_b3_r270" >
+
+                <ImageButton
+                    android:id="@+id/b3_r270"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:adjustViewBounds="true"
+                    android:background="@drawable/btn_selector"
+                    android:contentDescription="@string/b3"
+                    android:nextFocusLeft="@+id/b6_r270"
+                    android:nextFocusUp="@+id/b2_r270"
+                    android:scaleType="centerInside" >
+                </ImageButton>
+            </LinearLayout>
+        </TableRow>
+
+ 
+    </TableLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	    android:id="@+id/cf_status_wrapper_r270"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center_vertical|center_horizontal"
+	    android:orientation="vertical" >
+	    <TextView
+	        android:id="@+id/cf_status_r270"
+	        style="?android:attr/textAppearanceMedium"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:editable="false"
+	        android:ellipsize="marquee"
+	        android:marqueeRepeatLimit="marquee_forever"
+	        android:scrollHorizontally="true"
+	        android:lines="1">
+	     </TextView>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/cf_dummy_dn_r270"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:editable="false"
+        android:gravity="center_horizontal"
+        android:singleLine="true"
+        android:text="" >
+    </TextView>
+
+</LinearLayout>
