@@ -80,8 +80,40 @@ public class ControlScreen extends arActivity
     static final int SK_BOTTOMLINE = 1;
    
     static final int NUM_ICONS     = 12;
-    static final int NUM_ICONS_BTM = 7;
+    static final int NUM_ICONS_BTM = 7;			
     
+	static final int[] btns3x4 = { R.id.b1, R.id.b2, R.id.b3, R.id.b4, R.id.b5,
+			R.id.b6, R.id.b7, R.id.b8, R.id.b9, R.id.b10, R.id.b0, R.id.b11 };
+
+	static final int[] lbtns3x4 = { R.id.tl_b1, R.id.tl_b2, R.id.tl_b3,
+			R.id.tl_b4, R.id.tl_b5, R.id.tl_b6, R.id.tl_b7, R.id.tl_b8,
+			R.id.tl_b9, R.id.tl_b10, R.id.tl_b11, R.id.tl_b12 };
+
+	static final int[] btns3x4_r90 = { R.id.b1_r90, R.id.b2_r90, R.id.b3_r90,
+			R.id.b4_r90, R.id.b5_r90, R.id.b6_r90, R.id.b7_r90, R.id.b8_r90,
+			R.id.b9_r90, R.id.b10_r90, R.id.b11_r90, R.id.b12_r90 };
+
+	static final int[] lbtns3x4_r90 = { R.id.tl_b1_r90, R.id.tl_b2_r90,
+			R.id.tl_b3_r90, R.id.tl_b4_r90, R.id.tl_b5_r90, R.id.tl_b6_r90,
+			R.id.tl_b7_r90, R.id.tl_b8_r90, R.id.tl_b9_r90, R.id.tl_b10_r90,
+			R.id.tl_b11_r90, R.id.tl_b12_r90 };
+
+	static final int[] btns3x4_r270 = { R.id.b1_r270, R.id.b2_r270,
+			R.id.b3_r270, R.id.b4_r270, R.id.b5_r270, R.id.b6_r270,
+			R.id.b7_r270, R.id.b8_r270, R.id.b9_r270, R.id.b10_r270,
+			R.id.b11_r270, R.id.b12_r270 };
+
+	static final int[] lbtns3x4_r270 = { R.id.tl_b1_r270, R.id.tl_b2_r270,
+			R.id.tl_b3_r270, R.id.tl_b4_r270, R.id.tl_b5_r270, R.id.tl_b6_r270,
+			R.id.tl_b7_r270, R.id.tl_b8_r270, R.id.tl_b9_r270,
+			R.id.tl_b10_r270, R.id.tl_b11_r270, R.id.tl_b12_r270 };
+   
+	static final int[] btns7x1 = { R.id.bb1, R.id.bb2, R.id.bb3, R.id.bb4,
+			R.id.bb5, R.id.bb6, R.id.bb7 };
+	
+	static final int[] lbtns7x1 = { R.id.tl_bb1, R.id.tl_bb2, R.id.tl_bb3,
+			R.id.tl_bb4, R.id.tl_bb5, R.id.tl_bb6, R.id.tl_bb7 };    
+   
     boolean fullscreen  = false;
     Dispatcher.ArHandler hdlLocalCopy;
     
@@ -199,31 +231,14 @@ public class ControlScreen extends arActivity
 			
 			setContentView(R.layout.control_form_bottomline);
 			
-			buttons[0]  = (ImageButton) findViewById(R.id.bb1);
-			buttons[1]  = (ImageButton) findViewById(R.id.bb2);
-			buttons[2]  = (ImageButton) findViewById(R.id.bb3);
-			buttons[3]  = (ImageButton) findViewById(R.id.bb4);
-			buttons[4]  = (ImageButton) findViewById(R.id.bb5);
-			buttons[5]  = (ImageButton) findViewById(R.id.bb6);
-			buttons[6]  = (ImageButton) findViewById(R.id.bb7);
-			buttons[7]  = null;
-			buttons[8]  = null;
-			buttons[9]  = null;
-			buttons[10] = null;
-			buttons[11] = null;
-			
-			buttonsLayout[0]  = (LinearLayout) findViewById(R.id.tl_bb1);
-			buttonsLayout[1]  = (LinearLayout) findViewById(R.id.tl_bb2);
-			buttonsLayout[2]  = (LinearLayout) findViewById(R.id.tl_bb3);
-			buttonsLayout[3]  = (LinearLayout) findViewById(R.id.tl_bb4);
-			buttonsLayout[4]  = (LinearLayout) findViewById(R.id.tl_bb5);
-			buttonsLayout[5]  = (LinearLayout) findViewById(R.id.tl_bb6);
-			buttonsLayout[6]  = (LinearLayout) findViewById(R.id.tl_bb7);
-			buttonsLayout[7]  = null;
-			buttonsLayout[8]  = null;
-			buttonsLayout[9]  = null;
-			buttonsLayout[10] = null;
-			buttonsLayout[11] = null;
+			for (int b=0;b<7;b++) {
+				buttons[b]        = (ImageButton)  findViewById(btns7x1[b]);
+				buttonsLayout[0]  = (LinearLayout) findViewById(lbtns7x1[b]);
+			}
+			for (int b=7;b<12;b++) {
+				buttons[b]        = null;
+				buttonsLayout[0]  = null;
+			}
 			
 	        int realCnt = 0;
 			for (int i=0;i<NUM_ICONS_BTM;i++) {
@@ -277,94 +292,31 @@ public class ControlScreen extends arActivity
 			    setContentView(R.layout.control_form_default_r90);
 			    
 			    landscape = true;
-
-				buttons[0]  = (ImageButton) findViewById(R.id.b1_r90);
-				buttons[1]  = (ImageButton) findViewById(R.id.b2_r90);
-				buttons[2]  = (ImageButton) findViewById(R.id.b3_r90);
-				buttons[3]  = (ImageButton) findViewById(R.id.b4_r90);
-				buttons[4]  = (ImageButton) findViewById(R.id.b5_r90);
-				buttons[5]  = (ImageButton) findViewById(R.id.b6_r90);
-				buttons[6]  = (ImageButton) findViewById(R.id.b7_r90);
-				buttons[7]  = (ImageButton) findViewById(R.id.b8_r90);
-				buttons[8]  = (ImageButton) findViewById(R.id.b9_r90);
-				buttons[9]  = (ImageButton) findViewById(R.id.b10_r90);
-				buttons[10] = (ImageButton) findViewById(R.id.b11_r90);
-				buttons[11] = (ImageButton) findViewById(R.id.b12_r90);
-				
-				buttonsLayout[0]  = (LinearLayout) findViewById(R.id.tl_b1_r90);
-				buttonsLayout[1]  = (LinearLayout) findViewById(R.id.tl_b2_r90);
-				buttonsLayout[2]  = (LinearLayout) findViewById(R.id.tl_b3_r90);
-				buttonsLayout[3]  = (LinearLayout) findViewById(R.id.tl_b4_r90);
-				buttonsLayout[4]  = (LinearLayout) findViewById(R.id.tl_b5_r90);
-				buttonsLayout[5]  = (LinearLayout) findViewById(R.id.tl_b6_r90);
-				buttonsLayout[6]  = (LinearLayout) findViewById(R.id.tl_b7_r90);
-				buttonsLayout[7]  = (LinearLayout) findViewById(R.id.tl_b8_r90);
-				buttonsLayout[8]  = (LinearLayout) findViewById(R.id.tl_b9_r90);
-				buttonsLayout[9]  = (LinearLayout) findViewById(R.id.tl_b10_r90);
-				buttonsLayout[10] = (LinearLayout) findViewById(R.id.tl_b11_r90);
-				buttonsLayout[11] = (LinearLayout) findViewById(R.id.tl_b12_r90);
+			    
+				for (int b=0;b<12;b++) {
+					buttons[b]        = (ImageButton)  findViewById(btns3x4_r90[b]);
+					buttonsLayout[0]  = (LinearLayout) findViewById(lbtns3x4_r90[b]);
+				}
 				
 			} else if (display.getOrientation() == Surface.ROTATION_270) {
 	        	
 			    setContentView(R.layout.control_form_default_r270);
 			    
 			    landscape = true;
-
-				buttons[0]  = (ImageButton) findViewById(R.id.b1_r270);
-				buttons[1]  = (ImageButton) findViewById(R.id.b2_r270);
-				buttons[2]  = (ImageButton) findViewById(R.id.b3_r270);
-				buttons[3]  = (ImageButton) findViewById(R.id.b4_r270);
-				buttons[4]  = (ImageButton) findViewById(R.id.b5_r270);
-				buttons[5]  = (ImageButton) findViewById(R.id.b6_r270);
-				buttons[6]  = (ImageButton) findViewById(R.id.b7_r270);
-				buttons[7]  = (ImageButton) findViewById(R.id.b8_r270);
-				buttons[8]  = (ImageButton) findViewById(R.id.b9_r270);
-				buttons[9]  = (ImageButton) findViewById(R.id.b10_r270);
-				buttons[10] = (ImageButton) findViewById(R.id.b11_r270);
-				buttons[11] = (ImageButton) findViewById(R.id.b12_r270);
-				
-				buttonsLayout[0]  = (LinearLayout) findViewById(R.id.tl_b1_r270);
-				buttonsLayout[1]  = (LinearLayout) findViewById(R.id.tl_b2_r270);
-				buttonsLayout[2]  = (LinearLayout) findViewById(R.id.tl_b3_r270);
-				buttonsLayout[3]  = (LinearLayout) findViewById(R.id.tl_b4_r270);
-				buttonsLayout[4]  = (LinearLayout) findViewById(R.id.tl_b5_r270);
-				buttonsLayout[5]  = (LinearLayout) findViewById(R.id.tl_b6_r270);
-				buttonsLayout[6]  = (LinearLayout) findViewById(R.id.tl_b7_r270);
-				buttonsLayout[7]  = (LinearLayout) findViewById(R.id.tl_b8_r270);
-				buttonsLayout[8]  = (LinearLayout) findViewById(R.id.tl_b9_r270);
-				buttonsLayout[9]  = (LinearLayout) findViewById(R.id.tl_b10_r270);
-				buttonsLayout[10] = (LinearLayout) findViewById(R.id.tl_b11_r270);
-				buttonsLayout[11] = (LinearLayout) findViewById(R.id.tl_b12_r270);
+			    
+				for (int b=0;b<12;b++) {
+					buttons[b]        = (ImageButton)  findViewById(btns3x4_r270[b]);
+					buttonsLayout[0]  = (LinearLayout) findViewById(lbtns3x4_r270[b]);
+				}
 	        	
 	        } else {
-			
+	        	
 			    setContentView(R.layout.control_form_default);
-	
-				buttons[0]  = (ImageButton) findViewById(R.id.b1);
-				buttons[1]  = (ImageButton) findViewById(R.id.b2);
-				buttons[2]  = (ImageButton) findViewById(R.id.b3);
-				buttons[3]  = (ImageButton) findViewById(R.id.b4);
-				buttons[4]  = (ImageButton) findViewById(R.id.b5);
-				buttons[5]  = (ImageButton) findViewById(R.id.b6);
-				buttons[6]  = (ImageButton) findViewById(R.id.b7);
-				buttons[7]  = (ImageButton) findViewById(R.id.b8);
-				buttons[8]  = (ImageButton) findViewById(R.id.b9);
-				buttons[9]  = (ImageButton) findViewById(R.id.b10);
-				buttons[10] = (ImageButton) findViewById(R.id.b0);
-				buttons[11] = (ImageButton) findViewById(R.id.b11);
-				
-				buttonsLayout[0]  = (LinearLayout) findViewById(R.id.tl_b1);
-				buttonsLayout[1]  = (LinearLayout) findViewById(R.id.tl_b2);
-				buttonsLayout[2]  = (LinearLayout) findViewById(R.id.tl_b3);
-				buttonsLayout[3]  = (LinearLayout) findViewById(R.id.tl_b4);
-				buttonsLayout[4]  = (LinearLayout) findViewById(R.id.tl_b5);
-				buttonsLayout[5]  = (LinearLayout) findViewById(R.id.tl_b6);
-				buttonsLayout[6]  = (LinearLayout) findViewById(R.id.tl_b7);
-				buttonsLayout[7]  = (LinearLayout) findViewById(R.id.tl_b8);
-				buttonsLayout[8]  = (LinearLayout) findViewById(R.id.tl_b9);
-				buttonsLayout[9]  = (LinearLayout) findViewById(R.id.tl_b10);
-				buttonsLayout[10] = (LinearLayout) findViewById(R.id.tl_b11);
-				buttonsLayout[11] = (LinearLayout) findViewById(R.id.tl_b12);
+			    
+				for (int b=0;b<12;b++) {
+					buttons[b]        = (ImageButton)  findViewById(btns3x4[b]);
+					buttonsLayout[0]  = (LinearLayout) findViewById(lbtns3x4[b]);
+				}
 	        }
 			
 			h = landscape ? h/5 : h/6;   // 3 or 4 rows with icons and 2 line of text + gaps
