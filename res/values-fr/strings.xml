@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">anyRemote</string>
+    <string name="btnCancel">Annuler</string>
+    <string name="btnOk">Ok</string>
+    <string name="searchFormUnconnected">Déconnecté</string>
+    <string name="exit_item">Quitter</string>
+    <string name="connect_item">Connecter</string>
+    <string name="disconnect_item">Déconnecter</string>
+    <string name="search_item">Chercher</string>
+    <string name="searching">Recherche en cours&#8230;</string>
+    <string name="cancel_search_item">Annuler Recherche</string>
+    <string name="enter_bt_item">Entrer adresse BT</string>
+    <string name="enter_ip_item">Entrer addresse IP</string>
+    <string name="enter_item_name">Changer Nom</string>
+    <string name="enter_item_pass">Changer mot de passe</string>
+    <string name="enter_pass">Entrer mot de passe</string>
+    <string name="label_pass">Mot de passe</string>
+    <string name="clean_item">Effacer</string>
+    <string name="autoconnect_item">Autoconnecter</string>
+    <string name="log_item">Journal</string>
+    <string name="clear_log_item">Effacer journal</string>
+    <string name="back_item">Retour</string>
+    <string name="report_bug_item">"Rapport de Bug"</string>
+    <string name="default_bt">btspp://0008F4163049</string>
+    <string name="default_ip">socket://192.168.1.1:5000</string>
+    <string name="connect_to">Connecter à</string>
+    <string name="autoconnect_to">Auto-Connecter à</string>
+    <string name="connection_successful">Connecté</string>
+    <string name="connection_failed">Déconnecté</string>
+    <string name="not_found">Pas de serveur AnyRemote trouvé</string>
+    <string name="bt_turning_on">"Allumage Bluetooth"</string>
+    <string name="bt_turning_off">"Arrêt Bluetooth"</string>
+    <string name="bt_off">"Bluetooth arrêté"</string>
+    <string name="bt_on">"Bluetooth allumé"</string>
+    
+    <string name="b1">"1"</string>
+    <string name="b2">"2"</string>
+    <string name="b3">"3"</string>
+    <string name="b4">"4"</string>
+    <string name="b5">"5"</string>
+    <string name="b6">"6"</string>
+    <string name="b7">"7"</string>
+    <string name="b8">"8"</string>
+    <string name="b9">"9"</string>
+    <string name="b10">"*"</string>
+    <string name="b11">"0"</string>
+    <string name="b12">"#"</string>
+    
+    <string name="cover_description">"Image de couverture"</string>
+    
+</resources>
