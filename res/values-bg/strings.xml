@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">anyRemote</string>
+    <string name="btnCancel">Отказ</string>
+    <string name="btnOk">Ок</string>
+    <string name="searchFormUnconnected">Несвързан</string>
+    <string name="exit_item">Изход</string>
+    <string name="connect_item">Свързване</string>
+    <string name="disconnect_item">Прекъсване на връзка</string>
+    <string name="search_item">Търсене</string>
+    <string name="searching">Търсене &#8230;</string>
+    <string name="cancel_search_item">Отказ от търсене</string>
+    <string name="enter_bt_item">Въведете BT адрес</string>
+    <string name="enter_ip_item">Въведете IP адрес</string>
+    <string name="enter_item_name">Смяна на приятелско име</string>
+    <string name="enter_item_pass">Смяна на парола</string>
+    <string name="enter_pass">Въведете парола</string>
+    <string name="label_pass">Парола</string>
+    <string name="clean_item">Чист адрес</string>
+    <string name="autoconnect_item">Автоматично свързване</string>
+    <string name="log_item">Лог</string>
+    <string name="clear_log_item">Изчистване на лог</string>
+    <string name="back_item">Назад</string>
+    <string name="report_bug_item">"Докладване за грешка"</string>
+    <string name="default_bt">btspp://0008F4163049</string>
+    <string name="default_ip">socket://192.168.1.1:5000</string>
+    <string name="connect_to">Свързване към</string>
+    <string name="autoconnect_to">Автоматично свързване към</string>
+    <string name="connection_successful">Свързване успешно</string>
+    <string name="connection_failed">Свързване неуспешно</string>
+    <string name="not_found">Не са открити anyRemote сървъри</string>
+    <string name="bt_turning_on">"Bluetooth включване"</string>
+    <string name="bt_turning_off">"Bluetooth изключване"</string>
+    <string name="bt_off">"Bluetooth включен"</string>
+    <string name="bt_on">"Bluetooth изключен"</string>
+    
+    <string name="b1">"1"</string>
+    <string name="b2">"2"</string>
+    <string name="b3">"3"</string>
+    <string name="b4">"4"</string>
+    <string name="b5">"5"</string>
+    <string name="b6">"6"</string>
+    <string name="b7">"7"</string>
+    <string name="b8">"8"</string>
+    <string name="b9">"9"</string>
+    <string name="b10">"*"</string>
+    <string name="b11">"0"</string>
+    <string name="b12">"#"</string>
+    
+    <string name="cover_description">"Изображение"</string>
+    
+</resources>
