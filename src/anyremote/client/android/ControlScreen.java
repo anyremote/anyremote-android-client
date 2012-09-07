@@ -295,7 +295,7 @@ public class ControlScreen extends arActivity
 			    
 				for (int b=0;b<12;b++) {
 					buttons[b]        = (ImageButton)  findViewById(btns3x4_r90[b]);
-					buttonsLayout[0]  = (LinearLayout) findViewById(lbtns3x4_r90[b]);
+					buttonsLayout[b]  = (LinearLayout) findViewById(lbtns3x4_r90[b]);
 				}
 				
 			} else if (display.getOrientation() == Surface.ROTATION_270) {
@@ -306,7 +306,7 @@ public class ControlScreen extends arActivity
 			    
 				for (int b=0;b<12;b++) {
 					buttons[b]        = (ImageButton)  findViewById(btns3x4_r270[b]);
-					buttonsLayout[0]  = (LinearLayout) findViewById(lbtns3x4_r270[b]);
+					buttonsLayout[b]  = (LinearLayout) findViewById(lbtns3x4_r270[b]);
 				}
 	        	
 	        } else {
@@ -315,7 +315,7 @@ public class ControlScreen extends arActivity
 			    
 				for (int b=0;b<12;b++) {
 					buttons[b]        = (ImageButton)  findViewById(btns3x4[b]);
-					buttonsLayout[0]  = (LinearLayout) findViewById(lbtns3x4[b]);
+					buttonsLayout[b]  = (LinearLayout) findViewById(lbtns3x4[b]);
 				}
 	        }
 			
