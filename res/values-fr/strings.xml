@@ -29,7 +29,7 @@
     <string name="autoconnect_to">Connexion automatique à</string>
     <string name="connection_successful">Connecté</string>
     <string name="connection_failed">Déconnecté</string>
-    <string name="not_found">Aucun serveur AnyRemote n'a été trouvé</string>
+    <string name="not_found">Aucun serveur AnyRemote n\'a été trouvé</string>
     <string name="bt_turning_on">"Allumage Bluetooth"</string>
     <string name="bt_turning_off">"Arrêt Bluetooth"</string>
     <string name="bt_off">"Bluetooth arrêté"</string>
