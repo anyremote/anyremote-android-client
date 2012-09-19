@@ -233,11 +233,11 @@ public class ControlScreen extends arActivity
 			
 			for (int b=0;b<7;b++) {
 				buttons[b]        = (ImageButton)  findViewById(btns7x1[b]);
-				buttonsLayout[0]  = (LinearLayout) findViewById(lbtns7x1[b]);
+				buttonsLayout[b]  = (LinearLayout) findViewById(lbtns7x1[b]);
 			}
 			for (int b=7;b<12;b++) {
 				buttons[b]        = null;
-				buttonsLayout[0]  = null;
+				buttonsLayout[b]  = null;
 			}
 			
 	        int realCnt = 0;
