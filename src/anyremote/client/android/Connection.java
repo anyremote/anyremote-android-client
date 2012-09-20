@@ -216,7 +216,7 @@ public final class Connection implements Runnable {
 
 			connectionListenerNotifiedAboutError = true;
 
-			Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED);
+			Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, ue.getDetails());
 			msg.sendToTarget();
 		}
 	}

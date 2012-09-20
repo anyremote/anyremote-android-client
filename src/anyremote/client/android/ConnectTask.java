@@ -89,7 +89,7 @@ public class ConnectTask extends TimerTask {
 				// tell the view that we have no connection
 				anyRemote._log("ConnectTask", "run UserException " + e.getDetails());
 				
-				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED);
+				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, e.getDetails());
 			    msg.sendToTarget();
 
 				return;
@@ -113,7 +113,7 @@ public class ConnectTask extends TimerTask {
 				// tell the view that we have no connection
 				anyRemote._log("ConnectTask", "run UserException " + e.getDetails());
 				
-				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED);
+				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, e.getDetails());
 			    msg.sendToTarget();
 
 				return;

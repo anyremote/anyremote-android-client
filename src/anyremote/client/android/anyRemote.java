@@ -44,6 +44,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
+import android.widget.Toast;
 import anyremote.client.android.util.Address;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.R;
@@ -418,7 +419,12 @@ public class anyRemote extends Activity
 		case anyRemote.DISCONNECTED:
 			
 			anyRemote._log("handleMessage: DISCONNECTED");
-			//Toast.makeText(client, R.string.connection_failed, Toast.LENGTH_SHORT).show();
+			
+			if (msg.obj != null ) {
+				Resources res = getResources();
+				
+			    Toast.makeText(this, res.getString(R.string.connection_failed)+"\n"+(String) msg.obj, Toast.LENGTH_SHORT).show();
+			}
 			
 			protocol.disconnected();
 			handleEvent(anyRemote.DISCONNECTED);
