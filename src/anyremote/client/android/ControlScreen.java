@@ -177,6 +177,12 @@ public class ControlScreen extends arActivity
     	anyRemote.protocol.removeMessageHandler(hdlLocalCopy);
 		super.onDestroy();
 	}
+	
+	@Override
+	protected void onUserLeaveHint() {
+		log("onUserLeaveHint");
+		//protocol.disconnect(true);
+	}
 
     public void handleEvent(InfoMessage data) {
 	   

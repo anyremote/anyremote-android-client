@@ -202,7 +202,12 @@ AdapterView.OnItemSelectedListener {
 			addAddress(value,value,"");
 		}
 	}
-
+	
+	@Override
+	protected void onUserLeaveHint() {
+		log("onUserLeaveHint");
+		//protocol.disconnect(true);
+	}
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
