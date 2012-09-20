@@ -78,17 +78,17 @@ public class BTSocket implements ISocket {
 		  } catch (SecurityException e) {
 			  
 			anyRemote._log("BTSocket","SecurityException "+e);
-			throw new UserException("Connection Error", "Not allowed to connect to " + host);
+			throw new UserException("Connection Error", e.getMessage());
 		  
 		  } catch (IOException e) {
 			anyRemote._log("BTSocket","IOException "+e);
 			if (attempts > 10) {
-			    throw new UserException("Connection Error", "IO error while setting up the connection to " + host);
+			    throw new UserException("Connection Error", e.getMessage());
 			}
 		  } catch (Exception e) {
 			anyRemote._log("BTSocket","Exception "+e);
 			if (attempts > 10) {
-		     	throw new UserException("Connection Error", "Error while setting up the connection to " + host);
+		     	throw new UserException("Connection Error", "Error while setting up the connection " + e.getMessage());
 			}
 	      }
 		  if (isClosed) {

@@ -423,7 +423,7 @@ public class anyRemote extends Activity
 			if (msg.obj != null ) {
 				Resources res = getResources();
 				
-			    Toast.makeText(this, res.getString(R.string.connection_failed)+"\n"+(String) msg.obj, Toast.LENGTH_SHORT).show();
+			    Toast.makeText(this, res.getString(R.string.connection_failed)+"\n"+(String) msg.obj, Toast.LENGTH_LONG).show();
 			}
 			
 			protocol.disconnected();

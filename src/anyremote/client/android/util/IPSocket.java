@@ -39,14 +39,11 @@ public class IPSocket implements ISocket {
 		try {
 			this.sock = new java.net.Socket(host, port);
 		} catch (UnknownHostException e) {
-			throw new UserException("Connection Error",
-					"Given host name is unknown.");
+			throw new UserException("Connection Error", e.getMessage());
 		} catch (SecurityException e) {
-			throw new UserException("Connection Error",
-					"Not allowed to connect.");
+			throw new UserException("Connection Error", e.getMessage());
 		} catch (IOException e) {
-			throw new UserException("Connection Error",
-					"IO error while setting up the connection "+e.getMessage());
+			throw new UserException("Connection Error", e.getMessage());
 		}
 
 		try {
