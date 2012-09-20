@@ -21,7 +21,6 @@
 
 package anyremote.client.android;
 
-
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -34,7 +33,7 @@ import android.widget.Toast;
 import android.widget.TableLayout;
 import android.widget.TextView;
 //import android.text.method.ScrollingMovementMethod;
-import android.text.method.ScrollingMovementMethod;
+//import android.text.method.ScrollingMovementMethod;
 import android.view.Display;
 import android.view.MenuItem;
 import android.view.Surface;

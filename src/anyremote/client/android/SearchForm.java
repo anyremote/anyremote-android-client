@@ -47,6 +47,7 @@ import anyremote.client.android.R;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
+import anyremote.client.android.util.About;
 import anyremote.client.android.util.Address;
 import anyremote.client.android.util.AddressAdapter;
 
@@ -527,8 +528,15 @@ AdapterView.OnItemSelectedListener {
 			intentl.putExtra(anyRemote.ACTION, "log");
 			setResult(RESULT_OK, intentl);
 			finish();
-			break;			
+			break;	
+			
+	    case R.id.about_item:
+	    	
+	    	About about = new About(this);
+	    	about.setTitle(R.string.about);
+	    	about.show();	    	
 		}
+		
 		return true;
 	}
 

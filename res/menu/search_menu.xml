@@ -10,6 +10,6 @@
 	<item android:id="@+id/enter_item_pass"     android:title="@string/enter_item_pass">	</item>
 	<item android:id="@+id/clean_item"   		android:title="@string/clean_item" >	</item>
 	<item android:id="@+id/exit_item"   		android:title="@string/exit_item">	</item>
-	<item android:id="@+id/log_item"   		android:title="@string/log_item">	</item>
-
+	<item android:id="@+id/log_item"   		    android:title="@string/log_item">	</item>
+	<item android:id="@+id/about_item"   		android:title="@string/about">	</item>
 </menu>
