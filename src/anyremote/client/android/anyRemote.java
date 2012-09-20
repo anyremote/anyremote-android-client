@@ -527,12 +527,12 @@ public class anyRemote extends Activity
 			File iFile = new File(dir, "Android/data/anyremote.client.android/files/"+icon+".png");
 
 			if(iFile.canRead()) {
-				_log("getIconBitmap", icon+" found on SDCard"); 
+				//_log("getIconBitmap", icon+" found on SDCard"); 
 				Bitmap ic = BitmapFactory.decodeFile(iFile.getAbsolutePath());
 				iconMap.put(icon,ic);
 				return ic;
 			} else {
-				_log("getIconBitmap", icon+" absent on SDCard");
+				_log("getIconBitmap", iFile.getAbsolutePath()+" absent on SDCard");
 				return null;
 			}
 		}
