@@ -34,8 +34,11 @@ import android.widget.TableLayout;
 import android.widget.TextView;
 //import android.text.method.ScrollingMovementMethod;
 //import android.text.method.ScrollingMovementMethod;
+import android.view.GestureDetector.OnGestureListener;
+import android.view.GestureDetector;
 import android.view.Display;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.KeyEvent;
@@ -45,7 +48,8 @@ import anyremote.client.android.util.ProtocolMessage;
 public class ControlScreen extends arActivity 
                            implements View.OnClickListener,
                                       //View.OnTouchListener,
-                                      KeyEvent.Callback {
+                                      KeyEvent.Callback,
+                                      OnGestureListener {
   
    	static final int KEY_NUM1  = 1;
 	static final int KEY_NUM2  = 2;
@@ -79,7 +83,11 @@ public class ControlScreen extends arActivity
     static final int SK_BOTTOMLINE = 1;
    
     static final int NUM_ICONS     = 12;
-    static final int NUM_ICONS_BTM = 7;			
+    static final int NUM_ICONS_BTM = 7;	
+    
+    private static final int SWIPE_MIN_DISTANCE = 120;
+    private static final int SWIPE_MAX_OFF_PATH = 250;
+    private static final int SWIPE_THRESHOLD_VELOCITY = 200; 
     
 	static final int[] btns3x4 = { R.id.b1, R.id.b2, R.id.b3, R.id.b4, R.id.b5,
 			R.id.b6, R.id.b7, R.id.b8, R.id.b9, R.id.b10, R.id.b0, R.id.b11 };
@@ -118,6 +126,7 @@ public class ControlScreen extends arActivity
     
     ImageButton  [] buttons;
     LinearLayout [] buttonsLayout;
+    private GestureDetector gestureScanner;
       
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +137,8 @@ public class ControlScreen extends arActivity
 		
 		buttons    = new ImageButton[NUM_ICONS];
 		buttonsLayout = new LinearLayout[NUM_ICONS];
+		
+		gestureScanner = new GestureDetector(this);
 	  	
 	    hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new Handler(this));
 	    anyRemote.protocol.addMessageHandler(hdlLocalCopy);	    
@@ -617,6 +628,11 @@ public class ControlScreen extends arActivity
     	}
     	return false;
     }*/
+    
+    @Override
+    public boolean onTouchEvent(MotionEvent me) {
+        return gestureScanner.onTouchEvent(me);
+    }
 	
 	private String key2str(int keyCode) { 
 		
@@ -814,4 +830,59 @@ public class ControlScreen extends arActivity
 		}
 		return id;
 	}
+	
+	@Override
+    public boolean onDown(MotionEvent e) {
+        log("onDown");
+        return true;
+    }
+   
+    @Override
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        log("onFling " + e1.getX() + " " + e1.getY() + " " 
+        		       + e2.getX() + " " + e2.getY() + " " 
+        		       + velocityX + " " + velocityY);
+        try {
+            //if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH) {
+            //    return false;
+            //}
+            
+            // right to left swipe
+            if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                clickOn("SlideLeft");
+            } else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE && Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+                clickOn("SlideRight");
+            } else if (e1.getY() - e2.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                 clickOn("SlideUp");
+            } else if (e2.getY() - e1.getY() > SWIPE_MIN_DISTANCE && Math.abs(velocityY) > SWIPE_THRESHOLD_VELOCITY) {
+                clickOn("SlideDown");
+            }
+        } catch (Exception e) {
+            // nothing
+        }
+
+        return true;
+    }
+   
+    @Override
+    public void onLongPress(MotionEvent e) {
+        //log("onLongPress");
+    }
+   
+    @Override
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        //log("onScroll");
+        return true;
+    }
+   
+    @Override
+    public void onShowPress(MotionEvent e) {
+        //log("onShowPress");
+    }    
+   
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        //log("onSingleTapUp");
+        return true;
+    }
 }
