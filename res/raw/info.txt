@@ -1,5 +1,6 @@
 <h3>anyRemote</h3>
 Version 1.0<br>
-Copyright 2012<br>
+Copyright 2012 <br>
+Mikhail Fedotov<br>
 <b>anyremote.sf.net</b>
 <br><br><br><br>
