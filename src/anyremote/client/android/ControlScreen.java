@@ -155,6 +155,8 @@ public class ControlScreen extends arActivity
 		//MainLoop.enable();
 		super.onResume();
 		
+		exiting = false;
+		
         if (anyRemote.status == anyRemote.DISCONNECTED) {
         	log("onResume no connection");	
         	doFinish("");
@@ -162,7 +164,6 @@ public class ControlScreen extends arActivity
  
         redraw();
 		popup();
-
 	}
 	
 	@Override
@@ -180,8 +181,12 @@ public class ControlScreen extends arActivity
 	
 	@Override
 	protected void onUserLeaveHint() {
-		log("onUserLeaveHint");
-		//protocol.disconnect(true);
+		log("onUserLeaveHint - make disconnect");
+		// no time to sending events
+		//commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
+		if (!exiting) {
+	    	anyRemote.protocol.disconnect(true);
+		}
 	}
 
     public void handleEvent(InfoMessage data) {
@@ -661,6 +666,12 @@ public class ControlScreen extends arActivity
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) { 
 		//log("onKeyUp "+keyCode);
+		
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
+			return true;
+		}		
+		
 		String key = key2str(keyCode); 
 		if (key.length() > 0) {
             anyRemote.protocol.queueCommand(key, false);
@@ -677,6 +688,7 @@ public class ControlScreen extends arActivity
             anyRemote.protocol.queueCommand(key, true);
             return true;
 		}
+		log("onKeyDown TRANSFER "+keyCode);
 	    return false;
     }
 
@@ -707,10 +719,11 @@ public class ControlScreen extends arActivity
 		return true;
 	}
 	
-	@Override
-	public void onBackPressed() { 
-		commandAction(anyRemote.protocol.context.getString(R.string.exit_item));
-	}
+	//@Override
+	//public void onBackPressed() { 
+	//	log("onBackPressed");
+	//	commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
+	//}
 	
 	public void commandAction(String command) {
 		log("commandAction "+command);
@@ -736,6 +749,9 @@ public class ControlScreen extends arActivity
 	    final Intent intent = new Intent();  
 	    intent.putExtra(anyRemote.ACTION, action);
         setResult(RESULT_OK, intent);
+        
+        exiting = true;
+       
         finish();  	
     }
 	

@@ -187,12 +187,6 @@ public class anyRemote extends Activity
 	//	super.onStop();	
 	//	//protocol.pauseConnection();
 	//}
-	
-	@Override
-	protected void onUserLeaveHint() {
-		_log("onUserLeaveHint");
-		//protocol.disconnect(true);
-	}
 
 	public void setCurrentView(int which, String subCommand) {
 		_log("setCurrentView " + getScreenStr(which) + " (was " + getScreenStr(currForm) + ") finish="+finishFlag);

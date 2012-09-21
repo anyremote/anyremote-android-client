@@ -108,6 +108,8 @@ public class TextScreen extends arActivity  {
 		//MainLoop.enable();
 		super.onResume();
 		
+		exiting = false;
+		
         if (anyRemote.status == anyRemote.DISCONNECTED && 
         	!isLog) {
         	
@@ -147,6 +149,13 @@ public class TextScreen extends arActivity  {
 		return super.onContextItemSelected(item);
 	}	
 	
+	@Override
+	protected void onUserLeaveHint() {
+		log("onUserLeaveHint - make disconnect");
+		if (!exiting) {
+		    anyRemote.protocol.disconnect(true);
+		}
+	}
 	
 	@Override
 	protected void doFinish(String action) {
@@ -162,7 +171,7 @@ public class TextScreen extends arActivity  {
 		if (!isLog) {
 			log("doFinish finish");
 		}
-		
+		exiting = true;
 		finish();  	
 	}
 

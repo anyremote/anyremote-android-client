@@ -91,7 +91,9 @@ public class ListScreen extends arActivity
 	protected void onResume() {
 		log("onResume");
 		//MainLoop.enable();
-		super.onResume();	
+		super.onResume();
+		
+		exiting = false;	
 		
         if (anyRemote.status == anyRemote.DISCONNECTED) {
         	log("onResume no connection");	
@@ -153,7 +155,8 @@ public class ListScreen extends arActivity
 	protected void doFinish(String action) {
 
 		log("doFinish");
-		finish();  	
+	    exiting = true;
+	    finish();  	
 	}
 
 	/*@Override
@@ -195,6 +198,14 @@ public class ListScreen extends arActivity
 		commandAction(item.getTitle().toString(), itemText, anyRemote.protocol.listSelectPos);
 		
 		return true;
+	}
+	
+	@Override
+	protected void onUserLeaveHint() {
+		log("onUserLeaveHint - make disconnect");
+		if (!exiting) {
+			anyRemote.protocol.disconnect(true);
+		}
 	}
 
 	public void commandAction(String command, String value, int pos) {

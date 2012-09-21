@@ -38,6 +38,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -203,11 +204,6 @@ AdapterView.OnItemSelectedListener {
 		}
 	}
 	
-	@Override
-	protected void onUserLeaveHint() {
-		log("onUserLeaveHint");
-		//protocol.disconnect(true);
-	}
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
@@ -508,12 +504,7 @@ AdapterView.OnItemSelectedListener {
 
 		case R.id.exit_item:
 
-			stopBluetoothDiscovery();
-
-			final Intent intente = new Intent();
-			intente.putExtra(anyRemote.ACTION, "exit");
-			setResult(RESULT_OK, intente);
-			finish();
+			doExit();
 			break;
 
 		case R.id.clean_item:
@@ -543,6 +534,26 @@ AdapterView.OnItemSelectedListener {
 		}
 		
 		return true;
+	}
+	
+	public void doExit() { 
+		
+		stopBluetoothDiscovery();
+	
+		final Intent intente = new Intent();
+		intente.putExtra(anyRemote.ACTION, "exit");
+		setResult(RESULT_OK, intente);
+		finish();
+	}
+	
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event) { 
+		
+		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			doExit();
+			return true;
+		}
+		return false;
 	}
 
 	public void stopBluetoothDiscovery() {

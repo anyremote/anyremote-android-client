@@ -74,6 +74,8 @@ public class WinManager extends arActivity  {
 	protected void onResume() {
 		log("onResume");
 		super.onResume();
+
+		exiting = false;
 		
         if (anyRemote.status == anyRemote.DISCONNECTED) {
           	log("onResume no connection");
@@ -108,11 +110,19 @@ public class WinManager extends arActivity  {
 		return super.onContextItemSelected(item);
 	}	
 	
+	@Override
+	protected void onUserLeaveHint() {
+		log("onUserLeaveHint - make disconnect");
+		if (!exiting) {
+			anyRemote.protocol.disconnect(true);
+		}
+	}
 	
 	@Override
 	protected void doFinish(String action) {
 		
 		log("doFinish");
+		exiting = true;
 		finish();  	
 	}
 

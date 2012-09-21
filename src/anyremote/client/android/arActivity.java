@@ -40,6 +40,7 @@ public class arActivity extends Activity
 	//protected Vector<String> menuItems;
 	protected String prefix = "";	
 	private boolean skipDismissEditDialog = false;
+	protected boolean exiting = false;
 	
 	public boolean handleMessage(Message msg) {
 		handleEvent((InfoMessage) msg.obj);
