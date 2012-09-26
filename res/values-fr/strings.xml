@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    
+    <string name="about">À propos</string>
     <string name="app_name">anyRemote</string>
     <string name="btnCancel">Annuler</string>
     <string name="btnOk">Ok</string>
