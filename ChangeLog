@@ -1,6 +1,6 @@
-* Fri Aug 16 2012 Mikhail Fedotov <anyremote at mail.ru> - 1.1
+* Mon Sep 26 2012 Mikhail Fedotov <anyremote at mail.ru> - 1.1
 - Support Set(vibrate,duration) command. Support slide events.
-  Add some translations. Some bugfixes and enhancements.
+  Add translations. Some bugfixes and enhancements.
 
 * Fri Jun 29 2012 Mikhail Fedotov <anyremote at mail.ru> - 1.0
 - Do not switch screen on Set(*,close) commands. Allow Set(layout,3x4|7x1)
