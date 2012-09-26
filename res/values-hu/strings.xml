@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="about">Névjegy</string>
     <string name="app_name">anyRemote</string>
     <string name="btnCancel">Mégsem</string>
     <string name="btnOk">Ok</string>

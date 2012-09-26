@@ -86,7 +86,7 @@ public class ControlScreen extends arActivity
     static final int NUM_ICONS_BTM = 7;	
     
     private static final int SWIPE_MIN_DISTANCE = 120;
-    private static final int SWIPE_MAX_OFF_PATH = 250;
+    //private static final int SWIPE_MAX_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200; 
     
 	static final int[] btns3x4 = { R.id.b1, R.id.b2, R.id.b3, R.id.b4, R.id.b5,
@@ -831,13 +831,11 @@ public class ControlScreen extends arActivity
 		return id;
 	}
 	
-	@Override
     public boolean onDown(MotionEvent e) {
         log("onDown");
         return true;
     }
    
-    @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
         log("onFling " + e1.getX() + " " + e1.getY() + " " 
         		       + e2.getX() + " " + e2.getY() + " " 
@@ -864,23 +862,19 @@ public class ControlScreen extends arActivity
         return true;
     }
    
-    @Override
     public void onLongPress(MotionEvent e) {
         //log("onLongPress");
     }
    
-    @Override
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
         //log("onScroll");
         return true;
     }
    
-    @Override
     public void onShowPress(MotionEvent e) {
         //log("onShowPress");
     }    
    
-    @Override
     public boolean onSingleTapUp(MotionEvent e) {
         //log("onSingleTapUp");
         return true;
