@@ -27,15 +27,21 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.MotionEvent;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.view.GestureDetector.OnGestureListener;
+import android.view.GestureDetector;
 import anyremote.client.android.util.InfoMessage;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.R;
 
-public class WinManager extends arActivity  {
+public class WinManager extends arActivity 
+                        implements OnGestureListener {
 	
-	ImageView image;
+    ImageButton image;
 	Dispatcher.ArHandler hdlLocalCopy;
+	private GestureDetector gestureScanner;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +50,9 @@ public class WinManager extends arActivity  {
 
 		setContentView(R.layout.win_manager);
 		
-		image = (ImageView) findViewById(R.id.window);	
+		image = (ImageButton) findViewById(R.id.window);
+		
+		gestureScanner = new GestureDetector(this,this);	
 				
 		hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.WMAN_FORM, new Handler(this));
 		anyRemote.protocol.addMessageHandler(hdlLocalCopy);
@@ -92,6 +100,19 @@ public class WinManager extends arActivity  {
 	   	anyRemote.protocol.removeMessageHandler(hdlLocalCopy);		
 	   	super.onDestroy();
 	}
+	
+	@Override 
+    public boolean dispatchTouchEvent(MotionEvent ev) { 
+		//log("dispatchTouchEvent");
+        super.dispatchTouchEvent(ev); 
+        return gestureScanner.onTouchEvent(ev); 
+	}
+	
+    @Override
+    public boolean onTouchEvent(MotionEvent me) {
+    	//log("onTouchEvent");
+        return gestureScanner.onTouchEvent(me);
+    }
 
 	// Handle long-click
 	@Override
@@ -163,5 +184,54 @@ public class WinManager extends arActivity  {
 			// should not come here
 			redraw();
 		}
-	}		
+	}	
+	
+    public boolean onDown(MotionEvent e) {
+        //log("onDown");
+        return true;
+    }
+   
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        //log("onFling " + e1.getX() + " " + e1.getY() + " " 
+        //		       + e2.getX() + " " + e2.getY() + " " 
+        //		       + velocityX + " " + velocityY);
+        try {
+             // right to left swipe
+            if (e1.getX() - e2.getX() > anyRemote.SWIPE_MIN_DISTANCE && 
+            		   Math.abs(velocityX) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
+                commandAction("ImageSlideLeft");
+            } else if (e2.getX() - e1.getX() > anyRemote.SWIPE_MIN_DISTANCE && 
+            		   Math.abs(velocityX) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
+            	commandAction("ImageSlideRight");
+            } else if (e1.getY() - e2.getY() > anyRemote.SWIPE_MIN_DISTANCE && 
+            		   Math.abs(velocityY) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
+            	commandAction("ImageSlideUp");
+            } else if (e2.getY() - e1.getY() > anyRemote.SWIPE_MIN_DISTANCE && 
+            		   Math.abs(velocityY) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
+            	commandAction("ImageSlideDown");
+            }
+        } catch (Exception e) {
+            // nothing
+        }
+
+        return true;
+    }
+   
+    public void onLongPress(MotionEvent e) {
+        //log("onLongPress");
+    }
+   
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        //log("onScroll");
+        return true;
+    }
+   
+    public void onShowPress(MotionEvent e) {
+        //log("onShowPress");
+    }    
+   
+    public boolean onSingleTapUp(MotionEvent e) {
+        //log("onSingleTapUp");
+        return true;
+    }
 }

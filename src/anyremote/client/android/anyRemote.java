@@ -52,9 +52,12 @@ import anyremote.client.android.R;
 public class anyRemote extends Activity 
                        implements Handler.Callback {
 
-	public static final int  DISCONNECTED = 0;
-	public static final int  CONNECTED    = 1;
-	public static final int  COMMAND      = 2;
+	public static final int DISCONNECTED = 0;
+	public static final int CONNECTED    = 1;
+	public static final int COMMAND      = 2;
+	
+	public static final int SWIPE_MIN_DISTANCE = 120;
+    public static final int SWIPE_THRESHOLD_VELOCITY = 200; 
 
 	static final int  NO_FORM      = 0;
 	static final int  SEARCH_FORM  = 1;

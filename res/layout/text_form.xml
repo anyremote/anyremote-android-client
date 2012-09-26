@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent">
-	<TextView android:text="@+id/text_from" android:id="@+id/text_form"
-		android:scrollbars="vertical" android:layout_width="fill_parent" android:layout_height="fill_parent"
-		android:scrollHorizontally="false"></TextView>
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <TextView
+        android:id="@+id/text_form"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:scrollHorizontally="false"
+        android:scrollbars="vertical"
+        android:text="@+id/text_from" >
+    </TextView>
 
 </LinearLayout>

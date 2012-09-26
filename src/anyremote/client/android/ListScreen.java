@@ -34,7 +34,10 @@ import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyEvent;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.GestureDetector.OnGestureListener;
+import android.view.GestureDetector;
 import anyremote.client.android.util.ListScreenAdapter;
 import anyremote.client.android.util.ListItem;
 import anyremote.client.android.util.InfoMessage;
@@ -44,7 +47,8 @@ import anyremote.client.android.R;
 public class ListScreen extends arActivity 
 						implements OnItemClickListener,
 								   AdapterView.OnItemSelectedListener,
-								   KeyEvent.Callback {
+								   KeyEvent.Callback,
+								   OnGestureListener {
 
 	ListView          list;
 	ListScreenAdapter dataSource;
@@ -52,6 +56,8 @@ public class ListScreen extends arActivity
 	ArrayList<ListItem> listItems;
 
 	boolean skipDismissEditDialog = false;
+	
+	private GestureDetector gestureScanner;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +66,7 @@ public class ListScreen extends arActivity
 
 		prefix = "ListScreen"; // log stuff
 		log("onCreate");
-		
+			
 		listItems  = new ArrayList<ListItem>();
 		dataSource = new ListScreenAdapter(this, R.layout.list_form_item, listItems);
 		
@@ -73,6 +79,8 @@ public class ListScreen extends arActivity
 		list.setAdapter(dataSource); 
 		list.setOnItemSelectedListener(this);
 		list.setOnItemClickListener   (this); 
+		
+		gestureScanner = new GestureDetector(this);
 		
 		registerForContextMenu(list);
 	}
@@ -187,6 +195,18 @@ public class ListScreen extends arActivity
 			}
 		}
 	}
+	
+	@Override 
+    public boolean dispatchTouchEvent(MotionEvent ev) { 
+		//log("dispatchTouchEvent");
+        super.dispatchTouchEvent(ev); 
+        return gestureScanner.onTouchEvent(ev); 
+	}
+
+	@Override
+    public boolean onTouchEvent(MotionEvent me) {
+        return gestureScanner.onTouchEvent(me);
+    }
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
@@ -300,5 +320,49 @@ public class ListScreen extends arActivity
 		} 
 		return false;
 	}
-}
+    public boolean onDown(MotionEvent e) {
+        //log("onDown");
+        return true;
+    }
+   
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+        //log("onFling " + e1.getX() + " " + e1.getY() + " " 
+        //		       + e2.getX() + " " + e2.getY() + " " 
+        //		       + velocityX + " " + velocityY);
+        try {
+             // right to left swipe
+            if (e1.getX() - e2.getX() > anyRemote.SWIPE_MIN_DISTANCE && 
+            		   Math.abs(velocityX) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
+                commandAction("ListSlideLeft","",-1);
+            } else if (e2.getX() - e1.getX() > anyRemote.SWIPE_MIN_DISTANCE && 
+            		   Math.abs(velocityX) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
+            	commandAction("ListSlideRight","",-1);
+            } else {
+             	return false;
+            }
+        } catch (Exception e) {
+            // nothing
+        }
+
+        return true;
+    }
+   
+    public void onLongPress(MotionEvent e) {
+        //log("onLongPress");
+    }
+   
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        //log("onScroll");
+        return true;
+    }
+   
+    public void onShowPress(MotionEvent e) {
+        //log("onShowPress");
+    }    
+   
+    public boolean onSingleTapUp(MotionEvent e) {
+        //log("onSingleTapUp");
+        return true;
+    }
+ }
 

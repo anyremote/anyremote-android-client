@@ -29,17 +29,21 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.GestureDetector.OnGestureListener;
+import android.view.GestureDetector;
 import android.widget.TextView;
 import anyremote.client.android.util.InfoMessage;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.R;
 
-public class TextScreen extends arActivity  {
+public class TextScreen extends arActivity implements OnGestureListener {
 
 	TextView  text;
 	Dispatcher.ArHandler hdlLocalCopy;
 	boolean isLog = false;
+	private GestureDetector gestureScanner;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +64,8 @@ public class TextScreen extends arActivity  {
 			log("onCreate");
 			
 		} else {
+			
+			gestureScanner = new GestureDetector(this);
 			
 			hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.TEXT_FORM, new Handler(this));
 			anyRemote.protocol.addMessageHandler(hdlLocalCopy);
@@ -141,6 +147,18 @@ public class TextScreen extends arActivity  {
 			addContextMenu(menu);
 		}
 	}
+
+	@Override 
+    public boolean dispatchTouchEvent(MotionEvent ev) { 
+		//log("dispatchTouchEvent");
+        super.dispatchTouchEvent(ev); 
+        return (isLog ? false : gestureScanner.onTouchEvent(ev)); 
+	}
+
+    @Override
+    public boolean onTouchEvent(MotionEvent me) {
+        return (isLog ? false : gestureScanner.onTouchEvent(me));
+    }
 
 	// Handle context menu, opened by long-click
 	@Override
@@ -254,4 +272,49 @@ public class TextScreen extends arActivity  {
 		ttx.setTypeface (anyRemote.protocol.textTFace);
 		ttx.setTextSize (anyRemote.protocol.textFSize);
 	}
-}
+	
+    public boolean onDown(MotionEvent e) {
+        //log("onDown");
+        return true;
+    }
+   
+    public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+    	if (isLog) {
+    		return false;
+    	}
+    		
+    	try {
+             // right to left swipe
+            if (e1.getX() - e2.getX() > anyRemote.SWIPE_MIN_DISTANCE && 
+            		   Math.abs(velocityX) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
+                commandAction("TextSlideLeft");
+            } else if (e2.getX() - e1.getX() > anyRemote.SWIPE_MIN_DISTANCE && 
+            		   Math.abs(velocityX) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
+            	commandAction("TextSlideRight");
+            } else {
+             	return false;
+            }
+        } catch (Exception e) {
+            // nothing
+        }
+        return true;
+    }
+   
+    public void onLongPress(MotionEvent e) {
+        //log("onLongPress");
+    }
+   
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+        //log("onScroll");
+        return true;
+    }
+   
+    public void onShowPress(MotionEvent e) {
+        //log("onShowPress");
+    }    
+   
+    public boolean onSingleTapUp(MotionEvent e) {
+        //log("onSingleTapUp");
+        return true;
+    }
+ }
