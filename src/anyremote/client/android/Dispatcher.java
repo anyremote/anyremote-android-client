@@ -231,7 +231,7 @@ public class Dispatcher {
 	public void setDefValues() {
 		
 		for (int i=0;i<ControlScreen.NUM_ICONS;i++) {
-			cfIcons[i] = "default";
+			cfIcons[i] = "none";
 		}
 		cfSkin = ControlScreen.SK_DEFAULT;
 		cfUpEvent   = "UP";

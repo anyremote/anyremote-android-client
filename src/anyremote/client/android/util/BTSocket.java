@@ -77,18 +77,18 @@ public class BTSocket implements ISocket {
             isClosed = false;
 		  } catch (SecurityException e) {
 			  
-			anyRemote._log("BTSocket","SecurityException "+e);
+			anyRemote._log("BTSocket","SecurityException "+e.getMessage());
 			throw new UserException("Connection Error", e.getMessage());
 		  
 		  } catch (IOException e) {
-			anyRemote._log("BTSocket","IOException "+e);
+			anyRemote._log("BTSocket","IOException "+e.getMessage());
 			if (attempts > 10) {
 			    throw new UserException("Connection Error", e.getMessage());
 			}
 		  } catch (Exception e) {
-			anyRemote._log("BTSocket","Exception "+e);
+			anyRemote._log("BTSocket","Exception "+e.getMessage());
 			if (attempts > 10) {
-		     	throw new UserException("Connection Error", "Error while setting up the connection " + e.getMessage());
+		     	throw new UserException("Connection Error", e.getMessage());
 			}
 	      }
 		  if (isClosed) {
@@ -109,7 +109,8 @@ public class BTSocket implements ISocket {
 			try {
 				sock.close();
 			} catch (IOException e1) { }
-			throw new UserException("Connecting failed", "IO Error while opening input stream.", e);
+			anyRemote._log("BTSocket","Exception on input stream "+e.getMessage());
+			throw new UserException("Connecting failed", e.getMessage());
 		}
 
 		try {
@@ -119,7 +120,8 @@ public class BTSocket implements ISocket {
 				is.close();
 				sock.close();
 			} catch (IOException e1) { }
-			throw new UserException("Connecting failed", "IO Error while opening output stream.", e);
+			anyRemote._log("BTSocket","Exception on output stream "+e.getMessage());
+			throw new UserException("Connecting failed", e.getMessage());
 		}
 		anyRemote._log("BTSocket","CONNECTED");
 	}
