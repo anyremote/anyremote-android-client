@@ -102,6 +102,7 @@ public class BTSocket implements ISocket {
 			break;
 		  }
 		}
+		
 		anyRemote._log("BTSocket","setup streams");
 		try {
 			is = sock.getInputStream();
@@ -143,6 +144,11 @@ public class BTSocket implements ISocket {
 			is.close();
 		} catch (IOException e) { }
 	}
+	
+	// API level 14 or higher
+	//public boolean isConnected() {
+	//	return sock.isConnected();
+	//}
 
 	//@Override
 	public InputStream getInputStream() {

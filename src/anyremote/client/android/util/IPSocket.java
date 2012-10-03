@@ -71,7 +71,10 @@ public class IPSocket implements ISocket {
 
 	}
 
-	//@Override
+	//public boolean isConnected() {
+	//	return sock.isConnected();
+	//}
+	
 	public void close() {
 		try {
 			sock.close();
@@ -87,12 +90,10 @@ public class IPSocket implements ISocket {
 		}
 	}
 
-	//@Override
 	public InputStream getInputStream() {
 		return is;
 	}
 
-	//@Override
 	public OutputStream getOutputStream() {
 		return os;
 	}

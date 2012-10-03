@@ -26,6 +26,7 @@ import java.io.OutputStream;
 
 public interface ISocket {
 	public void close();
+	//public boolean isConnected(); BluetoothSocket API level 14 or higher
 	public InputStream getInputStream();
 	public OutputStream getOutputStream();
 
