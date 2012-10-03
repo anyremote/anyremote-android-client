@@ -25,6 +25,7 @@ package anyremote.client.android;
 import java.util.TimerTask;
 
 import android.os.Message;
+import android.widget.Toast;
 import anyremote.client.android.Connection;
 import anyremote.client.android.util.BTSocket;
 import anyremote.client.android.util.IPSocket;
@@ -53,14 +54,9 @@ public class ConnectTask extends TimerTask {
 		ISocket s = null;
 
 		if (type == WIFI) {
-			/*
-			 * Create a socket (note that WifiSocket is a wrapper around java.net.Socket
-			 * which implements ISocket - this is because we need a uniform socket
-			 * interface for JAndroid client). The socket parameters are
-			 * for connecting to localhost from an emulated Android device. The
-			 * socket creation should be done in an extra thread (e.g. using the
-			 * MainLoop) to not block the UI.
-			 */
+
+			// Create a socket. The socket creation should be done in an extra thread 
+			// (e.g. using the MainLoop) to not block the UI.
 
 			try {
 
@@ -97,40 +93,39 @@ public class ConnectTask extends TimerTask {
 		}
 
 		if (type == BLUETOOTH) {
-			/*
-			 * Create a socket (note that BluetoothSocket is a wrapper around android.bluetooth.BluetoothSocket
-			 * which implements ISocket - this is because we need a uniform socket
-			 * interface for Android client). The socket parameters are
-			 * for connecting to localhost from an emulated Android device. The
-			 * socket creation should be done in an extra thread (e.g. using the
-			 * MainLoop) to not block the UI.
-			 */
+
+			// Create a socket. The socket creation should be done in an extra thread 
+			// (e.g. using the MainLoop) to not block the UI.
 
 			try {
 				s = new BTSocket(host.substring(8)); // strip btspp://
 			} catch (UserException e) {
-
 				// tell the view that we have no connection
 				anyRemote._log("ConnectTask", "run UserException " + e.getDetails());
-				
 				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, e.getDetails());
 			    msg.sendToTarget();
-
+				return;
+			} catch (Exception e) {
+				anyRemote._log("ConnectTask", "run Exception " + e.getMessage());
+				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, e.getMessage());
+			    msg.sendToTarget();
 				return;
 			}
 		}
 
-		if (s == null) return;
+		if (s == null) {
+			anyRemote._log("ConnectTask", "NULL socket ");
+			Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, "can not obtain socket");
+		    msg.sendToTarget();
+			return;
+		}
 
-		//anyRemote._log("ConnectTask", "run: get connection");
-		/* 
-		 * Given the socket and the client info, we can set up a connection. A
-		 * connection cares about exchanging initial messages between client and
-		 * server. If a connections has been established it provides a Protocol
-		 * class which can be used to interact with the server. A
-		 * connection automatically creates it's own thread, so this call
-		 * returns immediately.
-		 */
+		// Given the socket and the client info, we can set up a connection. A
+		// connection cares about exchanging initial messages between client and
+		// server. If a connections has been established it provides a Protocol
+		// class which can be used to interact with the server. A
+		// connection automatically creates it's own thread, so this call
+		// returns immediately.
 		new Connection(s, connectionListener);
 	}
 

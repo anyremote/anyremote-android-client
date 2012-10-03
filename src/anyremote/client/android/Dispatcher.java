@@ -25,6 +25,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimerTask;
 import java.util.Vector;
 import android.content.ComponentName;
@@ -913,18 +914,19 @@ public class Dispatcher {
 		editor.putString(currentConnName, UP);
 		editor.commit();
 	}
-
+	
 	public Vector<Address> loadPrefs() {
-
+		
 		SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
-		Vector<Address>  addressesA = new Vector<Address>();
+		Vector<Address>  addresses = new Vector<Address>();
 
 		try {
 			Map<String, String> datam = (Map<String, String>) preference.getAll();    
 
-			Iterator it = datam.entrySet().iterator();
+			Iterator<Map.Entry<String, String>> it = datam.entrySet().iterator();
+			
 			while (it.hasNext()) {
-				Map.Entry pairs = (Map.Entry)it.next();
+				Map.Entry<String, String> pairs = (Map.Entry<String, String>) it.next();
 
 				String url_pass = (String)  pairs.getValue();
 				int p = url_pass.lastIndexOf('\n');
@@ -935,14 +937,14 @@ public class Dispatcher {
 					a.URL =  url_pass.substring(0, p);
 					a.pass = url_pass.substring(p);
 
-					addressesA.add(a);
+					addresses.add(a);
 				}
 			}		    
 		} catch(Exception z) { }
-
-		return addressesA;
+		
+		return addresses;
 	}
-
+	
 	public void cleanAddress(String name) {
 		//log("cleanAddress "+name);
 

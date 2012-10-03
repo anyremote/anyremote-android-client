@@ -83,12 +83,10 @@ public class anyRemote extends Activity
 	private static int  currForm = NO_FORM;
 	static int         status;
 	static Dispatcher  protocol;
-	//public static int runningCount = 0;
-	
-	Vector<Address>    addressesA;
+
 	public static boolean  finishFlag = false;
 	
-	private static TreeMap iconMap = new TreeMap(); //String.CASE_INSENSITIVE_ORDER);
+	private static TreeMap<String,Bitmap> iconMap = new TreeMap<String,Bitmap>();
 
 	private Handler viewHandler;
 	
@@ -110,7 +108,7 @@ public class anyRemote extends Activity
 		
 		_log("onCreate "+android.os.Build.MODEL+ " " +android.os.Build.VERSION.CODENAME+" "+android.os.Build.VERSION.RELEASE);
 		
-		protocol        = new Dispatcher(this);
+		protocol = new Dispatcher(this);
 
 		//requestWindowFeature(Window.FEATURE_NO_TITLE);
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -306,7 +304,6 @@ public class anyRemote extends Activity
 					protocol.doConnect(connName, autoConnTo, connPass);
 				} else if (connTo != null && connTo.length() > 0) {
 					setProgressBarIndeterminateVisibility(true);	
-					//Toast.makeText(this, "Connecting...", Toast.LENGTH_SHORT).show();	
 					protocol.doConnect(connName, connTo, connPass);
 				} else {
 					setCurrentView(DUMMY_FORM, "");

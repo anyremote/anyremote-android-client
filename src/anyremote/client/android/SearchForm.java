@@ -21,9 +21,7 @@
 
 package anyremote.client.android;
 
-import java.util.ArrayList;
 import java.util.Vector;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -64,9 +62,6 @@ AdapterView.OnItemSelectedListener {
 
 	ListView searchList;
 	AddressAdapter dataSource;
-
-	ArrayList<String> addresses;
-	Vector<Address> addressesA;
 	int selected = -1;
 
 	private BluetoothAdapter mBtAdapter;
@@ -98,16 +93,9 @@ AdapterView.OnItemSelectedListener {
 
 		registerForContextMenu(searchList);
 
-		loadPrefs();
-
-		addresses = new ArrayList<String>();
-		for (int i = 0;i< addressesA.size();i++) {		
-			addresses.add(addressesA.elementAt(i).name);
-		}
-
-		dataSource = new AddressAdapter(this, R.layout.search_list_item, addresses);
+		dataSource = new AddressAdapter(this, R.layout.search_list_item, anyRemote.protocol.loadPrefs());
 		searchList.setAdapter(dataSource);
-
+		
 		searchList.setOnItemSelectedListener(this);
 
 		// Register for broadcasts when a device is discovered
@@ -120,25 +108,23 @@ AdapterView.OnItemSelectedListener {
 
 		// Get the local Bluetooth adapter
 		mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-		
-		if (addresses.size() == 0) { // first-time run
+
+		if (dataSource.size() == 0) { // first-time run
 			Toast.makeText(this, "Press Menu ...", Toast.LENGTH_SHORT).show();
+		} else {
+	        Address auto = dataSource.getItem("__AUTOCONNECT__");
+			if (auto != null) {
+				doConnect(auto.URL, anyRemote.AUTOCONNECT_TO);
+			}
 		}
 	}
 
 	//@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {		
-		doConnect(dataSource.getItem(arg2),anyRemote.CONNECT_TO);
-	}
-
-	public void loadPrefs() {
-
-		addressesA = anyRemote.protocol.loadPrefs();
-		for( int i = 0; i < addressesA.size(); i++) {
-			if (addressesA.elementAt(i).name.compareTo("__AUTOCONNECT__") == 0) {
-				doConnect(addressesA.elementAt(i).URL, anyRemote.AUTOCONNECT_TO);
-			}
-		}
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		Address a = dataSource.getItem(arg2);
+		if (a != null) {
+		    doConnect(a.name,anyRemote.CONNECT_TO);
+	    }
 	}
 
 	public void  handleEditFieldResult(int id, String button, String value) {
@@ -161,7 +147,7 @@ AdapterView.OnItemSelectedListener {
 				cleanAddress(connectName);
 				dataSource.remove(connectName);
 
-				if (dataSource.addIfNew(value)) {
+				if (dataSource.addIfNew(value,connectTo,connectPass)) {
 					addAddress(value,connectTo,connectPass);
 				}
 			}
@@ -169,7 +155,6 @@ AdapterView.OnItemSelectedListener {
 		}
 
 		if (id == Dispatcher.CMD_EDIT_FORM_PASS) { 
-
 			addAddress(connectName,connectTo,value);
 			return;
 		}
@@ -178,7 +163,7 @@ AdapterView.OnItemSelectedListener {
 		if (value.length() == 0) return;
 		
 		// Format control
-		if (id == Dispatcher.CMD_EDIT_FORM_BT) { // value.startsWith("btspp:"))
+		if (id == Dispatcher.CMD_EDIT_FORM_BT) { 
 			 
 			// Samsung's does allows BT address only in capital
 			StringBuffer baddr = new StringBuffer("btspp://");
@@ -199,7 +184,7 @@ AdapterView.OnItemSelectedListener {
 			value = new String(baddr);	       
 		}
 
-		if (dataSource.addIfNew(value)) {
+		if (dataSource.addIfNew(value,value,"")) {
 			addAddress(value,value,"");
 		}
 	}
@@ -214,9 +199,9 @@ AdapterView.OnItemSelectedListener {
 		}
 
 		// Unregister broadcast listeners
-		this.unregisterReceiver(mReceiver);
+		unregisterReceiver(mReceiver);
 		if (deregStateRcv) {
-			this.unregisterReceiver(mBTStateReceiver);
+			unregisterReceiver(mBTStateReceiver);
 		}
 	}
 
@@ -240,8 +225,9 @@ AdapterView.OnItemSelectedListener {
 	public boolean onContextItemSelected(MenuItem item) {
 
 		final AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-
-		final String address = dataSource.getItem(info.position);
+		
+		Address a = dataSource.getItem(info.position);
+		final String address = a.name;
 
 		switch (item.getItemId()) {
 
@@ -331,9 +317,9 @@ AdapterView.OnItemSelectedListener {
 
 				// If it's already paired, skip it, because it's been listed already
 				//if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-				if (dataSource.addIfNew(device.getName())) {
-					addAddress(device.getName(),"btspp://"+device.getAddress(),"");
-				}
+					if (dataSource.addIfNew(device.getName(), "btspp://"+device.getAddress(), "")) {
+						//addAddress(device.getName(),"btspp://"+device.getAddress(),"");
+					}
 				//}
 
 				// When discovery is finished, change the Activity title
@@ -360,32 +346,34 @@ AdapterView.OnItemSelectedListener {
 			String stateExtra = BluetoothAdapter.EXTRA_STATE;
 			int state = intent.getIntExtra(stateExtra, -1);
 			switch (state) {
-			case (BluetoothAdapter.STATE_TURNING_ON) : {
-				setTitle(R.string.bt_turning_on);
-				break;
-			}
-			case (BluetoothAdapter.STATE_ON) : {
-				log("BroadcastReceiver::onReceive state ON");
-				setTitle(R.string.bt_on);
-				unregisterReceiver(this);
-
-				if (btUseFlag == BT_USE_SEARCH) {
-					doRealDiscovery();
-				} else if (btUseFlag == BT_USE_CONNECT) {
-					doRealConnect();
+				case (BluetoothAdapter.STATE_TURNING_ON) : {
+					setTitle(R.string.bt_turning_on);
+					break;
 				}
-				break;
-			}
-			case (BluetoothAdapter.STATE_TURNING_OFF) : {
-				setTitle(R.string.bt_turning_off);
-				break;
-			}
-			case (BluetoothAdapter.STATE_OFF) : {
-				log("BroadcastReceiver::onReceive state OFF");
-				setTitle(R.string.bt_off);
-				unregisterReceiver(this);
-				break;
-			}
+				case (BluetoothAdapter.STATE_ON) : {
+					log("BroadcastReceiver::onReceive state ON");
+					setTitle(R.string.bt_on);
+					unregisterReceiver(this);
+					deregStateRcv = false;
+	
+					if (btUseFlag == BT_USE_SEARCH) {
+						doRealDiscovery();
+					} else if (btUseFlag == BT_USE_CONNECT) {
+						doRealConnect();
+					}
+					break;
+				}
+				case (BluetoothAdapter.STATE_TURNING_OFF) : {
+					setTitle(R.string.bt_turning_off);
+					break;
+				}
+				case (BluetoothAdapter.STATE_OFF) : {
+					log("BroadcastReceiver::onReceive state OFF");
+					setTitle(R.string.bt_off);
+					unregisterReceiver(this);
+					deregStateRcv = false;
+					break;
+				}
 			}
 		}
 	};
@@ -431,16 +419,16 @@ AdapterView.OnItemSelectedListener {
 		case R.id.connect_item:
 
 			if (selected >= 0) {
-				final String address = dataSource.getItem(selected);
-				doConnect(address,anyRemote.CONNECT_TO);
+				Address a = dataSource.getItem(selected);
+				doConnect(a.name,anyRemote.CONNECT_TO);
 			}		    
 			break;
 
 		case R.id.autoconnect_item:
 
 			if (selected >= 0) {
-				final String address = dataSource.getItem(selected);
-				doConnect(address,anyRemote.AUTOCONNECT_TO);
+				Address a = dataSource.getItem(selected);
+				doConnect(a.name,anyRemote.AUTOCONNECT_TO);
 			}			    
 			break;
 
@@ -471,8 +459,8 @@ AdapterView.OnItemSelectedListener {
 			stopBluetoothDiscovery();
 
 			if (selected >= 0) {
-				final String address = dataSource.getItem(selected);
-                renameAddress(address);
+				Address a = dataSource.getItem(selected);
+                renameAddress(a.name);
 			}			    
 			break;
 
@@ -481,22 +469,22 @@ AdapterView.OnItemSelectedListener {
 			stopBluetoothDiscovery();
 
 			if (selected >= 0) {
-				final String address = dataSource.getItem(selected);
+				Address a = dataSource.getItem(selected);
 
 				// get URL by device name
-				String url = getURL(address);
+				String url = a.URL;
 				if (url == null) {
-					log("onOptionsItemSelected: enter_item_pass can not get URL for "+address);
+					log("onOptionsItemSelected: enter_item_pass can not get URL for "+a.name);
 					return true;
 				}
 
-				connectPass = getPass(address);
+				connectPass = a.pass;
 				if (connectPass == null) {
 					connectPass = "";
 				}
 
 				connectTo   = url;
-				connectName = address;
+				connectName = a.name;
 
 				setupEditField(Dispatcher.CMD_EDIT_FORM_PASS, null, null, null);
 			}			    
@@ -510,9 +498,9 @@ AdapterView.OnItemSelectedListener {
 		case R.id.clean_item:
 
 			if (selected >= 0) {
-				final String address = dataSource.getItem(selected);
-				cleanAddress(address);
-				dataSource.remove(address);
+				Address a = dataSource.getItem(selected);
+				cleanAddress(a.name);
+				dataSource.remove(a);
 			}
 			break;	
 
@@ -576,26 +564,21 @@ AdapterView.OnItemSelectedListener {
 	public void doConnect(String address, String option) {
 		log("doConnect:  "+address);
 
-		// get URL by device name
-		String url = getURL(address);
-		if (url == null) {
-			log("doConnect: can not get URL for "+address);
+		Address a = dataSource.getItem(address);
+		if (a == null) {
+			log("doConnect: can not get information for "+address);
 			return;
 		}
-		log("doConnect: address is "+url);
+		log("doConnect: host is "+a.URL);
 
-		connectPass = getPass(address);
-		if (connectPass == null) {
-			connectPass = "";
-		}
-
-		connectTo   = url;
+		connectTo   = a.URL;
 		connectName = address;
+		connectPass = a.pass;
 
 		connectOpts = option;
-		if (connectTo.startsWith("btspp:") && 
-				mBtAdapter != null &&  !mBtAdapter.isEnabled()) {
-			btUseFlag = BT_USE_SEARCH;
+
+		if (connectTo.startsWith("btspp:") && mBtAdapter != null &&  !mBtAdapter.isEnabled()) {
+			btUseFlag = BT_USE_CONNECT;
 			switchBluetoothOn();
 		} else {   
 			doRealConnect();
@@ -614,6 +597,9 @@ AdapterView.OnItemSelectedListener {
 			cleanAddress("__AUTOCONNECT__"); // clean auto-connect flag if user uses manual connect
 		}
 
+		// be sure peer is stored
+		addAddress(connectName,connectTo,connectPass);
+		
 		final Intent intent = new Intent();  
 
 		intent.putExtra(connectOpts, connectTo);
@@ -631,63 +617,36 @@ AdapterView.OnItemSelectedListener {
 	}
 	
 	public void renameAddress(String address) {
-		// get URL by device name
-		String url = getURL(address);
-		if (url == null) {
-			log("onOptionsItemSelected: enter_item_name can not get URL for "+address);
+		
+		Address a = dataSource.getItem(address);
+
+		if (a == null) {
+			log("onOptionsItemSelected: enter_item_name can not get info for "+address);
 			return;
 		}
-	
-		connectPass = getPass(address);
-		if (connectPass == null) {
-			connectPass = "";
-		}
-	
-		connectTo   = url;
+
 		connectName = address;
+		connectTo   = a.URL;
+		connectPass = a.pass;
 	
 		setupEditField(Dispatcher.CMD_EDIT_FORM_NAME, null, null, address);
 	}
 
 	public void cleanAddress(String name) {
 		//log("cleanAddress "+name);
-		for (int i=0;i<addressesA.size();i++) {
-			if (name.compareTo(addressesA.get(i).name) == 0) {
-				addressesA.remove(i);
-				break;
-			}
-		}
 		anyRemote.protocol.cleanAddress(name);
-	}
-
-	public String getURL(String name) {
-		for (int i=0;i<addressesA.size();i++) {
-			if (name.compareTo(addressesA.get(i).name) == 0) {
-				return addressesA.get(i).URL;
-			}
-		}
-		return null;
-	}
-
-	public String getPass(String name) {
-		for (int i=0;i<addressesA.size();i++) {
-			if (name.compareTo(addressesA.get(i).name) == 0) {
-				return addressesA.get(i).pass;
-			}
-		}
-		return null;
 	}
 
 	// save new address in preferences
 	public void addAddress(String name, String URL, String pass) {		        
 		//log("addAddress "+name+"/"+URL+"/"+pass);
 
-		Address a = new Address();
+		/*Address a = new Address();
 		a.name  = name;
 		a.URL   = URL;
 		a.pass  = pass;
-		addressesA.add(a);
+		addressesA.add(a);*/
 
-		anyRemote.protocol.addAddress(name,  URL, pass);
+		anyRemote.protocol.addAddress(name, URL, pass);
 	}
 }
