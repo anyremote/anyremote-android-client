@@ -934,8 +934,8 @@ public class Dispatcher {
 					Address a = new Address();
 
 					a.name  = (String) pairs.getKey();
-					a.URL =  url_pass.substring(0, p);
-					a.pass = url_pass.substring(p);
+					a.URL =  url_pass.substring(0, p).trim();
+					a.pass = url_pass.substring(p+1);
 
 					addresses.add(a);
 				}
@@ -961,7 +961,7 @@ public class Dispatcher {
 		SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = preference.edit();
 
-		String UP = URL + "\n" + pass;
+		String UP = URL.trim() + "\n" + pass;
 
 		editor.putString(name, UP);
 		editor.commit();
