@@ -153,7 +153,7 @@ public class ControlScreen extends arActivity
 		
 		popup();
 		
-		//MainLoop.disable();
+		//MainLoop.disable();k
 	    super.onPause();	
 	}
 
@@ -272,6 +272,7 @@ public class ControlScreen extends arActivity
 				}
 
 				buttons[i].setOnClickListener(this);
+				//buttons[i].setOnTouchListener(this);
 			}
 			
 			anyRemote.protocol.cfIconSize = w/realCnt;
@@ -355,6 +356,7 @@ public class ControlScreen extends arActivity
 								
 				buttons[i].setVisibility(View.VISIBLE);
 				buttons[i].setOnClickListener(this);
+				//buttons[i].setOnTouchListener(this);
 				
 				buttons[i].setMaxHeight(isz);    	
 				buttons[i].setMaxWidth (isz);
@@ -442,9 +444,11 @@ public class ControlScreen extends arActivity
 	}
     
     
-    public void onClick (View v) {  
-    	
+    public void onClick (View v) {
+    //public boolean onTouch (View v, MotionEvent e) {  
+    		      	
     	String key = "";
+    	//int action = e.getAction();
     	
     	switch (v.getId()) {
 		
@@ -530,102 +534,20 @@ public class ControlScreen extends arActivity
 		  default:
 			  log("onClick: Unknown button");
 			  return;
+			  //return false;
 		}
     	
     	clickOn(key);
-    }
-    
-	/*public boolean onTouch(View v, MotionEvent me) {  
-    	
-    	log("onTouch "+" "+v.getId()+" "+ R.id.b1);
-    	
-    	int a = me.getAction();
-    	//String key = "";
-    	int btnIdx = -1;
-    	
-    	switch (v.getId()) {
-		
-		  case R.id.b1: 
-		  case R.id.bb1: 
-	    	  //key = STR_NUM1;
-	    	  btnIdx = 0;
-			  break;
-			  
-		  case R.id.b2: 
-		  case R.id.bb2: 
-	    	  //key = STR_NUM2;
-			  btnIdx = 1;
-			  break;
-			  
-		  case R.id.b3: 
-		  case R.id.bb3: skin
-	    	  //key = STR_NUM3;	
-			  btnIdx = 2;
-			  break;
-			  
-		  case R.id.b4: 
-		  case R.id.bb4: 
-			  //key = STR_NUM4;
-			  btnIdx = 3;
-			  break;
-			  
-		  case R.id.b5: 
-		  case R.id.bb5: 
-			  //key = STR_NUM5;
-			  btnIdx = 4;
-			  break;
-			  
-		  case R.id.b6: 
-		  case R.id.bb6: 
-			  //key = STR_NUM6;
-			  btnIdx = 5;
-			  break;
-				
-		  case R.id.b7: 
-		  case R.id.bb7: 
-			  //key = STR_NUM7;
-			  btnIdx = 6;
-		      break;
-				
-		  case R.id.b8: 
-			  //key = STR_NUM8;
-			  btnIdx = 7;
-			  break;
-				
-		  case R.id.b9: 
-			  //key = STR_NUM9;
-			  btnIdx = 8;
-			  break;
-			  
-		  case R.id.b10: 
-			  //key = STR_STAR;
-			  btnIdx = 9;
-			  break;
-		 
-		  case R.id.b0: 
-			  //key = STR_NUM0;
-			  btnIdx = 10;
-			  break;
-			 
-		  case R.id.b11: 
-			  //key = STR_POUND;
-			  btnIdx = 11;
-		      break;
-        
-		  default:
-			  log("onTouch: Unknown button");
-			  return false;
-		}
-    	
-    	if (btnIdx >= 0) {
-    	    buttons[btnIdx].setBackgroundColor(
-    	    		 a == MotionEvent.ACTION_DOWN ? 
-    	    				 anyRemote.protocol.cfFrgr :
-    	    				 anyRemote.protocol.cfBkgr);
+    	/*if (action == MotionEvent.ACTION_DOWN) {
+    		iconPressed(key);
+    		return true;
+    	} else if (action == MotionEvent.ACTION_UP) {
+    	    iconReleased(key);
+    	    return true;
     	}
-    	return false;
-    }*/
-    
+    	return false;*/
+    }
+      
 	@Override 
     public boolean dispatchTouchEvent(MotionEvent ev) { 
        super.dispatchTouchEvent(ev); 
@@ -684,8 +606,7 @@ public class ControlScreen extends arActivity
 	
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) { 
-		//log("onKeyUp "+keyCode);
-		
+		log("onKeyUp "+keyCode);
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
 			commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
 			return true;
@@ -710,20 +631,20 @@ public class ControlScreen extends arActivity
 		log("onKeyDown TRANSFER "+keyCode);
 	    return false;
     }
-
+	
+	/*
 	public void keyPressed(int keyCode) {
 
 	}
+    */
+	public void iconPressed(String key) {
+		log("iconPressed "+key);
+        anyRemote.protocol.queueCommand(key, true);
+	}
 	
-	/*
-	public void keyPressed(String key) {
-
-	}*/
-	
-	public void keyReleased(int keyCode) {
-		log("keyReleased "+keyCode);
-		anyRemote.protocol.queueCommand(keyCode, true);
-		anyRemote.protocol.queueCommand(keyCode, false);
+	public void iconReleased(String key) {
+		log("iconReleased "+key);
+		anyRemote.protocol.queueCommand(key, false);
  	}
 	
 	public void clickOn(String key) {
