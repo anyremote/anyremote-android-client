@@ -684,55 +684,52 @@ public final class Connection implements Runnable {
 					// }
 
 					// store it in /sdcard/anyRemote/<name>.png
-					OutputStream outStream = null;
-
-					File dir = Environment.getExternalStorageDirectory();
-
-					File arDir = new File(dir,
-							"Android/data/anyremote.client.android/files");
-
-					if (!arDir.isDirectory()) {
-						arDir.mkdirs();
+					synchronized (anyRemote.iconMap) {
+						File dir = Environment.getExternalStorageDirectory();
+	
+						File arDir = new File(dir,
+								"Android/data/anyremote.client.android/files");
+	
+						if (!arDir.isDirectory()) {
+							arDir.mkdirs();
+						}
+	
+						File file = new File(arDir, iName + ".png");
+	
+						anyRemote._log("Connection",
+										"getBinaryImage going to save it to /sdcard/Android/data/anyremote.client.android/files/"
+									    + iName + ".png");
+						try {
+	
+							OutputStream outStream = new FileOutputStream(file);
+							screen.compress(Bitmap.CompressFormat.PNG, 100,
+									outStream);
+							outStream.flush();
+							outStream.close();
+	
+							anyRemote._log("Connection",
+									"Saved /sdcard/Android/data/anyremote.client.android/files/"
+											+ iName + ".png");
+	
+						} catch (FileNotFoundException e) {
+							anyRemote._log("Connection",
+									"Can not save /sdcard/Android/data/anyremote.client.android/files/"
+											+ iName + ".png " + e.toString());
+						} catch (IOException e) {
+							anyRemote._log("Connection",
+									"Can not save /sdcard/Android/data/anyremote.client.android/files//"
+											+ iName + ".png " + e.toString());
+						}
 					}
-
-					File file = new File(arDir, iName + ".png");
-
-					anyRemote._log("Connection",
-									"getBinaryImage going to save it to /sdcard/Android/data/anyremote.client.android/files/"
-								    + iName + ".png");
-
-					try {
-
-						outStream = new FileOutputStream(file);
-						screen.compress(Bitmap.CompressFormat.PNG, 100,
-								outStream);
-						outStream.flush();
-						outStream.close();
-
-						anyRemote._log("Connection",
-								"Saved /sdcard/Android/data/anyremote.client.android/files/"
-										+ iName + ".png");
-
-					} catch (FileNotFoundException e) {
-						anyRemote._log("Connection",
-								"Can not save /sdcard/Android/data/anyremote.client.android/files/"
-										+ iName + ".png " + e.toString());
-					} catch (IOException e) {
-						anyRemote._log("Connection",
-								"Can not save /sdcard/Android/data/anyremote.client.android/files//"
-										+ iName + ".png " + e.toString());
-					}
-					return;
 				} else {
 					anyRemote.protocol.imScreen = screen;
-					
-					Vector tokens = new Vector();
-					tokens.add(Dispatcher.CMD_IMAGE);
-					
-					execCommand(tokens, Dispatcher.CMD_IMAGE, ProtocolMessage.FULL);
-					
 				} 
 				
+				// Inform protocol about saved image
+				Vector tokens = new Vector();
+				tokens.add(Dispatcher.CMD_IMAGE);
+				tokens.add(action);
+				execCommand(tokens, Dispatcher.CMD_IMAGE, ProtocolMessage.FULL);
 			} else if (action.equals("close")) {
 					
 				Vector tokens = new Vector();

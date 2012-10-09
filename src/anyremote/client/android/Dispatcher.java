@@ -24,6 +24,7 @@ package anyremote.client.android;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimerTask;
@@ -132,6 +133,8 @@ public class Dispatcher {
 	ArrayList<ArHandler> actHandlers = new ArrayList<ArHandler>();
 	
 	ArrayList<QueueMessage> msgQueue = new ArrayList<QueueMessage>();
+	
+	ArrayList<String> autoUploaded = new ArrayList<String>();
 	
 	Connection   connection = null;
 	anyRemote    context    = null;
@@ -672,7 +675,12 @@ public class Dispatcher {
 			
 			boolean doCloseW = false;
 			
-			if (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close")) {
+			if (cmdTokens.size() < 2) {
+				log("Improper image command");
+				return;
+			}
+			
+			if (((String) cmdTokens.elementAt(1)).equals("close")) {
 				doCloseW = true;
 			}
 			
@@ -689,12 +697,21 @@ public class Dispatcher {
 				return;
 			}
 		
-			// Create activity
-			if (anyRemote.getCurScreen() != anyRemote.WMAN_FORM) {
-				context.setCurrentView(anyRemote.WMAN_FORM, "");
+			if (((String) cmdTokens.elementAt(1)).equals("window")) {
+				// Create activity
+				if (anyRemote.getCurScreen() != anyRemote.WMAN_FORM) {
+					context.setCurrentView(anyRemote.WMAN_FORM, "");
+				}
+				
+				sendToActivity(anyRemote.WMAN_FORM,id,stage);
+				
+			} else if (((String) cmdTokens.elementAt(1)).equals("icon")) {
+				
+				// redraw ControlForm if it is active
+				if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
+					sendToActivity(anyRemote.CONTROL_FORM,id,stage);	
+				}
 			}
-			
-			sendToActivity(anyRemote.WMAN_FORM,id,stage);		
 			break;    
 
 		case CMD_GETSCRSIZE:
@@ -1098,7 +1115,7 @@ public class Dispatcher {
 		    	controlSetSkin(vR); 
 			    break;
 				      
-		    case Dispatcher.CMD_STATUS:
+		    case CMD_STATUS:
 			   
 			    cfStatus = (String) vR.elementAt(1);
 				break;
@@ -1740,5 +1757,15 @@ public class Dispatcher {
 				return winMenu;
 		}
 		return null;
+	}
+	
+	public void autoUpload(String icon) {
+		synchronized (autoUploaded) {
+			if (!autoUploaded.contains(icon)) {
+				anyRemote._log("Dispatcher", "autoUpload request for "+icon);
+				autoUploaded.add(icon);
+		        queueCommand("_GET_ICON_(128,"+ icon +")");
+			}
+		}
 	}
 }

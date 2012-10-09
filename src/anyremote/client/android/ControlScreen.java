@@ -213,6 +213,9 @@ public class ControlScreen extends arActivity
 	    if (data.id == Dispatcher.CMD_VOLUME) {
     	    Toast.makeText(this, "Volume is "+anyRemote.protocol.cfVolume +"%", Toast.LENGTH_SHORT).show();
 		    return;
+		} else if (data.id == Dispatcher.CMD_IMAGE) {
+			// some icon was uploaded, need to redraw
+			log("handleEvent need to update icons");
 		}
 
 	    redraw();
@@ -303,7 +306,7 @@ public class ControlScreen extends arActivity
 			}
 		} else {
 			
-			//log("setSkin SK_DEFAULT ");
+			log("setSkinSimple SK_DEFAULT ");
 			boolean  landscape = false;
 			
 			if (display.getOrientation() == Surface.ROTATION_90) {
@@ -347,8 +350,10 @@ public class ControlScreen extends arActivity
 
 			for (int i=0;i<NUM_ICONS;i++) {
 				
+				log("setSkinSimple get bitmap "+anyRemote.protocol.cfIcons[i]);
 				Bitmap ic = anyRemote.getIconBitmap(getResources(), anyRemote.protocol.cfIcons[i]);
 				if (ic == null) { // no to squeze
+					log("setSkinSimple failed to get bitmap "+anyRemote.protocol.cfIcons[i]);
 					ic = anyRemote.getIconBitmap(getResources(), "transparent"); 
 				}
 				

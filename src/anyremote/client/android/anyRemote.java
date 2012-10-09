@@ -86,7 +86,7 @@ public class anyRemote extends Activity
 
 	public static boolean  finishFlag = false;
 	
-	private static TreeMap<String,Bitmap> iconMap = new TreeMap<String,Bitmap>();
+	static TreeMap<String,Bitmap> iconMap = new TreeMap<String,Bitmap>();
 
 	private Handler viewHandler;
 	
@@ -520,32 +520,38 @@ public class anyRemote extends Activity
 			return null;
 		}
 		
-		if (iconMap.containsKey(icon)) {
-			return (Bitmap) iconMap.get(icon);
-		}
+		synchronized (iconMap) {	
 		
-		int iconId = icon2int(icon);
-
-		//_log("getIconBitmap "+icon+" "+iconId);
-		if (iconId == R.drawable.icon) {
-
-			File dir = Environment.getExternalStorageDirectory();
-			File iFile = new File(dir, "Android/data/anyremote.client.android/files/"+icon+".png");
-
-			if(iFile.canRead()) {
-				//_log("getIconBitmap", icon+" found on SDCard"); 
-				Bitmap ic = BitmapFactory.decodeFile(iFile.getAbsolutePath());
-				iconMap.put(icon,ic);
-				return ic;
-			} else {
-				_log("getIconBitmap", iFile.getAbsolutePath()+" absent on SDCard");
-				return null;
+			if (iconMap.containsKey(icon)) {
+				return (Bitmap) iconMap.get(icon);
 			}
+			
+			int iconId = icon2int(icon);
+	
+			//_log("getIconBitmap "+icon+" "+iconId);
+			if (iconId == R.drawable.icon) {
+	
+				File dir = Environment.getExternalStorageDirectory();
+				File iFile = new File(dir, "Android/data/anyremote.client.android/files/"+icon+".png");
+	
+				if(iFile.canRead()) {
+					_log("getIconBitmap", icon+" found on SDCard"); 
+					Bitmap ic = BitmapFactory.decodeFile(iFile.getAbsolutePath());
+					iconMap.put(icon,ic);
+					return ic;
+				} else {
+					_log("getIconBitmap", iFile.getAbsolutePath()+" absent on SDCard");
+					
+					// try to auto upload it
+					protocol.autoUpload(icon);
+					return null;
+				}
+			}
+			
+			Bitmap ic = BitmapFactory.decodeResource(resources, icon2int(icon));
+			iconMap.put(icon,ic);
+			return ic;
 		}
-		
-		Bitmap ic = BitmapFactory.decodeResource(resources, icon2int(icon));
-		iconMap.put(icon,ic);
-		return ic;
 	}
 
 	public static int parseColor(String r, String g, String b) {
