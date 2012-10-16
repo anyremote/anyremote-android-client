@@ -973,7 +973,7 @@ public class Dispatcher {
 
 	// save new address in preferences
 	public void addAddress(String name, String URL, String pass) {		        
-		//log("addAddress "+name+"/"+URL+"/"+pass);
+		log("addAddress "+name+"/"+URL+"/"+pass);
 
 		SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = preference.edit();

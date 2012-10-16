@@ -93,7 +93,21 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 		for (int i=0;i<items.size();i++) {
 			Address a = items.get(i);
 			if (name.compareTo(a.name) == 0) {
-				return false;
+				boolean update = false;
+				if (host != null) {
+					if (host.compareTo(a.URL) != 0) {
+						a.URL = host;
+						update = true;
+					}
+				}
+				if (pass != null) {
+					if (pass.compareTo(a.pass) != 0) {
+						a.pass = pass;
+						update = true;
+					}
+				}
+				
+				return update;
 			}
 		}
 		

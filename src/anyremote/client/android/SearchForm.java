@@ -155,7 +155,10 @@ AdapterView.OnItemSelectedListener {
 		}
 
 		if (id == Dispatcher.CMD_EDIT_FORM_PASS) { 
-			addAddress(connectName,connectTo,value);
+			
+			if (dataSource.addIfNew(connectName,connectTo,value)) {
+			    addAddress(connectName,connectTo,value);
+			}
 			return;
 		}
 
