@@ -153,14 +153,13 @@ public class ControlScreen extends arActivity
 		
 		popup();
 		
-		//MainLoop.disable();k
 	    super.onPause();	
 	}
 
 	@Override
 	protected void onResume() {
 		log("onResume");		
-		//MainLoop.enable();
+
 		super.onResume();
 		
 		exiting = false;

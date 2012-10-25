@@ -104,14 +104,13 @@ public class TextScreen extends arActivity implements OnGestureListener {
 		
 		popup();
 		
-		//MainLoop.disable();
 	    super.onPause();	
 	}
 	
 	@Override
 	protected void onResume() {
 		log("onResume");
-		//MainLoop.enable();
+
 		super.onResume();
 		
 		exiting = false;

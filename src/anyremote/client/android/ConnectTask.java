@@ -56,7 +56,7 @@ public class ConnectTask extends TimerTask {
 		if (type == WIFI) {
 
 			// Create a socket. The socket creation should be done in an extra thread 
-			// (e.g. using the MainLoop) to not block the UI.
+			// to not block the UI.
 
 			try {
 
@@ -95,7 +95,7 @@ public class ConnectTask extends TimerTask {
 		if (type == BLUETOOTH) {
 
 			// Create a socket. The socket creation should be done in an extra thread 
-			// (e.g. using the MainLoop) to not block the UI.
+			// to not block the UI.
 
 			try {
 				s = new BTSocket(host.substring(8)); // strip btspp://

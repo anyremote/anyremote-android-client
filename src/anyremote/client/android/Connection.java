@@ -914,21 +914,6 @@ public final class Connection implements Runnable {
 		pm.id     = id;
 		pm.stage  = stage;
 		pm.tokens = new Vector(cmdTokens);
-		
-		/*
-		MainLoop.schedule(new TimerTask() {
-                public void run() {
-                        try {
-                                notifyMessage(pm);
-                        } catch (Exception e) {
-                                anyRemote._log("Connection", "execCommand Exception");
-                                notifyDisconnected("Connection Error", "Received malformed data.", e);
-                        } catch (OutOfMemoryError e) {
-                                anyRemote._log("Connection", "execCommand OutOfMemoryError");
-                                notifyDisconnected("Memory Error",  "Received data too big.", null);
-                        }
-                }
-        }, 1000);*/
         
 		try {
 			

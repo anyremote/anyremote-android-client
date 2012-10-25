@@ -209,6 +209,8 @@ public class Dispatcher {
 	int efId; 
 	
 	boolean connectBT = false;
+	int     keepaliveTimeout = -1;
+	int     keepaliveCounter = 0;
 
 	public Dispatcher(anyRemote ctx) {
 
@@ -759,8 +761,17 @@ public class Dispatcher {
 		case CMD_GETPING:
 			
 			sendMessage("Ping");
+			
+			if (cmdTokens.size() > 1) {   // get timeout
+				keepaliveTimeout = Integer.parseInt(((String) cmdTokens.elementAt(1)));
+			
+				if (keepaliveTimeout > 0) {
+					keepaliveCounter++;
+					scheduleKeepaliveTask();
+				}
+			}
 			break;
-
+			
 		case CMD_GETPASS:
 
 			log("CMD_GETPASS");
@@ -909,6 +920,30 @@ public class Dispatcher {
                      processMessageQueue();
                 }
             });			
+		}
+	}
+
+	private synchronized void scheduleKeepaliveTask() {
+		MainLoop.schedule(
+				new TimerTask() {
+                    public void run() {
+                	     keepaliveTask();
+                   }
+                }, 
+                (long) (keepaliveTimeout * 1.5));			
+	}
+	
+	private synchronized void keepaliveTask() {
+
+		if (keepaliveTimeout > 0) {
+			log("keepaliveTask test keepalive");
+			if (keepaliveCounter == 0) {
+				log("keepaliveTask seems connection is lost, do disconnect");
+				disconnect(true);
+			} else {
+				keepaliveCounter = 0;
+			    scheduleKeepaliveTask();
+			}
 		}
 	}
 
