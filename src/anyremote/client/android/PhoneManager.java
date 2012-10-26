@@ -39,17 +39,17 @@ public class PhoneManager extends PhoneStateListener {
         
           case TelephonyManager.CALL_STATE_IDLE:
             anyRemote._log("PhoneManager","Call Finish");
-            protocol.queueCommand("EndCall("+incomingNumber+")");
+            protocol.queueCommand("EndCall(,"+incomingNumber+")");
             break;
             
           case TelephonyManager.CALL_STATE_OFFHOOK:
         	anyRemote._log("PhoneManager","Call Starting");
-            protocol.queueCommand("AnswerCall("+incomingNumber+")");
+            protocol.queueCommand("AnswerCall(,"+incomingNumber+")");
             break;
             
           case TelephonyManager.CALL_STATE_RINGING:
         	anyRemote._log("PhoneManager","Call Ringing");
-            protocol.queueCommand("InCall("+incomingNumber+")");
+            protocol.queueCommand("InCall(,"+incomingNumber+")");
             break;
         }
     }

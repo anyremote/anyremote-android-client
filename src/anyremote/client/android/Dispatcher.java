@@ -384,9 +384,9 @@ public class Dispatcher {
 			try {
 				ComponentName comp = new ComponentName(context, this.getClass());
 				PackageInfo pinfo = context.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
-				sendMessage("Version(,"+pinfo.versionName);
+				queueCommand("Version(,"+pinfo.versionName);
 			} catch (android.content.pm.PackageManager.NameNotFoundException e) {
-				sendMessage("Version(,unknown)");
+				queueCommand("Version(,unknown)");
 			}
 		}
 
@@ -723,8 +723,8 @@ public class Dispatcher {
 	                           display.getOrientation() == Surface.ROTATION_270);
 			String ori = (rotated ? "R" : "");
 	        
-			sendMessage("SizeX("+display.getWidth() +","+ori+")");
-			sendMessage("SizeY("+display.getHeight()+","+ori+")");
+			queueCommand("SizeX("+display.getWidth() +","+ori+")");
+			queueCommand("SizeY("+display.getHeight()+","+ori+")");
 			break;
 
 		case CMD_GETCVRSIZE:
@@ -752,23 +752,26 @@ public class Dispatcher {
 			try {
 				ComponentName comp = new ComponentName(context, this.getClass());
 				PackageInfo pinfo = context.getPackageManager().getPackageInfo(comp.getPackageName(), 0);
-				sendMessage("Version(,"+pinfo.versionName+")");
+				queueCommand("Version(,"+pinfo.versionName+")");
 			} catch (android.content.pm.PackageManager.NameNotFoundException e) {
-				sendMessage("Version(,unknown)");
+				queueCommand("Version(,unknown)");
 			}          
 			break;
 
 		case CMD_GETPING:
 			
-			sendMessage("Ping");
+			queueCommand("Ping");
 			
 			if (cmdTokens.size() > 1) {   // get timeout
 				keepaliveTimeout = Integer.parseInt(((String) cmdTokens.elementAt(1)));
 			
 				if (keepaliveTimeout > 0) {
-					keepaliveCounter++;
 					scheduleKeepaliveTask();
 				}
+			}
+			
+			if (keepaliveTimeout > 0) {
+				keepaliveCounter++;
 			}
 			break;
 			
@@ -804,7 +807,7 @@ public class Dispatcher {
 
 		case CMD_GETPLTF:
 			
-			sendMessage("Model("+android.os.Build.MODEL+"/Android-"+android.os.Build.VERSION.RELEASE+")");
+			queueCommand("Model(,"+android.os.Build.MODEL+"/Android-"+android.os.Build.VERSION.RELEASE+")");
 			break;
 
 		case CMD_GETICON:
@@ -930,7 +933,7 @@ public class Dispatcher {
                 	     keepaliveTask();
                    }
                 }, 
-                (long) (keepaliveTimeout * 1.5));			
+                (long) (keepaliveTimeout * 3000));	// x2 is not enough sometimes		
 	}
 	
 	private synchronized void keepaliveTask() {
@@ -1019,7 +1022,7 @@ public class Dispatcher {
 		editor.commit();
 	}
 
-	public void sendMessage(String command) {
+	private void sendMessage(String command) {
 		if (connection != null && !connection.isClosed()) {
 			//log("sendMessage " + command);
 		    connection.send(command+";\r");
