@@ -546,7 +546,7 @@ public class Dispatcher {
 			int switchTo = listDataProcess(id, cmdTokens, stage); 
 			//log("handleCommand listDataProcess:" + switchTo);
 			
-			boolean doClose = ((String) cmdTokens.elementAt(1)).equals("close");
+			boolean doClose = (cmdTokens.size() > 1 && ((String) cmdTokens.elementAt(1)).equals("close"));
 			
 			if (anyRemote.logVisible()) {
 				if (doClose) {
