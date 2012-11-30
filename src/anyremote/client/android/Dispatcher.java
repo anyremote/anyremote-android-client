@@ -1488,12 +1488,18 @@ public class Dispatcher {
 		for (int idx=start;idx<end;idx++) {
 
 			String item = (String) vR.elementAt(idx);
+			
 			if (start == 0 && idx == 0) {
 				item = listBufferedItem.toString() + item;
 				listBufferedItem.delete(0, listBufferedItem.length());
 			}
-			if (!item.equals("") && ! (item.length() == 1 && item.charAt(0) == '\n')) {
-				listAddWithIcon(id, item); 
+			
+			String[] items = item.split("\n");
+			for (int i=0;i<items.length;i++) {
+				String subitem = items[i];
+				if (!subitem.equals("") && ! (subitem.length() == 1 && subitem.charAt(0) == '\n')) {
+					listAddWithIcon(id, subitem); 
+				}
 			}
 		}
 

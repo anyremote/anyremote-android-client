@@ -76,6 +76,7 @@ public class ListScreen extends arActivity
 		setContentView(R.layout.list_form);
 
 		list = (ListView) findViewById(R.id.list_form);	
+		list.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		list.setAdapter(dataSource); 
 		list.setOnItemSelectedListener(this);
 		list.setOnItemClickListener   (this); 
@@ -107,9 +108,9 @@ public class ListScreen extends arActivity
         	doFinish("");
         }
         
-		log("onResume UPDATE DATA SOURCE");
+		//log("onResume UPDATE DATA SOURCE");
 		dataSource.update(anyRemote.protocol.listContent);
-		log("onResume notifyDataSetChanged");
+		//log("onResume notifyDataSetChanged");
 		dataSource.notifyDataSetChanged();
         
 		redraw();
@@ -181,9 +182,7 @@ public class ListScreen extends arActivity
 
 	//@Override
 	public void onNothingSelected(AdapterView<?> parentView) {
-		//log("onNothingSelected");
-		//select(-1);
-		//select(selectedPosition);
+		anyRemote.protocol.listSelectPos = -1;
 	}
 
 	public void selectUpdate() {
@@ -294,17 +293,40 @@ public class ListScreen extends arActivity
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) { 
 
-		if (keyCode == KeyEvent.KEYCODE_CALL ||
-		    keyCode == KeyEvent.KEYCODE_SEARCH) {
+		switch (keyCode) {
+		
+		    case KeyEvent.KEYCODE_CALL:  
+	        case KeyEvent.KEYCODE_SEARCH:
+				final String itemTextC = (anyRemote.protocol.listSelectPos == -1 ? "" : 
+					                     dataSource.getItem(anyRemote.protocol.listSelectPos).text);
+				commandAction("Push", itemTextC, anyRemote.protocol.listSelectPos);		
+				return true;
 
-			final String itemText = (anyRemote.protocol.listSelectPos == -1 ? "" : dataSource.getItem(anyRemote.protocol.listSelectPos).text);
-			commandAction("Push", itemText, anyRemote.protocol.listSelectPos);		
-			return true;
-		} else if (keyCode == KeyEvent.KEYCODE_BACK) {
-
-			final String itemText = (anyRemote.protocol.listSelectPos == -1 ? "" : dataSource.getItem(anyRemote.protocol.listSelectPos).text);
-			commandAction("Back", itemText, anyRemote.protocol.listSelectPos);
-			return true;
+	        case KeyEvent.KEYCODE_BACK:
+	    	  
+				final String itemTextB = (anyRemote.protocol.listSelectPos == -1 ? "" : 
+					                     dataSource.getItem(anyRemote.protocol.listSelectPos).text);
+				commandAction("Back", itemTextB, anyRemote.protocol.listSelectPos);
+				return true;
+				
+		    case KeyEvent.KEYCODE_VOLUME_UP:  
+		    	if (anyRemote.protocol.listSelectPos > 0) {
+		    		anyRemote.protocol.listSelectPos--;
+		    	}
+		    	dataSource.setSelectedPosition(anyRemote.protocol.listSelectPos);
+		    	list.setSelection(anyRemote.protocol.listSelectPos);
+		    	//selectUpdate();
+	        	return true;
+	    	
+	        case KeyEvent.KEYCODE_VOLUME_DOWN:
+	        	if (anyRemote.protocol.listSelectPos < dataSource.size() - 1) {
+	        		anyRemote.protocol.listSelectPos++;
+	        	}
+	        	//log("onKeyUp KEYCODE_VOLUME_DOWN "+anyRemote.protocol.listSelectPos);
+	        	dataSource.setSelectedPosition(anyRemote.protocol.listSelectPos);
+	        	list.setSelection(anyRemote.protocol.listSelectPos);
+	        	//selectUpdate();
+	        	return true;  
 		}
 		return false;
 	}
@@ -313,9 +335,13 @@ public class ListScreen extends arActivity
 	public boolean onKeyDown (int keyCode, KeyEvent event) { 
 
 		//log("onKeyDown "+keyCode);
-		if (keyCode == KeyEvent.KEYCODE_CALL ||
-		    keyCode == KeyEvent.KEYCODE_SEARCH) {
-			return true;
+		switch (keyCode) {
+		
+		    case KeyEvent.KEYCODE_CALL:  
+            case KeyEvent.KEYCODE_SEARCH:
+		    case KeyEvent.KEYCODE_VOLUME_UP:  
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+           	return true;
 		} 
 		return false;
 	}

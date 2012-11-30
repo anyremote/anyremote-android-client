@@ -51,10 +51,10 @@ import anyremote.client.android.util.Address;
 import anyremote.client.android.util.AddressAdapter;
 
 public class SearchForm extends arActivity 
-implements OnItemClickListener,
-DialogInterface.OnDismissListener,
-DialogInterface.OnCancelListener,
-AdapterView.OnItemSelectedListener {
+                        implements OnItemClickListener,
+                                   DialogInterface.OnDismissListener,
+                                   DialogInterface.OnCancelListener,
+                                   AdapterView.OnItemSelectedListener {
 
 	static final int  BT_USE_NO      = 0;
 	static final int  BT_USE_SEARCH  = 1;
@@ -62,7 +62,7 @@ AdapterView.OnItemSelectedListener {
 
 	ListView searchList;
 	AddressAdapter dataSource;
-	int selected = -1;
+	int selected = 0;
 
 	private BluetoothAdapter mBtAdapter;
 
@@ -95,8 +95,9 @@ AdapterView.OnItemSelectedListener {
 
 		dataSource = new AddressAdapter(this, R.layout.search_list_item, anyRemote.protocol.loadPrefs());
 		searchList.setAdapter(dataSource);
-		
+		searchList.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
 		searchList.setOnItemSelectedListener(this);
+		//searchList.setItemChecked(selected, true); 
 
 		// Register for broadcasts when a device is discovered
 		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -423,7 +424,9 @@ AdapterView.OnItemSelectedListener {
 
 			if (selected >= 0) {
 				Address a = dataSource.getItem(selected);
-				doConnect(a.name,anyRemote.CONNECT_TO);
+				if (a != null) {
+				    doConnect(a.name,anyRemote.CONNECT_TO);
+				}
 			}		    
 			break;
 
@@ -431,7 +434,9 @@ AdapterView.OnItemSelectedListener {
 
 			if (selected >= 0) {
 				Address a = dataSource.getItem(selected);
-				doConnect(a.name,anyRemote.AUTOCONNECT_TO);
+				if (a != null) {
+					 doConnect(a.name,anyRemote.AUTOCONNECT_TO);
+				}
 			}			    
 			break;
 
@@ -463,7 +468,9 @@ AdapterView.OnItemSelectedListener {
 
 			if (selected >= 0) {
 				Address a = dataSource.getItem(selected);
-                renameAddress(a.name);
+				if (a != null) {
+                    renameAddress(a.name);
+				}
 			}			    
 			break;
 
@@ -473,23 +480,24 @@ AdapterView.OnItemSelectedListener {
 
 			if (selected >= 0) {
 				Address a = dataSource.getItem(selected);
-
-				// get URL by device name
-				String url = a.URL;
-				if (url == null) {
-					log("onOptionsItemSelected: enter_item_pass can not get URL for "+a.name);
-					return true;
+				if (a != null) {
+					// get URL by device name
+					String url = a.URL;
+					if (url == null) {
+						log("onOptionsItemSelected: enter_item_pass can not get URL for "+a.name);
+						return true;
+					}
+	
+					connectPass = a.pass;
+					if (connectPass == null) {
+						connectPass = "";
+					}
+	
+					connectTo   = url;
+					connectName = a.name;
+	
+					setupEditField(Dispatcher.CMD_EDIT_FORM_PASS, null, null, null);
 				}
-
-				connectPass = a.pass;
-				if (connectPass == null) {
-					connectPass = "";
-				}
-
-				connectTo   = url;
-				connectName = a.name;
-
-				setupEditField(Dispatcher.CMD_EDIT_FORM_PASS, null, null, null);
 			}			    
 			break;
 
@@ -502,8 +510,10 @@ AdapterView.OnItemSelectedListener {
 
 			if (selected >= 0) {
 				Address a = dataSource.getItem(selected);
-				cleanAddress(a.name);
-				dataSource.remove(a);
+				if (a != null) {
+					cleanAddress(a.name);
+					dataSource.remove(a);
+				}
 			}
 			break;	
 
@@ -540,13 +550,44 @@ AdapterView.OnItemSelectedListener {
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) { 
 		
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			doExit();
-			return true;
+		log("onKeyUp: "+keyCode);
+		switch (keyCode) {
+		
+		    case  KeyEvent.KEYCODE_BACK:
+			    doExit();
+			    return true;
+	        
+		    case KeyEvent.KEYCODE_VOLUME_UP:  
+		    	
+		    	if (selected > 0) {
+		    		selected--;
+		    	}
+		    	searchList.setSelection(selected);
+	        	return true;
+	        
+	        case KeyEvent.KEYCODE_VOLUME_DOWN: 
+	        	
+	        	if (selected < dataSource.size() - 1) {
+	        	    selected++;
+	        	}
+	        	searchList.setSelection(selected);
+
+	        	return true;
+        }
+	    return false;
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) { 
+		
+		switch (keyCode) {
+		    case KeyEvent.KEYCODE_VOLUME_UP:  
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            	return true;
 		}
 		return false;
 	}
-
+	
 	public void stopBluetoothDiscovery() {
 		log("stopBluetoothDiscovery");
 		if (mBtAdapter != null && mBtAdapter.isDiscovering()) {

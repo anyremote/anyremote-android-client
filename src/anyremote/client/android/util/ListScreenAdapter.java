@@ -119,6 +119,10 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
     	return v;
     }
     
+	public int size() {
+		return items.size();
+	}
+   
     public void setFont(float size) {
     	fSize = size;
 	}
