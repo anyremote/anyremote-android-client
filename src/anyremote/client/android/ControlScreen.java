@@ -281,7 +281,7 @@ public class ControlScreen extends arActivity
 			
 			int isz = (anyRemote.protocol.cfIconSizeOverride >= 0 ? anyRemote.protocol.cfIconSizeOverride : anyRemote.protocol.cfIconSize);
 			
-			log("setSkin set iconn size to "+isz);
+			log("setSkin set icon size to "+isz);
 			
 			for (int i=0;i<NUM_ICONS_BTM;i++) {
 				
@@ -427,9 +427,9 @@ public class ControlScreen extends arActivity
 	}
 	
 	private void setCover() {
-		
-		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE && anyRemote.protocol.cfCover != null) {
-			ImageView cover  = (ImageView) findViewById(R.id.cover);
+		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
+			ImageView cover  = (ImageView) findViewById(R.id.cover);		
+			log("setCover !!!!!!!!!! "+(anyRemote.protocol.cfCover == null ? "NULL" : "Set"));
 			cover.setImageBitmap(anyRemote.protocol.cfCover);
 		}
 	}

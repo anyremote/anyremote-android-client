@@ -1140,9 +1140,6 @@ public class Dispatcher {
     public void controlDataProcess(Vector vR) {
     	
     	//log("processData >"+vR+"<");
-    	if (vR.size() < 2) {
-    		return;
-    	}
     	
     	int id = (Integer) vR.elementAt(0);
    
@@ -1150,27 +1147,42 @@ public class Dispatcher {
 		
 		    case CMD_LAYOUT:
 		    	
+		    	if (vR.size() < 2) {
+		    		return;
+		    	}
 		    	controlSetSkin(vR); 
 			    break;
 				      
 		    case CMD_STATUS:
 			   
+		    	if (vR.size() < 2) {
+		    		return;
+		    	}
 			    cfStatus = (String) vR.elementAt(1);
 				break;
 
 		    case CMD_TITLE:
 		    	
+		    	if (vR.size() < 2) {
+		    		return;
+		    	}
 		    	cfTitle = (String) vR.elementAt(1);
 				break;
 			
 		    case CMD_ICONS:
 		    	
+		    	if (vR.size() < 3) {
+		    		return;
+		    	}
 				controlSetIconLayout(vR);
 				break; 
 				
   		    case CMD_BG:
   		    	
-  		    	cfBkgr = anyRemote.parseColor(
+  		    	if (vR.size() < 4) {
+  		    		return;
+  		    	}
+ 		    	cfBkgr = anyRemote.parseColor(
                         (String) vR.elementAt(1),
                         (String) vR.elementAt(2),
                         (String) vR.elementAt(3));
@@ -1178,7 +1190,10 @@ public class Dispatcher {
   		
   		    case CMD_FG:
 
-  		    	cfFrgr = anyRemote.parseColor(
+  		    	if (vR.size() < 4) {
+  		    		return;
+  		    	}
+ 		    	cfFrgr = anyRemote.parseColor(
                         (String) vR.elementAt(1),
                         (String) vR.elementAt(2),
                         (String) vR.elementAt(3));
@@ -1186,22 +1201,35 @@ public class Dispatcher {
   		  
   		    case CMD_FONT:
   		    	
+  		    	if (vR.size() < 2) {
+  		    		return;
+  		    	}
 			    controlSetFontParams(vR);
 			    break; 
 			     
 		    case CMD_FSCREEN:
 		    	
+		    	if (vR.size() < 2) {
+		    		return;
+		    	}
 		    	setFullscreen((String) vR.elementAt(1));
 			    break;   
 			 				
 		    case CMD_VOLUME:
 		    	
+		    	if (vR.size() < 2) {
+		    		return;
+		    	}
 		    	cfVolume = (String) vR.elementAt(1);
 				break;  
 
 			case CMD_COVER:
 				
-				cfCover = (Bitmap) vR.elementAt(1); 
+		    	if (vR.size() < 2) {
+		    		cfCover = null;
+		    	} else {
+				    cfCover = (Bitmap) vR.elementAt(1);
+		    	}
 				break;
 		}
     }
@@ -1313,7 +1341,7 @@ public class Dispatcher {
 		boolean setSize = false;
 		
 		int start = 1;
-       	while(start<defs.size()) {
+       	while (start<defs.size()) {
             String spec = (String) defs.elementAt(start);
             if (spec.equals("plain")) {
             	//style = Font.STYLE_PLAIN;
