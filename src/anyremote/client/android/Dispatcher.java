@@ -445,7 +445,7 @@ public class Dispatcher {
 		Vector cmdTokens = msg.tokens; 
 		int stage        = msg.stage;
 		
-		log("handleCommand got:" + cmdStr(id) + " " + cmdTokens+"(cur screen is "+anyRemote.getScreenStr(anyRemote.getCurScreen())+")");
+		//log("handleCommand got:" + cmdStr(id) + " " + cmdTokens+"(cur screen is "+anyRemote.getScreenStr(anyRemote.getCurScreen())+")");
 
 		switch (id) {
 
@@ -1596,14 +1596,17 @@ public class Dispatcher {
 	// Set(list,close) does NOT processed here !
 	//
 	public boolean textDataProcess(Vector vR, int stage) {   // message = add|replace|show|clear,title,long_text
-		
+		//log("textDataProcess VSIZE "+vR.size() + " stage " + stage); 
 		if (vR.size() == 0) {
 			return false;	
 		}
 		
-		if (stage == ProtocolMessage.INTERMED ||
-		    stage == ProtocolMessage.LAST) {
+		if (stage == ProtocolMessage.INTERMED) {
 			    
+			    textContent.append((String) vR.elementAt(0));
+			    return true;
+			    
+		} else if (stage == ProtocolMessage.LAST) {
 			    if (vR.size() > 2) {
 			        textContent.append((String) vR.elementAt(3));
 			    }
