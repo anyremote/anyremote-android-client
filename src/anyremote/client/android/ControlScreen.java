@@ -277,6 +277,10 @@ public class ControlScreen extends arActivity
 				//buttons[i].setOnTouchListener(this);
 			}
 			
+			if (realCnt == 0) {
+				realCnt = 7;
+			}
+			
 			anyRemote.protocol.cfIconSize = w/realCnt;
 			
 			int isz = (anyRemote.protocol.cfIconSizeOverride >= 0 ? anyRemote.protocol.cfIconSizeOverride : anyRemote.protocol.cfIconSize);
