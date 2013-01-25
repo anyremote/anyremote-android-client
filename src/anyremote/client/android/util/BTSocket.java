@@ -130,7 +130,6 @@ public class BTSocket implements ISocket {
 	//@Override
 	public void close() {
         if (isClosed) return;
-        isClosed = true;
 		
         try {
 			sock.close();
@@ -143,6 +142,8 @@ public class BTSocket implements ISocket {
 		try {
 			is.close();
 		} catch (IOException e) { }
+		
+        isClosed = true;
 	}
 	
 	// API level 14 or higher

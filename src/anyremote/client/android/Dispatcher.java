@@ -146,8 +146,7 @@ public class Dispatcher {
 	boolean     fullscreen = false;
 
 	// Control Screen stuff
-	Vector<String> cfMenu = new Vector<String>();
-	ArrayList<Handler> cfHandlers = new ArrayList<Handler>();	
+	Vector<String> cfMenu = new Vector<String>();	
 	int    cfSkin;
 	boolean cfUseJoystick;
 	String cfTitle;
@@ -171,7 +170,6 @@ public class Dispatcher {
 	String listTitle;
 	int    listSelectPos = -1;
 	Vector<String> listMenu = new Vector<String>();
-	ArrayList<Handler> listHandlers = new ArrayList<Handler>();
 	ArrayList<ListItem> listContent = null;
 	boolean listCustomBackColor = false;
 	boolean listCustomTextColor = false;
@@ -183,7 +181,6 @@ public class Dispatcher {
 	// Text Screen stuff
 	String textTitle;
 	Vector<String> textMenu = new Vector<String>();
-	ArrayList<Handler> textHandlers = new ArrayList<Handler>();
 	StringBuilder textContent;
 	int         textFrgr;
 	int         textBkgr;
@@ -191,7 +188,6 @@ public class Dispatcher {
 	Typeface    textTFace;
 	
 	// Image Screen stuff
-	ArrayList<Handler> imHandlers = new ArrayList<Handler>();	
 	Bitmap      imScreen;
 	Vector<String> winMenu = new Vector<String>();
 

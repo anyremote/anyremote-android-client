@@ -433,7 +433,7 @@ public class ControlScreen extends arActivity
 	private void setCover() {
 		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 			ImageView cover  = (ImageView) findViewById(R.id.cover);		
-			log("setCover !!!!!!!!!! "+(anyRemote.protocol.cfCover == null ? "NULL" : "Set"));
+			log("setCover "+(anyRemote.protocol.cfCover == null ? "NULL" : "Set"));
 			cover.setImageBitmap(anyRemote.protocol.cfCover);
 		}
 	}
