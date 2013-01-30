@@ -50,5 +50,6 @@
     <string name="b12">"#"</string>
     
     <string name="cover_description">"Cover Image"</string>
+    <string name="dummy">""</string>
     
 </resources>

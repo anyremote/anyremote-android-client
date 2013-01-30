@@ -1,7 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent">
-	<TextView android:text="" android:id="@+id/search_list_item"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"
-		style="?android:attr/textAppearanceLarge"></TextView>
-</LinearLayout>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight" >
+
+    <ImageView
+        android:id="@+id/peer_type_icon"
+        android:layout_width="36dip"
+        android:layout_height="36dip"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="6dip"
+        android:contentDescription="@string/dummy"
+        android:paddingBottom="2dip"
+        android:paddingTop="2dip" >
+    </ImageView>
+    <TextView
+        android:id="@+id/peer_list_item"
+ 		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_toRightOf="@id/peer_type_icon"
+		android:layout_alignTop="@id/peer_type_icon"
+		android:singleLine="true"
+		style="?android:attr/textAppearanceLarge"
+        android:textColor="?android:attr/textColorPrimary"
+        android:ellipsize="marquee"
+        android:text="" >
+    </TextView>
+     <TextView
+        android:id="@+id/peer_list_address"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+ 		android:layout_toRightOf="@id/peer_type_icon"
+ 		android:layout_below="@id/peer_list_item"
+ 		android:singleLine="true"
+ 		style="?android:attr/textAppearanceSmall"
+        android:textColor="@color/address_color"
+        android:ellipsize="marquee"
+        android:text="" >
+    </TextView>
+
+    <ImageView
+        android:id="@+id/peer_security_icon"
+        android:layout_width="16dip"
+        android:layout_height="16dip"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/peer_list_item"
+        android:contentDescription="@string/dummy" >
+   </ImageView>
+
+</RelativeLayout>

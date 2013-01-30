@@ -21,16 +21,18 @@
 
 package anyremote.client.android.util;
 
-import java.util.ArrayList;
 import java.util.Vector;
 
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.view.LayoutInflater;
 import anyremote.client.android.R;
+import anyremote.client.android.anyRemote;
 
 public class AddressAdapter extends ArrayAdapter<Address> {
 
@@ -52,11 +54,28 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 		} else {
 			v = convertView;
 		}
-
-		TextView txt = (TextView) v.findViewById(R.id.search_list_item);
 		
 		Address a = items.get(position);
-		txt.setText(a.name);
+		
+		ImageView type = (ImageView) v.findViewById(R.id.peer_type_icon);
+		ImageView secu = (ImageView) v.findViewById(R.id.peer_security_icon);
+		
+		TextView name = (TextView) v.findViewById(R.id.peer_list_item);
+		TextView addr = (TextView) v.findViewById(R.id.peer_list_address);
+		
+		if (a.URL.startsWith("btspp:")) {
+		    type.setImageResource(R.drawable.bluetooth);
+		} else{
+			type.setImageResource(R.drawable.wifi);	
+		}
+		if (a.pass.length() == 0) {
+		    secu.setImageResource(R.drawable.decrypted);
+		} else{
+			secu.setImageResource(R.drawable.encrypted);	
+		}
+		
+		name.setText(a.name);
+		addr.setText(a.URL);
 
 		return v;
 	}
@@ -107,6 +126,11 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 					}
 				}
 				
+				//anyRemote._log("AddressAdapter", "addIfNew "+update+" "+name+"/"+host+"/"+pass);
+				if (update) {
+					notifyDataSetChanged();
+				}
+				             
 				return update;
 			}
 		}
@@ -117,6 +141,8 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 		a.pass = pass;		
 		add(a);
 		
+		//anyRemote._log("AddressAdapter", "addIfNew 1 "+name+"/"+host+"/"+pass);
+		notifyDataSetChanged();
 		return true;
 	}
 }

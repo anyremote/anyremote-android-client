@@ -25,7 +25,6 @@ package anyremote.client.android;
 import java.util.TimerTask;
 
 import android.os.Message;
-import android.widget.Toast;
 import anyremote.client.android.Connection;
 import anyremote.client.android.util.BTSocket;
 import anyremote.client.android.util.IPSocket;

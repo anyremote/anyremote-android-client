@@ -22,12 +22,10 @@
 package anyremote.client.android;
 
 import java.io.File;
-import java.util.TimerTask;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TreeMap;
-import java.util.Vector;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -45,7 +43,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
-import anyremote.client.android.util.Address;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.R;
 

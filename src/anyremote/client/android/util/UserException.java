@@ -23,6 +23,8 @@ package anyremote.client.android.util;
 
 public class UserException extends Exception {
 	private String error, details;
+	
+	static final long serialVersionUID = 1232123;
 
 	public UserException(String error, String details) {
 

@@ -29,7 +29,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.MotionEvent;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.GestureDetector;
 import anyremote.client.android.util.InfoMessage;

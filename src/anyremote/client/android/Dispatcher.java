@@ -24,9 +24,7 @@ package anyremote.client.android;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TimerTask;
 import java.util.Vector;
 import android.content.ComponentName;
@@ -1007,7 +1005,7 @@ public class Dispatcher {
 
 	// save new address in preferences
 	public void addAddress(String name, String URL, String pass) {		        
-		log("addAddress "+name+"/"+URL+"/"+pass);
+		//log("addAddress "+name+"/"+URL+"/"+pass);
 
 		SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = preference.edit();
@@ -1425,7 +1423,6 @@ public class Dispatcher {
 		}
 		
 		String oper  = (String) vR.elementAt(1); 
-		boolean needUpdataDataSource = true;
 
 		if (oper.equals("clear")) {
 
@@ -1492,7 +1489,6 @@ public class Dispatcher {
 						
 		} else if (oper.equals("show")) {
 			// nothing to do
-			needUpdataDataSource = false;
 			return NOTUPDATE_SWITCH;
 		} else {
 	    	log("processList: ERROR improper command >"+oper+"<");

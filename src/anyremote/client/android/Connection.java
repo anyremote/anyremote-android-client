@@ -30,7 +30,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.TimerTask;
 import java.util.Vector;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -908,7 +907,7 @@ public final class Connection implements Runnable {
 		if (cmdTokens.size() <= 0) {
 			return;
 		}
-		anyRemote._log("Connection", "execCommand " + anyRemote.protocol.cmdStr(id) + " " + cmdTokens);
+		anyRemote._log("Connection", "execCommand " + Dispatcher.cmdStr(id) + " " + cmdTokens);
 	
 		final ProtocolMessage pm = new ProtocolMessage();
 		pm.id     = id;

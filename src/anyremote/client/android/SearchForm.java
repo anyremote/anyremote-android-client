@@ -21,7 +21,6 @@
 
 package anyremote.client.android;
 
-import java.util.Vector;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -129,7 +128,9 @@ public class SearchForm extends arActivity
 	}
 
 	public void  handleEditFieldResult(int id, String button, String value) {
-				
+		
+		//log("handleEditFieldResult "+id+" "+value);
+		
 		if (button.equals("Cancel")) return;
 		
 		if (value.length() > 0 && value.charAt(value.length() - 1) == '\n') {
@@ -157,7 +158,10 @@ public class SearchForm extends arActivity
 
 		if (id == Dispatcher.CMD_EDIT_FORM_PASS) { 
 			
+			log("handleEditFieldResult CMD_EDIT_FORM_PASS "+id+" "+value);
+			
 			if (dataSource.addIfNew(connectName,connectTo,value)) {
+				log("handleEditFieldResult CMD_EDIT_FORM_PASS NEW "+id+" "+value);
 			    addAddress(connectName,connectTo,value);
 			}
 			return;
@@ -216,7 +220,7 @@ public class SearchForm extends arActivity
 
 		if (v.getId() == R.id.search_list) {
 			final AdapterContextMenuInfo info = (AdapterContextMenuInfo)menuInfo;
-			final TextView tv= (TextView) info.targetView.findViewById(R.id.search_list_item);
+			final TextView tv= (TextView) info.targetView.findViewById(R.id.peer_list_item);
 
 			menu.setHeaderTitle(tv.getText());
 			MenuInflater inflater = getMenuInflater();
@@ -227,7 +231,9 @@ public class SearchForm extends arActivity
 	// Handle context menu, opened by long-click
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-
+		
+		stopBluetoothDiscovery();
+		
 		final AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		
 		Address a = dataSource.getItem(info.position);
@@ -248,6 +254,11 @@ public class SearchForm extends arActivity
 		case R.id.enter_item_name:
 
 			renameAddress(address);
+			break;
+			
+		case R.id.enter_item_pass:
+
+			changePassword(a);
 			break;
 
 		case R.id.clean_item:
@@ -420,7 +431,7 @@ public class SearchForm extends arActivity
 
 		switch(item.getItemId()) {
 
-		case R.id.connect_item:
+		/*case R.id.connect_item:
 
 			if (selected >= 0) {
 				Address a = dataSource.getItem(selected);
@@ -438,7 +449,7 @@ public class SearchForm extends arActivity
 					 doConnect(a.name,anyRemote.AUTOCONNECT_TO);
 				}
 			}			    
-			break;
+			break;*/
 
 		case R.id.search_item:
 
@@ -462,8 +473,8 @@ public class SearchForm extends arActivity
 			setupEditField(Dispatcher.CMD_EDIT_FORM_IP, null, null, null);
 			break;
 
-		case R.id.enter_item_name:
-
+		/*case R.id.enter_item_name:
+			
 			stopBluetoothDiscovery();
 
 			if (selected >= 0) {
@@ -475,35 +486,15 @@ public class SearchForm extends arActivity
 			break;
 
 		case R.id.enter_item_pass:
-
+			
 			stopBluetoothDiscovery();
 
 			if (selected >= 0) {
 				Address a = dataSource.getItem(selected);
 				if (a != null) {
-					// get URL by device name
-					String url = a.URL;
-					if (url == null) {
-						log("onOptionsItemSelected: enter_item_pass can not get URL for "+a.name);
-						return true;
-					}
-	
-					connectPass = a.pass;
-					if (connectPass == null) {
-						connectPass = "";
-					}
-	
-					connectTo   = url;
-					connectName = a.name;
-	
-					setupEditField(Dispatcher.CMD_EDIT_FORM_PASS, null, null, null);
+				    changePassword(a);
 				}
 			}			    
-			break;
-
-		case R.id.exit_item:
-
-			doExit();
 			break;
 
 		case R.id.clean_item:
@@ -516,6 +507,13 @@ public class SearchForm extends arActivity
 				}
 			}
 			break;	
+        */
+			
+		case R.id.exit_item:
+
+			doExit();
+			break;
+
 
 		case R.id.log_item:
 
@@ -675,7 +673,25 @@ public class SearchForm extends arActivity
 	
 		setupEditField(Dispatcher.CMD_EDIT_FORM_NAME, null, null, address);
 	}
+	
+	public void changePassword(Address a) {
+		
+		if (a == null) {
+			return;
+		}
+		
+		if (a.URL == null) {
+			log("changePassword: can not get URL for "+a.name);
+			return;
+		}
 
+		connectPass = (a.pass == null ? "" : a.pass);
+		connectTo   = a.URL;
+		connectName = a.name;
+
+		setupEditField(Dispatcher.CMD_EDIT_FORM_PASS, null, null, null);	
+	}			    
+	
 	public void cleanAddress(String name) {
 		//log("cleanAddress "+name);
 		anyRemote.protocol.cleanAddress(name);

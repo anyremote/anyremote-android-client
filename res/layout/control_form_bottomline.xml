@@ -35,7 +35,7 @@
 	        android:lines="1">
 	    </TextView>
     </LinearLayout>
-    
+ 
     <ImageButton
         android:id="@+id/cover"
         android:layout_width="fill_parent"

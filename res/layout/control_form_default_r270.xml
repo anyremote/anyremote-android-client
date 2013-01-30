@@ -34,7 +34,7 @@
 	        android:scrollHorizontally="true"
 	        android:lines="1" >
 	    </TextView>
-    
+
     </LinearLayout>
 
     <TableLayout
