@@ -26,13 +26,11 @@ import java.util.Vector;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.view.LayoutInflater;
 import anyremote.client.android.R;
-import anyremote.client.android.anyRemote;
 
 public class AddressAdapter extends ArrayAdapter<Address> {
 

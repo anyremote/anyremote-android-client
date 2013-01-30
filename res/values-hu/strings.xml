@@ -9,12 +9,14 @@
     <string name="exit_item">Kilépés</string>
     <string name="connect_item">Kapcsolódás</string>
     <string name="disconnect_item">Szétkapcsolás</string>
-    <string name="search_item">Keresés</string>
+    <string name="bt_search_item">BT Keresés</string>
+    <string name="tcp_search_item">IP Keresés</string>
     <string name="searching">Keresés &#8230;</string>
     <string name="cancel_search_item">Keresés leállítása</string>
     <string name="enter_bt_item">BT cím megadása</string>
     <string name="enter_ip_item">IP cím megadása</string>
     <string name="enter_item_name">Barátságos név megváltoztatása</string>
+    <string name="enter_item_addr">Keresés megváltoztatása</string>
     <string name="enter_item_pass">Jelszó megváltoztatása</string>
     <string name="enter_pass">Jelszó megadása</string>
     <string name="label_pass">Jelszó</string>

@@ -9,12 +9,14 @@
     <string name="exit_item">Zakończ</string>
     <string name="connect_item">Połącz</string>
     <string name="disconnect_item">Rozłącz</string>
-    <string name="search_item">Wyszukaj</string>
+    <string name="bt_search_item">Wyszukaj BT</string>
+    <string name="tcp_search_item">Wyszukaj IP</string>
     <string name="searching">Wyszukiwanie &#8230;</string>
     <string name="cancel_search_item">Zatrzymaj wyszukiwanie</string>
     <string name="enter_bt_item">Podaj adres BT</string>
     <string name="enter_ip_item">Podaj adres IP</string>
     <string name="enter_item_name">Zmień przyjazną nazwę</string>
+    <string name="enter_item_addr">Zmień adres</string>
     <string name="enter_item_pass">Zmień hasło</string>
     <string name="enter_pass">Podaj hasło</string>
     <string name="label_pass">Hasło</string>

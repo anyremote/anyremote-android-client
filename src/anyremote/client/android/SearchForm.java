@@ -21,11 +21,23 @@
 
 package anyremote.client.android;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.LineNumberReader;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.app.Activity;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -58,10 +70,15 @@ public class SearchForm extends arActivity
 	static final int  BT_USE_NO      = 0;
 	static final int  BT_USE_SEARCH  = 1;
 	static final int  BT_USE_CONNECT = 2;
+	static final String  DEFAULT_IP_PORT = "5197";
 
 	ListView searchList;
 	AddressAdapter dataSource;
 	int selected = 0;
+	
+	// IP search
+	Integer asyncNum = new Integer(0);
+	ArrayList<String> hosts = new ArrayList<String>();
 
 	private BluetoothAdapter mBtAdapter;
 
@@ -155,6 +172,28 @@ public class SearchForm extends arActivity
 			}
 			return;	
 		}
+		
+		if (id == Dispatcher.CMD_EDIT_FORM_ADDR) { 
+			
+			log("handleEditFieldResult CMD_EDIT_FORM_ADDR "+id+" "+value);
+			
+			if (value.length() == 0) return;
+			
+			if (value.startsWith("btspp://")) {
+				value = formatBTAddr(value);
+			}
+			
+			if (value != connectTo) {
+
+				cleanAddress(connectName);
+				dataSource.remove(connectName);
+
+				if (dataSource.addIfNew(connectName,value,connectPass)) {
+					addAddress(value,connectTo,connectPass);
+				}
+			}
+			return;	
+		}
 
 		if (id == Dispatcher.CMD_EDIT_FORM_PASS) { 
 			
@@ -172,29 +211,32 @@ public class SearchForm extends arActivity
 		
 		// Format control
 		if (id == Dispatcher.CMD_EDIT_FORM_BT) { 
-			 
-			// Samsung's does allows BT address only in capital
-			StringBuffer baddr = new StringBuffer("btspp://");
-
-			baddr.append(value.substring(8).
-					replace('a','A').replace('b','B').
-					replace('c','C').replace('d','D').
-					replace('e','E').replace('f','F'));
-
-			int i = 8;
-			while (i<baddr.length()-3) {
-				if (baddr.charAt(i) == ':') {
-					baddr.deleteCharAt(i); 
-				} else {
-					i++;
-				}
-			}		       
-			value = new String(baddr);	       
+			value = formatBTAddr(value);
 		}
 
 		if (dataSource.addIfNew(value,value,"")) {
 			addAddress(value,value,"");
 		}
+	}
+	
+	private String formatBTAddr(String value) {
+		
+		// Samsung's does allows BT address only in capital
+		StringBuffer baddr = new StringBuffer("btspp://");
+
+		baddr.append(value.substring(8).replace('a', 'A').replace('b', 'B')
+				.replace('c', 'C').replace('d', 'D').replace('e', 'E')
+				.replace('f', 'F'));
+
+		int i = 8;
+		while (i < baddr.length() - 3) {
+			if (baddr.charAt(i) == ':') {
+				baddr.deleteCharAt(i);
+			} else {
+				i++;
+			}
+		}
+		return new String(baddr);
 	}
 	
 	@Override
@@ -253,12 +295,17 @@ public class SearchForm extends arActivity
 			
 		case R.id.enter_item_name:
 
-			renameAddress(address);
+			renameAddress(a);
 			break;
 			
 		case R.id.enter_item_pass:
 
 			changePassword(a);
+			break;
+			
+		case R.id.enter_item_addr:
+
+			changeAddress(a);
 			break;
 
 		case R.id.clean_item:
@@ -401,7 +448,176 @@ public class SearchForm extends arActivity
 			setTitle(R.string.searchFormUnconnected);
 		}
 	}
+	
+	private void doPing() {
+		
+		String ip = anyRemote.getLocalIpAddress();
+		if (ip == null) {
+			return;
+		}
+		log("doPing "+ip);
+		
+		try {
+			Thread.sleep(200);
+		} catch (InterruptedException e) {
+		}
+	
+		scanSubNet(ip.substring(0,ip.lastIndexOf('.')+1));
+		//scanSubNet("172.16.32.");
+	}
+	
+	private void scanSubNet(String subnet){
+		
+		log("scanSubNet "+subnet);
+		
+		setProgressBarIndeterminateVisibility(true);
+		setTitle(R.string.searching);
+		
+	    hosts.clear();
+	    
+	    for (int i=1; i<254; i++){
+	        log("Trying: " + subnet + String.valueOf(i));
+	        
+	        synchronized (asyncNum) {
+	        	asyncNum++;
+	        }
+	        PingTask mTask = new PingTask();
+	        mTask.execute(subnet + String.valueOf(i));
+	        
+	        while (asyncNum > 16) {
+	    		try {
+	    			Thread.sleep(200);
+	    		} catch (InterruptedException e) {
+	    		}
+	        }
+	    }
+	    
+	    while (asyncNum > 0) {
+    		try {
+    			Thread.sleep(300);
+     		} catch (InterruptedException e) {
+    		}
+	    }
+	    
+	    synchronized (hosts) {
+	        log("Got: " + hosts);
+	    }
+	    
+	    for (int i = 0;i<hosts.size();i++) {
+	        dataSource.addIfNew("socket://"+hosts.get(i), "socket://"+hosts.get(i) + ":" + DEFAULT_IP_PORT, "");
+	    }
+	    
+	    setProgressBarIndeterminateVisibility(false);
+	    setTitle(R.string.searchFormUnconnected);
+	}
+	
+	class PingTask extends AsyncTask<String, Void, Void> {
+		
+        /*PipedOutputStream mPOut;
+        PipedInputStream mPIn;
+        LineNumberReader mReader;
+        Process mProcess;*/
+ 
+        @Override
+        protected void onPreExecute() {
+            /*mPOut = new PipedOutputStream();
+            try {
+                mPIn = new PipedInputStream(mPOut);
+                mReader = new LineNumberReader(new InputStreamReader(mPIn));
+            } catch (IOException e) {
+                cancel(true);
+            }*/
+        }
 
+		public void stop() {
+			/*Process p = mProcess;
+			if (p != null) {
+				p.destroy();
+			}*/
+			cancel(true);
+		}
+
+		@Override
+		protected Void doInBackground(String... params) {
+
+			try {
+				InetAddress inetAddress = InetAddress.getByName(params[0]);
+				if (inetAddress.isReachable(1000)) {
+
+					log("Up # " + params[0]);
+					String host = inetAddress.getHostName();
+
+					synchronized (hosts) {
+						hosts.add(host);
+					}
+
+					synchronized (asyncNum) {
+						asyncNum--;
+					}
+
+					return null;
+				}
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			/*try {
+				log("start # " + params[0]);
+				String cmd = "/system/bin/ping -q -n -w 1 -c 1 " + params[0];
+				Process mProcess = new ProcessBuilder()
+						.command(cmd)
+						.redirectErrorStream(true).start();
+				log("started # " + params[0]);
+
+				try {
+					InputStream in = mProcess.getInputStream();
+					OutputStream out = mProcess.getOutputStream();
+					byte[] buffer = new byte[1024];
+					int count;
+					log("AA " + params[0]);
+					
+					// in -> buffer -> mPOut -> mReader -> 1 line of ping
+					// information to parse
+					while ((count = in.read(buffer)) != -1) {
+						mPOut.write(buffer, 0, count);
+						// publishProgress();
+					}
+					log("done for # " + params[0] + " " + buffer);
+					out.close();
+					in.close();
+					mPOut.close();
+					mPIn.close();
+				} finally {
+					mProcess.destroy();
+					mProcess = null;
+				}
+			} catch (IOException e) {
+				log("IOException for # " + params[0] + " " + e.getMessage());
+			}*/
+
+			synchronized (asyncNum) {
+				asyncNum--;
+			}
+
+			log("Down # " + params[0]);
+			return null;
+		}
+        
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            /*try {
+                // Is a line ready to read from the "ping" command?
+                while (mReader.ready()) {
+                    // This just displays the output, you should typically parse it I guess.
+                	log("Got "+mReader.readLine());
+                }
+            } catch (IOException t) {
+            }*/
+        }
+ 	}
+	
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) { 
 		menu.clear();
@@ -451,9 +667,14 @@ public class SearchForm extends arActivity
 			}			    
 			break;*/
 
-		case R.id.search_item:
+		case R.id.bt_search_item:
 
 			doDiscovery();
+			break;
+
+		case R.id.tcp_search_item:
+
+			doPing();
 			break;
 
 		case R.id.cancel_search_item:
@@ -480,7 +701,7 @@ public class SearchForm extends arActivity
 			if (selected >= 0) {
 				Address a = dataSource.getItem(selected);
 				if (a != null) {
-                    renameAddress(a.name);
+                    renameAddress(a);
 				}
 			}			    
 			break;
@@ -658,20 +879,18 @@ public class SearchForm extends arActivity
 		finish();
 	}
 	
-	public void renameAddress(String address) {
-		
-		Address a = dataSource.getItem(address);
-
+	public void renameAddress(Address a) {
+	
 		if (a == null) {
-			log("onOptionsItemSelected: enter_item_name can not get info for "+address);
+			log("onOptionsItemSelected: enter_item_name can not get info for "+a.name);
 			return;
 		}
 
-		connectName = address;
+		connectName = a.name;
 		connectTo   = a.URL;
 		connectPass = a.pass;
 	
-		setupEditField(Dispatcher.CMD_EDIT_FORM_NAME, null, null, address);
+		setupEditField(Dispatcher.CMD_EDIT_FORM_NAME, null, null, a.name);
 	}
 	
 	public void changePassword(Address a) {
@@ -690,6 +909,25 @@ public class SearchForm extends arActivity
 		connectName = a.name;
 
 		setupEditField(Dispatcher.CMD_EDIT_FORM_PASS, null, null, null);	
+	}	
+	
+	public void changeAddress(Address a) {
+		log("changeAddress");
+		
+		if (a == null) {
+			return;
+		}
+		
+		if (a.URL == null) {
+			log("changeAddress: can not get URL for "+a.name);
+			return;
+		}
+
+		connectPass = (a.pass == null ? "" : a.pass);
+		connectTo   = a.URL;
+		connectName = a.name;
+
+		setupEditField(Dispatcher.CMD_EDIT_FORM_ADDR, null, null, a.URL);	
 	}			    
 	
 	public void cleanAddress(String name) {

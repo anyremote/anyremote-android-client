@@ -22,9 +22,13 @@
 package anyremote.client.android;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.TreeMap;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -617,6 +621,26 @@ public class anyRemote extends Activity
 		} 
 	}
 	
+	public static String getLocalIpAddress() {
+		try {
+			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+				
+				NetworkInterface intf = en.nextElement();
+				for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+					InetAddress inetAddress = enumIpAddr.nextElement();
+					
+					if (!(inetAddress.isLoopbackAddress() || 
+					     inetAddress.getHostAddress().contains(":"))) {  // avoid IPv6 addresses
+						return inetAddress.getHostAddress();
+					}
+				}
+			}
+		} catch (SocketException ex) {
+			return null;
+		}
+		return null;
+	}
+
 	public static boolean logVisible() {
 		return (currForm == LOG_FORM);
 	}

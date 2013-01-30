@@ -90,10 +90,11 @@ public class Dispatcher {
 	static final int  CMD_EDIT_FORM_BT    = 104;
 	static final int  CMD_EDIT_FORM_NAME  = 105;
 	static final int  CMD_EDIT_FORM_PASS  = 106;
+	static final int  CMD_EDIT_FORM_ADDR  = 107;
 
-	static final int  CMD_LIST_UPDATE     = 107;
+	static final int  CMD_LIST_UPDATE     = 110;
 
-	static final int  CMD_CLOSE  = 110;
+	static final int  CMD_CLOSE  = 120;
 
 	static final int SIZE_SMALL    = 12;
 	static final int SIZE_MEDIUM   = 22;

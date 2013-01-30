@@ -153,6 +153,7 @@ public class arActivity extends Activity
 		case Dispatcher.CMD_EDIT_FORM_BT:
 		case Dispatcher.CMD_EDIT_FORM_NAME:
 		case Dispatcher.CMD_EDIT_FORM_PASS:
+		case Dispatcher.CMD_EDIT_FORM_ADDR:
 			log("handleEditFormvalue improper case");
 			break;
 		case Dispatcher.CMD_GETPASS:
@@ -170,6 +171,7 @@ public class arActivity extends Activity
 		case Dispatcher.CMD_EDIT_FORM_BT:
 		case Dispatcher.CMD_EDIT_FORM_NAME:
 		case Dispatcher.CMD_EDIT_FORM_PASS:
+		case Dispatcher.CMD_EDIT_FORM_ADDR:
 		case Dispatcher.CMD_GETPASS:
 		case Dispatcher.CMD_EFIELD:
 			return new EditFieldDialog(this);
@@ -223,6 +225,17 @@ public class arActivity extends Activity
 			((EditFieldDialog) d).setupEField(getResources().getString(R.string.enter_item_pass),
 					getResources().getString(R.string.enter_item_pass),
 					"", 
+					true);
+			d.setOnDismissListener(this);
+			d.setOnCancelListener (this);
+
+			break;
+			
+		case Dispatcher.CMD_EDIT_FORM_ADDR:
+
+			((EditFieldDialog) d).setupEField(getResources().getString(R.string.enter_item_addr),
+					getResources().getString(R.string.enter_item_addr),
+					anyRemote.protocol.efValue, 
 					true);
 			d.setOnDismissListener(this);
 			d.setOnCancelListener (this);
