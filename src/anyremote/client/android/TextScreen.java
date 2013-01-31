@@ -25,7 +25,7 @@ package anyremote.client.android;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.method.ScrollingMovementMethod;
+//import android.text.method.ScrollingMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
@@ -76,7 +76,7 @@ public class TextScreen extends arActivity implements OnGestureListener {
 		
 		registerForContextMenu(text);
 		
-		text.setMovementMethod(new ScrollingMovementMethod());
+		//text.setMovementMethod(new ScrollingMovementMethod());
 	}
 	
 	// update all visuals

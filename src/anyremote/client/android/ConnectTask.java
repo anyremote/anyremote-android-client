@@ -62,21 +62,20 @@ public class ConnectTask extends TimerTask {
 				int split = host.lastIndexOf(":");
 
 				if (split < 8 || // socket://
-						split >= host.length() - 2) {
-					// format control failed
-					return;
+					split >= host.length() - 2) {
+					return;    // format control failed
 				}
 
 				String hostname = host.substring(9, split);
-				//anyRemote._log("ConnectTask", "connectWifi connection is "+hostname+" : " + host.substring(split + 1));
 				String sport = host.substring(split + 1).trim();
 
 				if (sport.charAt(sport.length() - 1) == '\n') {
 					sport = sport.substring(0, sport.length() - 1);
 				}
-
+				
 				int  port = Integer.valueOf(sport);
 
+				anyRemote._log("ConnectTask", "connectWifi connection is "+hostname+" : " + port);
 				s = new IPSocket(hostname, port);
 
 			} catch (UserException e) {

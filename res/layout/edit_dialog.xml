@@ -1,28 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="fill_parent"
-	android:layout_height="fill_parent">
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
-	<TextView android:text="@+id/EditDialogLabel" android:id="@+id/EditDialogLabel"
-		android:layout_width="fill_parent" android:layout_height="wrap_content"></TextView>
+    <TextView
+        android:id="@+id/EditDialogLabel"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="@+id/EditDialogLabel" >
+    </TextView>
 
-	<EditText android:id="@+id/EditDialogEditText" android:text=""
-		android:layout_height="wrap_content" android:layout_width="fill_parent"
-		android:maxLines="1"></EditText>
+    <EditText
+        android:id="@+id/EditDialogEditText"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:text="" >
+    </EditText>
 
-	<LinearLayout android:id="@+id/EditDialogBtnBar"
-	    android:orientation="horizontal"
-		android:layout_width="fill_parent" android:layout_height="wrap_content">
+    <LinearLayout
+        android:id="@+id/EditDialogBtnBar"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
 
+        <Button
+            android:id="@+id/EditDialogButtonOk"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:text="@string/btnOk" >
+        </Button>
 
-		<Button android:id="@+id/EditDialogButtonOk"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:text="@string/btnOk" android:layout_gravity="fill_horizontal"></Button>
-
-		<Button android:id="@+id/EditDialogButtonCancel"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content" android:text="@string/btnCancel" android:layout_gravity="fill_horizontal"></Button>
-
-	</LinearLayout>
+        <Button
+            android:id="@+id/EditDialogButtonCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="fill_horizontal"
+            android:text="@string/btnCancel" >
+        </Button>
+    </LinearLayout>
 
 </LinearLayout>

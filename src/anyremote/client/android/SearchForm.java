@@ -22,12 +22,12 @@
 package anyremote.client.android;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+//import java.io.InputStream;
+//import java.io.InputStreamReader;
+//import java.io.LineNumberReader;
+//import java.io.OutputStream;
+//import java.io.PipedInputStream;
+//import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -882,7 +882,6 @@ public class SearchForm extends arActivity
 	public void renameAddress(Address a) {
 	
 		if (a == null) {
-			log("onOptionsItemSelected: enter_item_name can not get info for "+a.name);
 			return;
 		}
 
