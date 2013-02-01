@@ -20,6 +20,8 @@
     <string name="enter_item_pass">Смяна на парола</string>
     <string name="enter_pass">Въведете парола</string>
     <string name="label_pass">Парола</string>
+    <string name="label_addr">Адрес</string>
+    <string name="label_name">Име</string>
     <string name="clean_item">Чист адрес</string>
     <string name="autoconnect_item">Автоматично свързване</string>
     <string name="log_item">Лог</string>

@@ -20,6 +20,8 @@
     <string name="enter_item_pass">Zmień hasło</string>
     <string name="enter_pass">Podaj hasło</string>
     <string name="label_pass">Hasło</string>
+    <string name="label_addr">Adres</string>
+    <string name="label_name">Nazwę</string>
     <string name="clean_item">Wyczyść adres</string>
     <string name="autoconnect_item">Połączenie automatyczne</string>
     <string name="log_item">Log</string>

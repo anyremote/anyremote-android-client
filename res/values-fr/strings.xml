@@ -20,6 +20,8 @@
     <string name="enter_item_pass">Changer de mot de passe</string>
     <string name="enter_pass">Entrer le mot de passe</string>
     <string name="label_pass">Mot de passe</string>
+    <string name="label_addr">Rechercher</string>
+    <string name="label_name">Nom</string>
     <string name="clean_item">Effacer</string>
     <string name="autoconnect_item">Se conneter automatiquement</string>
     <string name="log_item">Journal</string>

@@ -20,6 +20,8 @@
 <string name="enter_item_pass">Ändra lösenord</string>
 <string name="enter_pass">Fyll i lösenord</string>
 <string name="label_pass">Lösenord</string>
+<string name="label_addr">Address</string>
+<string name="label_name">Visningsnamn</string>
 <string name="clean_item">Rensa adress</string>
 <string name="autoconnect_item">Automatisk uppkoppling</string>
 <string name="log_item">Logg</string>

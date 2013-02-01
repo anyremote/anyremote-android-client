@@ -20,6 +20,8 @@
 <string name="enter_item_pass">Zmeniť heslo</string>
 <string name="enter_pass">Vložte heslo</string>
 <string name="label_pass">Heslo</string>
+<string name="label_addr">Adresu</string>
+<string name="label_name">Názov partnera</string>
 <string name="clean_item">Vymazať adresu</string>
 <string name="autoconnect_item">Automatické pripojenie</string>
 <string name="log_item">Záznam</string>

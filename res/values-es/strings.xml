@@ -20,6 +20,8 @@
     <string name="enter_item_pass">Cambiar Contraseña</string>
     <string name="enter_pass">Introducir Contraseña</string>
     <string name="label_pass">Contraseña</string>
+    <string name="label_addr">Dirección</string>
+    <string name="label_name">Name</string>
     <string name="clean_item">Limpiar dirección</string>
     <string name="autoconnect_item">Autoconectar</string>
     <string name="log_item">Log</string>

@@ -70,6 +70,7 @@ public class SearchForm extends arActivity
 	static final int  BT_USE_NO      = 0;
 	static final int  BT_USE_SEARCH  = 1;
 	static final int  BT_USE_CONNECT = 2;
+	
 	static final String  DEFAULT_IP_PORT = "5197";
 
 	ListView searchList;
@@ -79,6 +80,7 @@ public class SearchForm extends arActivity
 	// IP search
 	Integer asyncNum = new Integer(0);
 	ArrayList<String> hosts = new ArrayList<String>();
+	PingTask ipSearchTask = null;;
 
 	private BluetoothAdapter mBtAdapter;
 
@@ -244,9 +246,7 @@ public class SearchForm extends arActivity
 		super.onDestroy();
 
 		// Make sure we're not doing discovery anymore
-		if (btUseFlag != BT_USE_NO) {
-			cancelSearch(false);
-		}
+		cancelSearch(false);
 
 		// Unregister broadcast listeners
 		unregisterReceiver(mReceiver);
@@ -321,9 +321,7 @@ public class SearchForm extends arActivity
 	@Override
 	public void onBackPressed() {
 
-		if (btUseFlag != BT_USE_NO) {
-			cancelSearch(false);
-		}
+		cancelSearch(false);
 
 		final Intent intent = new Intent();  
 		intent.putExtra(anyRemote.CONNECT_TO, "");
@@ -439,86 +437,150 @@ public class SearchForm extends arActivity
 			}
 		}
 	};
+	
+	private void stopSearch() { 
+		cancelSearch(false);
+	}
 
-	public void cancelSearch(boolean onlyCancel) { 
+	private void cancelSearch(boolean onlyCancel) { 
 		log("cancelSearch");
+		
 		stopBluetoothDiscovery();
+		stopTcpDiscovery();
+		
 		if (!onlyCancel) {
 			setProgressBarIndeterminateVisibility(false);
 			setTitle(R.string.searchFormUnconnected);
 		}
 	}
 	
-	private void doPing() {
+	private void tcpSearch() {
+		
+		if (ipSearchTask != null) {
+			log("tcpSearch: already searching");
+			return;
+		}
 		
 		String ip = anyRemote.getLocalIpAddress();
 		if (ip == null) {
 			return;
 		}
-		log("doPing "+ip);
-		
-		try {
-			Thread.sleep(200);
-		} catch (InterruptedException e) {
-		}
+		log("tcpSearch "+ip);
 	
 		scanSubNet(ip.substring(0,ip.lastIndexOf('.')+1));
 		//scanSubNet("172.16.32.");
+	}
+
+	private void stopTcpDiscovery() {
+		log("stopTcpDiscovery");
+		synchronized (asyncNum) {
+			asyncNum = -1;
+		}
+		if (ipSearchTask != null) {
+			ipSearchTask.cancel(true);
+		}
 	}
 	
 	private void scanSubNet(String subnet){
 		
 		log("scanSubNet "+subnet);
-		
+				
+	    hosts.clear();
+	    asyncNum = 0; 
+	    
 		setProgressBarIndeterminateVisibility(true);
 		setTitle(R.string.searching);
 		
-	    hosts.clear();
-	    
-	    for (int i=1; i<254; i++){
-	        log("Trying: " + subnet + String.valueOf(i));
-	        
-	        synchronized (asyncNum) {
-	        	asyncNum++;
-	        }
-	        PingTask mTask = new PingTask();
-	        mTask.execute(subnet + String.valueOf(i));
-	        
-	        while (asyncNum > 16) {
-	    		try {
-	    			Thread.sleep(200);
-	    		} catch (InterruptedException e) {
-	    		}
-	        }
-	    }
-	    
-	    while (asyncNum > 0) {
-    		try {
-    			Thread.sleep(300);
-     		} catch (InterruptedException e) {
-    		}
-	    }
-	    
-	    synchronized (hosts) {
-	        log("Got: " + hosts);
-	    }
-	    
-	    for (int i = 0;i<hosts.size();i++) {
-	        dataSource.addIfNew("socket://"+hosts.get(i), "socket://"+hosts.get(i) + ":" + DEFAULT_IP_PORT, "");
-	    }
-	    
-	    setProgressBarIndeterminateVisibility(false);
-	    setTitle(R.string.searchFormUnconnected);
+	    ipSearchTask = new PingTask();
+	    ipSearchTask.execute(subnet);    
 	}
 	
-	class PingTask extends AsyncTask<String, Void, Void> {
+	class PingTask extends AsyncTask<String, Integer, Void> {
+
+		@Override
+		protected Void doInBackground(String... params) {
+			
+		    for (int i=1; i<254; i++){
+		        log("Trying: " + params[0] + String.valueOf(i));
+		        
+		        synchronized (asyncNum) {
+		        	if (asyncNum < 0) {
+		        		// cancel search
+		        		log("Search cancelled");
+		        		i = 255;
+		        	} else {
+		        	    asyncNum++;
+		        	}
+		        }
+		        PingHostTask mTask = new PingHostTask();
+		        mTask.execute(params[0] + String.valueOf(i));
+		        
+		        while (asyncNum > 16) {
+		        	log("Waiting to run : " + asyncNum);
+		    		try {
+		    			Thread.sleep(200);
+		    		} catch (InterruptedException e) {
+		    		}
+		        }
+			    
+			    publishProgress(i);
+		    }
+		    
+		    while (asyncNum > 0) {
+	    		try {
+	    			Thread.sleep(300);
+	     		} catch (InterruptedException e) {
+	    		}
+		    }
+
+			return null;
+		}
+		
+        @Override
+        protected void onProgressUpdate(Integer... progress) {
+        	
+        	log("onProgressUpdate "+progress[0]);
+        	
+        	// dynamically add discovered hosts
+		    synchronized (hosts) {
+			    for (int h = 0;h<hosts.size();h++) {
+			        dataSource.addIfNew("socket://"+hosts.get(h), "socket://"+hosts.get(h) + ":" + DEFAULT_IP_PORT, "");
+			    }
+			    hosts.clear();
+		    }
+		    
+		    synchronized (asyncNum) {
+		    	if (asyncNum > 0) {
+				    log("onProgressUpdate " + asyncNum);
+			    	setTitle(progress[0]+"/255");
+		    	}
+		    }
+        }
+        
+        @Override
+        protected void onPostExecute(Void unused) {
+        	setProgressBarIndeterminateVisibility(false);
+		    setTitle(R.string.searchFormUnconnected);
+		    ipSearchTask = null;
+        }
+        
+        @Override
+        protected void onCancelled() {
+        	setProgressBarIndeterminateVisibility(false);
+		    setTitle(R.string.searchFormUnconnected);
+		    ipSearchTask = null;
+        }
+	}
+	
+	class PingHostTask extends AsyncTask<String, Void, Void> {
 		
         /*PipedOutputStream mPOut;
         PipedInputStream mPIn;
         LineNumberReader mReader;
         Process mProcess;*/
  
-        @Override
+		/*
+		@Override
         protected void onPreExecute() {
             /*mPOut = new PipedOutputStream();
             try {
@@ -526,16 +588,16 @@ public class SearchForm extends arActivity
                 mReader = new LineNumberReader(new InputStreamReader(mPIn));
             } catch (IOException e) {
                 cancel(true);
-            }*/
-        }
+            }
+        }*/
 
-		public void stop() {
-			/*Process p = mProcess;
+        /*public void stop() {
+			Process p = mProcess;
 			if (p != null) {
 				p.destroy();
-			}*/
+			}
 			cancel(true);
-		}
+		}*/
 
 		@Override
 		protected Void doInBackground(String... params) {
@@ -543,6 +605,12 @@ public class SearchForm extends arActivity
 			try {
 				InetAddress inetAddress = InetAddress.getByName(params[0]);
 				if (inetAddress.isReachable(1000)) {
+					
+					synchronized (asyncNum) {
+						if (asyncNum < 0) {
+							return null;
+						}
+					}
 
 					log("Up # " + params[0]);
 					String host = inetAddress.getHostName();
@@ -604,18 +672,19 @@ public class SearchForm extends arActivity
 			log("Down # " + params[0]);
 			return null;
 		}
-        
+		
+		/*
         @Override
         protected void onProgressUpdate(Void... values) {
-            /*try {
+            try {
                 // Is a line ready to read from the "ping" command?
                 while (mReader.ready()) {
                     // This just displays the output, you should typically parse it I guess.
                 	log("Got "+mReader.readLine());
                 }
             } catch (IOException t) {
-            }*/
-        }
+            }
+        }*/
  	}
 	
 	@Override
@@ -674,12 +743,12 @@ public class SearchForm extends arActivity
 
 		case R.id.tcp_search_item:
 
-			doPing();
+			tcpSearch();
 			break;
 
 		case R.id.cancel_search_item:
 
-			stopBluetoothDiscovery();
+			stopSearch();
 			break;
 
 		case R.id.enter_bt_item:
@@ -809,6 +878,9 @@ public class SearchForm extends arActivity
 	
 	public void stopBluetoothDiscovery() {
 		log("stopBluetoothDiscovery");
+		
+		btUseFlag = BT_USE_NO;
+
 		if (mBtAdapter != null && mBtAdapter.isDiscovering()) {
 			log("stopBluetoothDiscovery: cancelDiscovery");
 			mBtAdapter.cancelDiscovery();
@@ -850,10 +922,7 @@ public class SearchForm extends arActivity
 
 	public void doRealConnect() {
 		//log("doRealConnect");
-		if (btUseFlag != BT_USE_NO) {
-			btUseFlag = BT_USE_NO;
-			cancelSearch(false);
-		}
+		cancelSearch(false);
 
 		log("doRealConnect: address is "+connectTo);
 		if (connectOpts.contentEquals(anyRemote.CONNECT_TO)) {

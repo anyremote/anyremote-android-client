@@ -16,10 +16,12 @@
     <string name="enter_bt_item">BT cím megadása</string>
     <string name="enter_ip_item">IP cím megadása</string>
     <string name="enter_item_name">Barátságos név megváltoztatása</string>
-    <string name="enter_item_addr">Keresés megváltoztatása</string>
+    <string name="enter_item_addr">Cím megváltoztatása</string>
     <string name="enter_item_pass">Jelszó megváltoztatása</string>
     <string name="enter_pass">Jelszó megadása</string>
     <string name="label_pass">Jelszó</string>
+    <string name="label_addr">Cím</string>
+    <string name="label_name">Barátságos név</string>
     <string name="clean_item">Cím törlése</string>
     <string name="autoconnect_item">Automatikus kapcsolódás</string>
     <string name="log_item">Napló</string>
