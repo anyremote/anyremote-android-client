@@ -37,6 +37,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.app.Activity;
+import android.app.Dialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.AdapterView;
@@ -63,8 +64,8 @@ import anyremote.client.android.util.AddressAdapter;
 
 public class SearchForm extends arActivity 
                         implements OnItemClickListener,
-                                   DialogInterface.OnDismissListener,
-                                   DialogInterface.OnCancelListener,
+                                   //DialogInterface.OnDismissListener,
+                                   //DialogInterface.OnCancelListener,
                                    AdapterView.OnItemSelectedListener {
 
 	static final int  BT_USE_NO      = 0;
@@ -90,6 +91,7 @@ public class SearchForm extends arActivity
 	String connectName = "";
 	String connectPass = "";
 	String connectOpts = "";
+	boolean skipDismissDialog = false;
 	boolean deregStateRcv = false;
 
 	@Override
@@ -145,101 +147,6 @@ public class SearchForm extends arActivity
 		    doConnect(a.name,anyRemote.CONNECT_TO);
 	    }
 	}
-
-	public void  handleEditFieldResult(int id, String button, String value) {
-		
-		//log("handleEditFieldResult "+id+" "+value);
-		
-		if (button.equals("Cancel")) return;
-		
-		if (value.length() > 0 && value.charAt(value.length() - 1) == '\n') {
-			value = value.substring(0, value.length() - 1);
-		}
-		if (value.length() > 0 && value.charAt(0) == '\n') {
-			value = value.substring(1, value.length());
-		}
-
-		if (id == Dispatcher.CMD_EDIT_FORM_NAME) { 
-
-			if (value.length() == 0) return;
-			
-			if (value != connectName) {
-
-				cleanAddress(connectName);
-				dataSource.remove(connectName);
-
-				if (dataSource.addIfNew(value,connectTo,connectPass)) {
-					addAddress(value,connectTo,connectPass);
-				}
-			}
-			return;	
-		}
-		
-		if (id == Dispatcher.CMD_EDIT_FORM_ADDR) { 
-			
-			log("handleEditFieldResult CMD_EDIT_FORM_ADDR "+id+" "+value);
-			
-			if (value.length() == 0) return;
-			
-			if (value.startsWith("btspp://")) {
-				value = formatBTAddr(value);
-			}
-			
-			if (value != connectTo) {
-
-				cleanAddress(connectName);
-				dataSource.remove(connectName);
-
-				if (dataSource.addIfNew(connectName,value,connectPass)) {
-					addAddress(value,connectTo,connectPass);
-				}
-			}
-			return;	
-		}
-
-		if (id == Dispatcher.CMD_EDIT_FORM_PASS) { 
-			
-			log("handleEditFieldResult CMD_EDIT_FORM_PASS "+id+" "+value);
-			
-			if (dataSource.addIfNew(connectName,connectTo,value)) {
-				log("handleEditFieldResult CMD_EDIT_FORM_PASS NEW "+id+" "+value);
-			    addAddress(connectName,connectTo,value);
-			}
-			return;
-		}
-
-		// BT or IP address goes here
-		if (value.length() == 0) return;
-		
-		// Format control
-		if (id == Dispatcher.CMD_EDIT_FORM_BT) { 
-			value = formatBTAddr(value);
-		}
-
-		if (dataSource.addIfNew(value,value,"")) {
-			addAddress(value,value,"");
-		}
-	}
-	
-	private String formatBTAddr(String value) {
-		
-		// Samsung's does allows BT address only in capital
-		StringBuffer baddr = new StringBuffer("btspp://");
-
-		baddr.append(value.substring(8).replace('a', 'A').replace('b', 'B')
-				.replace('c', 'C').replace('d', 'D').replace('e', 'E')
-				.replace('f', 'F'));
-
-		int i = 8;
-		while (i < baddr.length() - 3) {
-			if (baddr.charAt(i) == ':') {
-				baddr.deleteCharAt(i);
-			} else {
-				i++;
-			}
-		}
-		return new String(baddr);
-	}
 	
 	@Override
 	protected void onDestroy() {
@@ -292,17 +199,7 @@ public class SearchForm extends arActivity
 
 			doConnect(address,anyRemote.AUTOCONNECT_TO);
 			break;
-			
-		case R.id.enter_item_name:
-
-			renameAddress(a);
-			break;
-			
-		case R.id.enter_item_pass:
-
-			changePassword(a);
-			break;
-			
+						
 		case R.id.enter_item_addr:
 
 			changeAddress(a);
@@ -716,110 +613,55 @@ public class SearchForm extends arActivity
 
 		switch(item.getItemId()) {
 
-		/*case R.id.connect_item:
-
-			if (selected >= 0) {
-				Address a = dataSource.getItem(selected);
-				if (a != null) {
-				    doConnect(a.name,anyRemote.CONNECT_TO);
-				}
-			}		    
-			break;
-
-		case R.id.autoconnect_item:
-
-			if (selected >= 0) {
-				Address a = dataSource.getItem(selected);
-				if (a != null) {
-					 doConnect(a.name,anyRemote.AUTOCONNECT_TO);
-				}
-			}			    
-			break;*/
-
-		case R.id.bt_search_item:
-
-			doDiscovery();
-			break;
-
-		case R.id.tcp_search_item:
-
-			tcpSearch();
-			break;
-
-		case R.id.cancel_search_item:
-
-			stopSearch();
-			break;
-
-		case R.id.enter_bt_item:
-
-			stopBluetoothDiscovery();
-			setupEditField(Dispatcher.CMD_EDIT_FORM_BT, null, null, null);
-			break;
-
-		case R.id.enter_ip_item:
-
-			stopBluetoothDiscovery();
-			setupEditField(Dispatcher.CMD_EDIT_FORM_IP, null, null, null);
-			break;
-
-		/*case R.id.enter_item_name:
-			
-			stopBluetoothDiscovery();
-
-			if (selected >= 0) {
-				Address a = dataSource.getItem(selected);
-				if (a != null) {
-                    renameAddress(a);
-				}
-			}			    
-			break;
-
-		case R.id.enter_item_pass:
-			
-			stopBluetoothDiscovery();
-
-			if (selected >= 0) {
-				Address a = dataSource.getItem(selected);
-				if (a != null) {
-				    changePassword(a);
-				}
-			}			    
-			break;
-
-		case R.id.clean_item:
-
-			if (selected >= 0) {
-				Address a = dataSource.getItem(selected);
-				if (a != null) {
-					cleanAddress(a.name);
-					dataSource.remove(a);
-				}
-			}
-			break;	
-        */
-			
-		case R.id.exit_item:
-
-			doExit();
-			break;
-
-
-		case R.id.log_item:
-
-			stopBluetoothDiscovery();
-
-			final Intent intentl = new Intent();
-			intentl.putExtra(anyRemote.ACTION, "log");
-			setResult(RESULT_OK, intentl);
-			finish();
-			break;	
-			
-	    case R.id.about_item:
-	    	
-	    	About about = new About(this);
-	    	about.setTitle(R.string.about);
-	    	about.show();	    	
+			case R.id.bt_search_item:
+	
+				doDiscovery();
+				break;
+	
+			case R.id.tcp_search_item:
+	
+				tcpSearch();
+				break;
+	
+			case R.id.cancel_search_item:
+	
+				stopSearch();
+				break;
+	
+			case R.id.enter_bt_item:
+	
+				stopSearch();
+				showDialog(Dispatcher.CMD_EDIT_FORM_BT);
+				break;
+	
+			case R.id.enter_ip_item:
+	
+				stopSearch();
+				showDialog(Dispatcher.CMD_EDIT_FORM_IP);
+				break;
+	
+				
+			case R.id.exit_item:
+	
+				doExit();
+				break;
+	
+	
+			case R.id.log_item:
+	
+				stopSearch();
+	
+				final Intent intentl = new Intent();
+				intentl.putExtra(anyRemote.ACTION, "log");
+				setResult(RESULT_OK, intentl);
+				finish();
+				break;	
+				
+		    case R.id.about_item:
+		    	
+		    	About about = new About(this);
+		    	about.setTitle(R.string.about);
+		    	about.show();	    	
 		}
 		
 		return true;
@@ -827,7 +669,7 @@ public class SearchForm extends arActivity
 	
 	public void doExit() { 
 		
-		stopBluetoothDiscovery();
+		stopSearch();
 	
 		final Intent intente = new Intent();
 		intente.putExtra(anyRemote.ACTION, "exit");
@@ -948,36 +790,6 @@ public class SearchForm extends arActivity
 		finish();
 	}
 	
-	public void renameAddress(Address a) {
-	
-		if (a == null) {
-			return;
-		}
-
-		connectName = a.name;
-		connectTo   = a.URL;
-		connectPass = a.pass;
-	
-		setupEditField(Dispatcher.CMD_EDIT_FORM_NAME, null, null, a.name);
-	}
-	
-	public void changePassword(Address a) {
-		
-		if (a == null) {
-			return;
-		}
-		
-		if (a.URL == null) {
-			log("changePassword: can not get URL for "+a.name);
-			return;
-		}
-
-		connectPass = (a.pass == null ? "" : a.pass);
-		connectTo   = a.URL;
-		connectName = a.name;
-
-		setupEditField(Dispatcher.CMD_EDIT_FORM_PASS, null, null, null);	
-	}	
 	
 	public void changeAddress(Address a) {
 		log("changeAddress");
@@ -987,7 +799,7 @@ public class SearchForm extends arActivity
 		}
 		
 		if (a.URL == null) {
-			log("changeAddress: can not get URL for "+a.name);
+			log("changeAddress: can not get peer address for "+a.name);
 			return;
 		}
 
@@ -995,7 +807,7 @@ public class SearchForm extends arActivity
 		connectTo   = a.URL;
 		connectName = a.name;
 
-		setupEditField(Dispatcher.CMD_EDIT_FORM_ADDR, null, null, a.URL);	
+		showDialog(Dispatcher.CMD_EDIT_FORM_ADDR);	
 	}			    
 	
 	public void cleanAddress(String name) {
@@ -1005,14 +817,128 @@ public class SearchForm extends arActivity
 
 	// save new address in preferences
 	public void addAddress(String name, String URL, String pass) {		        
-		//log("addAddress "+name+"/"+URL+"/"+pass);
-
-		/*Address a = new Address();
-		a.name  = name;
-		a.URL   = URL;
-		a.pass  = pass;
-		addressesA.add(a);*/
-
 		anyRemote.protocol.addAddress(name, URL, pass);
+	}
+
+	// Got result from AddressDialog dialog ("Ok"/"Cancel" was pressed)
+	public void onDismiss (DialogInterface dialog) {
+	
+		if (skipDismissDialog) {
+			skipDismissDialog = false;
+		} else {
+			String n = stripNewLines(((AddressDialog) dialog).getPeerName());
+			String a = stripNewLines(((AddressDialog) dialog).getPeerAddress());
+			String p = stripNewLines(((AddressDialog) dialog).getPeerPassword());
+			
+			log("onDismiss AddressDialog >"+n+"< >"+a+"< >"+p+"<");
+			
+			if (a.length() == 0) {
+				return;
+			}
+			if (n.length() == 0) {
+				n = a;
+			}
+			if (a.startsWith("btspp://")) {
+				a = formatBTAddr(a);
+			}
+
+			if (connectName.length() > 0 && a != connectName) {
+				cleanAddress(connectName);
+				dataSource.remove(connectName);
+			}
+			
+			if (dataSource.addIfNew(n,a,p)) {
+			    addAddress(n,a,p);
+			}
+		}
+	}
+	
+	// Handle "Cancel" press in EditFieldDialog
+	public void onCancel(DialogInterface dialog) { 
+		skipDismissDialog = true;
+	}
+	
+	@Override
+	protected Dialog onCreateDialog(int id) {
+		
+		switch(id){
+		    case Dispatcher.CMD_EDIT_FORM_ADDR:
+		    case Dispatcher.CMD_EDIT_FORM_IP:
+		    case Dispatcher.CMD_EDIT_FORM_BT:
+			    return new AddressDialog(this);
+		}
+		return null;
+	}
+	
+	@Override
+	protected void onPrepareDialog(int id, Dialog d) {
+	
+		if (d == null) return;
+		
+		skipDismissDialog = false;
+		
+		switch(id){
+	
+		    case Dispatcher.CMD_EDIT_FORM_ADDR:
+	
+				((AddressDialog) d).setupDialog(connectName,connectTo,connectPass);
+				break;
+			
+			case Dispatcher.CMD_EDIT_FORM_IP:
+		
+				connectPass = "";
+				connectTo   = "";
+				connectName = "";
+				
+				((AddressDialog) d).setupDialog("",getResources().getString(R.string.default_ip),"");
+		
+				break;
+		
+			case Dispatcher.CMD_EDIT_FORM_BT:
+		
+				connectPass = "";
+				connectTo   = "";
+				connectName = "";
+				
+				((AddressDialog) d).setupDialog("",getResources().getString(R.string.default_bt),"");
+				break;
+			
+			default:
+				return;
+		}		
+		
+		d.setOnDismissListener(this);
+		d.setOnCancelListener (this);
+	}
+	
+	private String formatBTAddr(String value) {
+		
+		// Samsung's does allows BT address only in capital
+		StringBuffer baddr = new StringBuffer("btspp://");
+
+		baddr.append(value.substring(8)
+				.replace('a', 'A').replace('b', 'B')
+				.replace('c', 'C').replace('d', 'D')
+				.replace('e', 'E').replace('f', 'F'));
+
+		int i = 8;
+		while (i < baddr.length() - 3) {
+			if (baddr.charAt(i) == ':') {
+				baddr.deleteCharAt(i);
+			} else {
+				i++;
+			}
+		}
+		return new String(baddr);
+	}
+
+	private String stripNewLines(String value) {
+		if (value.length() > 0 && value.charAt(value.length() - 1) == '\n') {
+			value = value.substring(0, value.length() - 1);
+		}
+		if (value.length() > 0 && value.charAt(0) == '\n') {
+			value = value.substring(1, value.length());
+		}
+		return value;
 	}
 }

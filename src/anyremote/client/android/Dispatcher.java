@@ -88,9 +88,7 @@ public class Dispatcher {
 
 	static final int  CMD_EDIT_FORM_IP    = 103; // Internal pseudo-commands
 	static final int  CMD_EDIT_FORM_BT    = 104;
-	static final int  CMD_EDIT_FORM_NAME  = 105;
-	static final int  CMD_EDIT_FORM_PASS  = 106;
-	static final int  CMD_EDIT_FORM_ADDR  = 107;
+	static final int  CMD_EDIT_FORM_ADDR  = 105;
 
 	static final int  CMD_LIST_UPDATE     = 110;
 
@@ -426,8 +424,6 @@ public class Dispatcher {
 		    //case CMD_EXIT:     return "CMD_EXIT";
 	        case CMD_EDIT_FORM_IP:   return "CMD_EDIT_FORM_IP";
 	        case CMD_EDIT_FORM_BT:   return "CMD_EDIT_FORM_BT";
-	        case CMD_EDIT_FORM_NAME: return "CMD_EDIT_FORM_NAME";
-	        case CMD_EDIT_FORM_PASS: return "CMD_EDIT_FORM_PASS";
 	        case CMD_LIST_UPDATE:    return "CMD_LIST_UPDATE";
 	        case CMD_CLOSE:          return "CMD_CLOSE";
 		}

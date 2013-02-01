@@ -17,48 +17,49 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
-//
 
 package anyremote.client.android;
 
-import android.content.Context;
 import android.app.Dialog;
+import android.content.Context;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
-import android.view.View;
-import android.view.View.OnClickListener;
 import anyremote.client.android.R;
 
-public class EditFieldDialog extends Dialog implements OnClickListener {
+public class AddressDialog extends Dialog implements OnClickListener {
 	
 	Button   okButton;
 	Button   cancelButton;
-	EditText editField;
-	TextView label;
-    
-	public EditFieldDialog(Context context) {
+	EditText name = null;
+	EditText addr;
+	EditText pass;
+
+	public AddressDialog(Context context) {
 		super(context);
 	}
 	
-	public void setupEField(String caption, String lbl, String initValue) {
- 
-    	if (label == null) {
+	public void setupDialog(String n, String a, String p) {
+    	
+    	if (name == null) {
     		setupDialog();		
     	}
+    	setTitle(R.string.label_addr);
     	
-    	setTitle(caption);
-    	label.setText(lbl);
-    	editField.setText(initValue);
+     	name.setText(n);
+     	addr.setText(a);
+     	pass.setText(p);
     }
 	
 	private void setupDialog() {
 		
-	   okButton     = (Button) findViewById(R.id.EditDialogButtonOk);
-	   cancelButton = (Button) findViewById(R.id.EditDialogButtonCancel);
-	   editField    = (EditText) findViewById(R.id.EditDialogEditText);
-	   label        = (TextView) findViewById(R.id.EditDialogLabel);
+	   okButton     = (Button) findViewById(R.id.editAddrButtonOk);
+	   cancelButton = (Button) findViewById(R.id.editAddrButtonCancel);
+	   name    = (EditText) findViewById(R.id.edit_name);
+	   addr    = (EditText) findViewById(R.id.edit_addr);
+	   pass    = (EditText) findViewById(R.id.edit_pass);
 
 	    // setup listener
 	    okButton.setOnClickListener(this);
@@ -67,27 +68,32 @@ public class EditFieldDialog extends Dialog implements OnClickListener {
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		setContentView(R.layout.edit_dialog);
+		setContentView(R.layout.peer_edit);
 	
-    	if (label == null) {
+    	if (name == null) {
     		setupDialog();		
     	}
 	}
 	
 	@Override
 	public void onClick(View v) {
-		
 		if (v == okButton) {
 			this.dismiss();
-		}
-		
+		}		
 		if (v == cancelButton) {
 			this.cancel();
 		}
 	}
 	
-	public String getValue(){
-		return editField.getText().toString();
+	public String getPeerName(){
+		return name.getText().toString();
 	}
-
+	
+	public String getPeerAddress(){
+		return addr.getText().toString();
+	}
+	
+	public String getPeerPassword(){
+		return pass.getText().toString();
+	}
 }

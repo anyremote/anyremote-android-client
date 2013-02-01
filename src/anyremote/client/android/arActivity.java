@@ -108,13 +108,15 @@ public class arActivity extends Activity
 	// 
 
 	void setupEditField(int id, String caption, String label, String defvalue) {    	
-
+		
+		log("setupEditField "+id+" "+caption);
+		
 		anyRemote.protocol.efCaption = caption;
 		anyRemote.protocol.efLabel   = label;
 		anyRemote.protocol.efValue   = defvalue;
 		anyRemote.protocol.efId      = id;
 
-		if (id != -1) {
+		if (id > Dispatcher.CMD_NO) {
 		    showDialog(id);
 		}
 	}
@@ -124,6 +126,7 @@ public class arActivity extends Activity
 	public void onDismiss (DialogInterface dialog) {
 
 		log("onDismiss");
+		
 		if (skipDismissEditDialog) {
 			skipDismissEditDialog = false;
 			return;
@@ -131,7 +134,7 @@ public class arActivity extends Activity
 
 		handleEditFieldResult(anyRemote.protocol.efId, "Ok", ((EditFieldDialog) dialog).getValue());
 		
-		setupEditField(-1, "", "", ""); // reset values
+		setupEditField(Dispatcher.CMD_NO, "", "", ""); // reset values
 	}
 
 	// Handle "Cancel" press in EditFieldDialog
@@ -143,38 +146,30 @@ public class arActivity extends Activity
 
 		handleEditFieldResult(anyRemote.protocol.efId, "Cancel", "");
 		
-		setupEditField(-1, "", "", ""); // reset values
+		setupEditField(Dispatcher.CMD_NO, "", "", ""); // reset values
 	}
 
 	public void  handleEditFieldResult(int id, String button, String value) {
+		
 		// override in child classes
 		switch(id){
-		case Dispatcher.CMD_EDIT_FORM_IP:
-		case Dispatcher.CMD_EDIT_FORM_BT:
-		case Dispatcher.CMD_EDIT_FORM_NAME:
-		case Dispatcher.CMD_EDIT_FORM_PASS:
-		case Dispatcher.CMD_EDIT_FORM_ADDR:
-			log("handleEditFormvalue improper case");
-			break;
-		case Dispatcher.CMD_GETPASS:
-		case Dispatcher.CMD_EFIELD:
-			anyRemote.protocol.handleEditFieldResult(id, button, value);
+			case Dispatcher.CMD_GETPASS:
+			case Dispatcher.CMD_EFIELD:
+				anyRemote.protocol.handleEditFieldResult(id, button, value);
+			default:
+				log("handleEditFormResult improper case");
+				break;
 		}
 	}
 
 	// Show Edit field dialog 
 	@Override
 	protected Dialog onCreateDialog(int id) {
-
+		//log("onCreateDialog "+id);
 		switch(id){
-		case Dispatcher.CMD_EDIT_FORM_IP:
-		case Dispatcher.CMD_EDIT_FORM_BT:
-		case Dispatcher.CMD_EDIT_FORM_NAME:
-		case Dispatcher.CMD_EDIT_FORM_PASS:
-		case Dispatcher.CMD_EDIT_FORM_ADDR:
-		case Dispatcher.CMD_GETPASS:
-		case Dispatcher.CMD_EFIELD:
-			return new EditFieldDialog(this);
+			case Dispatcher.CMD_GETPASS:
+			case Dispatcher.CMD_EFIELD:
+				return new EditFieldDialog(this);
 		}
 		return null;
 	}
@@ -182,84 +177,27 @@ public class arActivity extends Activity
 	// Setup "Enter address" dialog
 	@Override
 	protected void onPrepareDialog(int id, Dialog d) {
-
+		//log("onPrepareDialog "+id);
 		if (d == null) return;
 
 		switch(id){
-
-		case Dispatcher.CMD_EDIT_FORM_IP:
-
-			((EditFieldDialog) d).setupEField(getResources().getString(R.string.enter_ip_item),
-					getResources().getString(R.string.enter_ip_item),
-					getResources().getString(R.string.default_ip), 
-					true);
-			d.setOnDismissListener(this);
-			d.setOnCancelListener (this);
-
-			break;
-
-		case Dispatcher.CMD_EDIT_FORM_BT:
-
-			((EditFieldDialog) d).setupEField(getResources().getString(R.string.enter_bt_item),
-					getResources().getString(R.string.enter_bt_item),
-					getResources().getString(R.string.default_bt), 
-					true);
-			d.setOnDismissListener(this);
-			d.setOnCancelListener (this);
-
-			break;
-
-		case Dispatcher.CMD_EDIT_FORM_NAME:
-
-			((EditFieldDialog) d).setupEField(getResources().getString(R.string.enter_item_name),
-					getResources().getString(R.string.enter_item_name),
-					anyRemote.protocol.efValue, 
-					true);
-			d.setOnDismissListener(this);
-			d.setOnCancelListener (this);
-
-			break;
-
-		case Dispatcher.CMD_EDIT_FORM_PASS:
-
-			((EditFieldDialog) d).setupEField(getResources().getString(R.string.enter_item_pass),
-					getResources().getString(R.string.enter_item_pass),
-					"", 
-					true);
-			d.setOnDismissListener(this);
-			d.setOnCancelListener (this);
-
-			break;
-			
-		case Dispatcher.CMD_EDIT_FORM_ADDR:
-
-			((EditFieldDialog) d).setupEField(getResources().getString(R.string.enter_item_addr),
-					getResources().getString(R.string.enter_item_addr),
-					anyRemote.protocol.efValue, 
-					true);
-			d.setOnDismissListener(this);
-			d.setOnCancelListener (this);
-
-			break;
-
-		case Dispatcher.CMD_GETPASS:
-
-			((EditFieldDialog) d).setupEField(getResources().getString(R.string.label_pass),
-					getResources().getString(R.string.enter_pass),
-					"", false);
-			d.setOnDismissListener(this);
-			d.setOnCancelListener (this);
-			break;
-
-		case Dispatcher.CMD_EFIELD:
-
-			((EditFieldDialog) d).setupEField(anyRemote.protocol.efCaption, 
-					                          anyRemote.protocol.efLabel, 
-					                          anyRemote.protocol.efValue, false);
-			d.setOnDismissListener(this);
-			d.setOnCancelListener (this);
-
-			break;
+			case Dispatcher.CMD_GETPASS:
+	
+				((EditFieldDialog) d).setupEField(getResources().getString(R.string.label_pass),
+						getResources().getString(R.string.enter_pass),
+						"");
+				d.setOnDismissListener(this);
+				d.setOnCancelListener (this);
+				break;
+	
+			case Dispatcher.CMD_EFIELD:
+	
+				((EditFieldDialog) d).setupEField(anyRemote.protocol.efCaption, 
+						                          anyRemote.protocol.efLabel, 
+						                          anyRemote.protocol.efValue);
+				d.setOnDismissListener(this);
+				d.setOnCancelListener (this);
+				break;
 		}		
 	}
 	
