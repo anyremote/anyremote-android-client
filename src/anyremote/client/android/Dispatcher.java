@@ -124,8 +124,7 @@ public class Dispatcher {
     	public int attemptsToSend;
     }
 
-	ArrayList<Handler> handlers;
-	Handler messageHandler;
+	private ArrayList<Handler> handlers;
 	
 	ArrayList<ArHandler> actHandlers = new ArrayList<ArHandler>();
 	
@@ -211,7 +210,6 @@ public class Dispatcher {
 
 		handlers = new ArrayList<Handler>();
 		
-		messageHandler = new Handler(ctx);
 		context = ctx;
 
 		listContent = new ArrayList<ListItem>();
@@ -280,7 +278,8 @@ public class Dispatcher {
 		log("doConnect " + (host!=null?host:"NULL")+" P=>"+pass+"<");
 		if (connection != null && !connection.isClosed()) {
 			log("doConnect already connected to " + currentConnection);
-			notifyHandlers(anyRemote.CONNECTED);
+		    anyRemote.sendGlobal(anyRemote.CONNECTED, "");
+
 			return;
 		}
 
@@ -301,7 +300,8 @@ public class Dispatcher {
 		}
 
 		//log("doConnect: cannot establish");
-		notifyHandlers(anyRemote.DISCONNECTED);
+	    anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
+
 	}
 
 	/**
@@ -340,7 +340,8 @@ public class Dispatcher {
 		if (full) {         // real close
 			currentConnection = "";
 		} // else           // pause connection
-		notifyHandlers(anyRemote.DISCONNECTED);
+	    anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
+
 	}
 
 	public void disconnected() {
@@ -361,7 +362,7 @@ public class Dispatcher {
 			doConnect(currentConnName, currentConnection, currentConnPass);
 			return;
 		}	
-		notifyHandlers(anyRemote.DISCONNECTED);	
+		anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
 	}
 
 	public void pauseConnection(){
@@ -1058,25 +1059,6 @@ public class Dispatcher {
 
 	public void queueCommand(String message) {
 		sendMessage("Msg:" + message);
-	}
-
-	private void notifyHandlers(int what){
-		for(Handler h : handlers){
-			Message msg = h.obtainMessage(what);
-			msg.sendToTarget();
-		}
-	}
-
-	public void addHandler(Handler h){
-		handlers.add(h);
-	}
-
-	public void removeHandler(Handler h){
-		handlers.remove(h);
-	}
-
-	public void clearHandlers(){
-		handlers.clear();
 	}
 
 	public void setFullscreen(String option) {

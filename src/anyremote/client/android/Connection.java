@@ -140,8 +140,7 @@ public final class Connection implements Runnable {
 
 		final Connection c = this;
 		
-		Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.CONNECTED,c);
-		msg.sendToTarget();
+	    anyRemote.sendGlobal(anyRemote.CONNECTED, c);
 
 		while (!closed) { // loop receiving messages
 
@@ -214,9 +213,7 @@ public final class Connection implements Runnable {
 		if (!connectionListenerNotifiedAboutError) {
 
 			connectionListenerNotifiedAboutError = true;
-
-			Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, ue.getDetails());
-			msg.sendToTarget();
+		    anyRemote.sendGlobal(anyRemote.DISCONNECTED, ue.getDetails());
 		}
 	}
 
@@ -897,11 +894,6 @@ public final class Connection implements Runnable {
 		return Dispatcher.CMD_NO;
 	}
 
-	/*private void notifyMessage(ProtocolMessage pm) {
-		Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.COMMAND,pm);
-		msg.sendToTarget();
-	}*/
-
 	private void execCommand(Vector cmdTokens, final int id, final int stage) {
 
 		if (cmdTokens.size() <= 0) {
@@ -916,9 +908,8 @@ public final class Connection implements Runnable {
         
 		try {
 			
-			Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.COMMAND,pm);
-			msg.sendToTarget();
-		
+		    anyRemote.sendGlobal(anyRemote.COMMAND, pm);
+
 		} catch (Exception e) {
 			
 			anyRemote._log("Connection", "execCommand Exception");

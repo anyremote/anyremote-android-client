@@ -89,7 +89,7 @@ public class anyRemote extends Activity
 	
 	static TreeMap<String,Bitmap> iconMap = new TreeMap<String,Bitmap>();
 
-	private Handler viewHandler;
+	private static Handler globalHandler = null;
 	
 	private static DateFormat now_format = new SimpleDateFormat("HH:mm:ss");
 	private static Date teraz = new Date();
@@ -118,16 +118,17 @@ public class anyRemote extends Activity
 
 		currForm        = DUMMY_FORM;
 		status          = DISCONNECTED;
-
-		viewHandler = new Handler(this);
-		
-		protocol.addHandler(viewHandler);
+        
+		if (globalHandler == null) {
+		    globalHandler = new Handler(this);
+		}
 
 		MainLoop.enable();
 		
 		currForm = DUMMY_FORM;
 		status = DISCONNECTED;
-	}          
+	}
+	
 
 	@Override
 	protected void onStart() {
@@ -403,7 +404,15 @@ public class anyRemote extends Activity
 		//cScreen.commandAction(item.getTitle().toString());
 		return true;
 	}
-
+	
+	public static void sendGlobal(int id, Object obj) {
+		if (globalHandler != null) {
+			Message msg = globalHandler.obtainMessage(id, obj);
+		    msg.sendToTarget();
+		}
+	}
+	
+	// get messages sent from sendGlobal()
 	public boolean handleMessage(Message msg) {
 
 		switch(msg.what){
@@ -424,7 +433,11 @@ public class anyRemote extends Activity
 			if (msg.obj != null ) {
 				Resources res = getResources();
 				
-			    Toast.makeText(this, res.getString(R.string.connection_failed)+"\n"+(String) msg.obj, Toast.LENGTH_LONG).show();
+				String alert = res.getString(R.string.connection_failed);
+				if (((String) msg.obj).length() > 0) {
+					alert += "\n"+(String) msg.obj;
+				}
+			    Toast.makeText(this, alert, Toast.LENGTH_LONG).show();
 			}
 			
 			protocol.disconnected();

@@ -24,7 +24,6 @@ package anyremote.client.android;
 
 import java.util.TimerTask;
 
-import android.os.Message;
 import anyremote.client.android.Connection;
 import anyremote.client.android.util.BTSocket;
 import anyremote.client.android.util.IPSocket;
@@ -83,8 +82,7 @@ public class ConnectTask extends TimerTask {
 				// tell the view that we have no connection
 				anyRemote._log("ConnectTask", "run UserException " + e.getDetails());
 				
-				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, e.getDetails());
-			    msg.sendToTarget();
+			    anyRemote.sendGlobal(anyRemote.DISCONNECTED, e.getDetails());
 
 				return;
 			}
@@ -100,21 +98,18 @@ public class ConnectTask extends TimerTask {
 			} catch (UserException e) {
 				// tell the view that we have no connection
 				anyRemote._log("ConnectTask", "run UserException " + e.getDetails());
-				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, e.getDetails());
-			    msg.sendToTarget();
+			    anyRemote.sendGlobal(anyRemote.DISCONNECTED, e.getDetails());
 				return;
 			} catch (Exception e) {
 				anyRemote._log("ConnectTask", "run Exception " + e.getMessage());
-				Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, e.getMessage());
-			    msg.sendToTarget();
+			    anyRemote.sendGlobal(anyRemote.DISCONNECTED, e.getMessage());
 				return;
 			}
 		}
 
 		if (s == null) {
 			anyRemote._log("ConnectTask", "NULL socket ");
-			Message msg = ((Dispatcher) connectionListener).messageHandler.obtainMessage(anyRemote.DISCONNECTED, "can not obtain socket");
-		    msg.sendToTarget();
+		    anyRemote.sendGlobal(anyRemote.DISCONNECTED, "can not obtain socket");
 			return;
 		}
 
