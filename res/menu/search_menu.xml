@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<!-- item android:id="@+id/connect_item" 	android:title="@string/connect_item">	</item>
-	<item android:id="@+id/autoconnect_item" 	android:title="@string/autoconnect_item"></item-->
+	<item android:id="@+id/autoconnect_item" 	android:title="@string/autoconnect_item"></item>
 	<item android:id="@+id/bt_search_item" 		android:title="@string/bt_search_item">	</item>
-	<item android:id="@+id/tcp_search_item" 	android:title="@string/tcp_search_item">	</item>
+	<item android:id="@+id/tcp_search_item" 	android:title="@string/tcp_search_item">	</item-->
+	<item android:id="@+id/search_item" 	    android:title="@string/search_item">	</item>
 	<item android:id="@+id/cancel_search_item" 	android:title="@string/cancel_search_item"></item>
 	<item android:id="@+id/enter_ip_item" 		android:title="@string/enter_ip_item">	</item>
 	<item android:id="@+id/enter_bt_item" 		android:title="@string/enter_bt_item">	</item>

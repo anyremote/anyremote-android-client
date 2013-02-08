@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.app.Activity;
@@ -79,7 +80,7 @@ public class SearchForm extends arActivity
 	int selected = 0;
 	
 	// IP search
-	Integer asyncNum = new Integer(0);
+	Integer asyncNum = new Integer(-1);
 	ArrayList<String> hosts = new ArrayList<String>();
 	PingTask ipSearchTask = null;;
 
@@ -243,7 +244,6 @@ public class SearchForm extends arActivity
 
 	private void doRealDiscovery() {
 		log("doRealDiscovery");
-		btUseFlag = BT_USE_NO;
 
 		// Indicate scanning in the title
 		setProgressBarIndeterminateVisibility(true);
@@ -458,6 +458,7 @@ public class SearchForm extends arActivity
         protected void onPostExecute(Void unused) {
         	setProgressBarIndeterminateVisibility(false);
 		    setTitle(R.string.searchFormUnconnected);
+		    asyncNum = -1;
 		    ipSearchTask = null;
         }
         
@@ -465,6 +466,7 @@ public class SearchForm extends arActivity
         protected void onCancelled() {
         	setProgressBarIndeterminateVisibility(false);
 		    setTitle(R.string.searchFormUnconnected);
+		    asyncNum = -1;
 		    ipSearchTask = null;
         }
 	}
@@ -589,6 +591,22 @@ public class SearchForm extends arActivity
 		menu.clear();
 		MenuInflater mi = getMenuInflater();		
 		mi.inflate(R.menu.search_menu, menu);
+		
+		if (asyncNum >= 0 || ipSearchTask != null ||    // have active search
+			btUseFlag == BT_USE_SEARCH) {
+			
+			/*MenuItem bsrch = menu.findItem(R.id.bt_search_item);
+			bsrch.setVisible(false);
+			
+			MenuItem isrch = menu.findItem(R.id.tcp_search_item);
+			isrch.setVisible(false);*/
+			
+			MenuItem isrch = menu.findItem(R.id.search_item);
+			isrch.setVisible(false);
+		} else {
+			MenuItem srch = menu.findItem(R.id.cancel_search_item);
+			srch.setVisible(false);
+		}
 		return true;
 	}
 
@@ -613,7 +631,7 @@ public class SearchForm extends arActivity
 
 		switch(item.getItemId()) {
 
-			case R.id.bt_search_item:
+			/*case R.id.bt_search_item:
 	
 				doDiscovery();
 				break;
@@ -621,6 +639,11 @@ public class SearchForm extends arActivity
 			case R.id.tcp_search_item:
 	
 				tcpSearch();
+				break;*/
+				
+			case R.id.search_item:
+				
+				showDialog(Dispatcher.CMD_SEARCH_DIALOG);
 				break;
 	
 			case R.id.cancel_search_item:
@@ -821,7 +844,7 @@ public class SearchForm extends arActivity
 	}
 
 	// Got result from AddressDialog dialog ("Ok"/"Cancel" was pressed)
-	public void onDismiss (DialogInterface dialog) {
+	public void onDismissAddressDialog (DialogInterface dialog) {
 	
 		if (skipDismissDialog) {
 			skipDismissDialog = false;
@@ -853,7 +876,22 @@ public class SearchForm extends arActivity
 		}
 	}
 	
-	// Handle "Cancel" press in EditFieldDialog
+	// Got result from SearchDialog dialog ("Ok"/"Cancel" was pressed)
+	public void onDismissSearchDialog (DialogInterface dialog) {
+	
+		if (skipDismissDialog) {
+			skipDismissDialog = false;
+		} else {
+
+			if (((SearchDialog) dialog).isBluetooth()) {
+				doDiscovery();
+			} else {
+				tcpSearch();
+			}
+		}
+	}
+	
+	// Handle "Cancel" press in EditFieldDialog/SearchDialog
 	public void onCancel(DialogInterface dialog) { 
 		skipDismissDialog = true;
 	}
@@ -866,6 +904,9 @@ public class SearchForm extends arActivity
 		    case Dispatcher.CMD_EDIT_FORM_IP:
 		    case Dispatcher.CMD_EDIT_FORM_BT:
 			    return new AddressDialog(this);
+			    
+		    case Dispatcher.CMD_SEARCH_DIALOG:
+			    return new SearchDialog(this);
 		}
 		return null;
 	}
@@ -902,12 +943,36 @@ public class SearchForm extends arActivity
 				
 				((AddressDialog) d).setupDialog("",getResources().getString(R.string.default_bt),"");
 				break;
+				
+			case Dispatcher.CMD_SEARCH_DIALOG:
+				
+				// nothing
+				break;
 			
 			default:
 				return;
-		}		
+		}
 		
-		d.setOnDismissListener(this);
+		switch(id){
+		    case Dispatcher.CMD_EDIT_FORM_ADDR:
+		    case Dispatcher.CMD_EDIT_FORM_IP:
+		    case Dispatcher.CMD_EDIT_FORM_BT:
+				d.setOnDismissListener(new OnDismissListener() {
+		            public void onDismiss(DialogInterface dialog) {
+		                onDismissAddressDialog(dialog);
+		            }
+		        });	
+		        break;
+		        
+		    case Dispatcher.CMD_SEARCH_DIALOG:
+				d.setOnDismissListener(new OnDismissListener() {
+		            public void onDismiss(DialogInterface dialog) {
+		                onDismissSearchDialog(dialog);
+		            }
+		        });	
+			    
+	    }
+				
 		d.setOnCancelListener (this);
 	}
 	

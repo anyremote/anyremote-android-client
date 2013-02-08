@@ -4,43 +4,47 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/EditDialogLabel"
+    <RadioGroup
+        android:id="@+id/searchGroup"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@+id/EditDialogLabel" >
-    </TextView>
+        android:layout_height="wrap_content" >
 
-    <EditText
-        android:id="@+id/EditDialogEditText"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:text="" 
-        android:inputType="text">
-    </EditText>
+        <RadioButton
+            android:id="@+id/searchBtCheckbox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/bluetooth" />
 
-    <LinearLayout
-        android:id="@+id/EditDialogBtnBar"
+        <RadioButton
+            android:id="@+id/searchIPCheckbox"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/tcpip" />
+
+        </RadioGroup>
+    
+   <LinearLayout
+        android:id="@+id/searchBtnBar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
         <Button
-            android:id="@+id/EditDialogButtonOk"
+            android:id="@+id/searchDialogButtonOk"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="fill_horizontal"
-            android:text="@string/btnOk" >
+            android:text="@string/search_item" >
         </Button>
 
         <Button
-            android:id="@+id/EditDialogButtonCancel"
+            android:id="@+id/searchDialogButtonCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="fill_horizontal"
             android:text="@string/btnCancel" >
         </Button>
     </LinearLayout>
-
+    
 </LinearLayout>

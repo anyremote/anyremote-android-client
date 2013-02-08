@@ -9,6 +9,7 @@
     <string name="exit_item">Quitter</string>
     <string name="connect_item">Connecter</string>
     <string name="disconnect_item">Déconnecter</string>
+    <string name="search_item">Rechercher</string>
     <string name="bt_search_item">Rechercher BT</string>
     <string name="tcp_search_item">Rechercher IP</string>
     <string name="searching">Recherche en cours&#8230;</string>
