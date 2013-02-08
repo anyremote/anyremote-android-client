@@ -356,6 +356,12 @@ public class Dispatcher {
 			connection.close();
 			autoPass = false;
 		}
+		
+		synchronized (msgQueue) {
+			msgQueue.clear();
+		}
+		
+		
 		if (full) {
 			currentConnection = "";	
 		}
