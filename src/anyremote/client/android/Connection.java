@@ -726,6 +726,7 @@ public final class Connection implements Runnable {
 				tokens.add(Dispatcher.CMD_IMAGE);
 				tokens.add(action);
 				execCommand(tokens, Dispatcher.CMD_IMAGE, ProtocolMessage.FULL);
+			
 			} else if (action.equals("close")) {
 					
 				Vector tokens = new Vector();
@@ -734,28 +735,49 @@ public final class Connection implements Runnable {
 				
 				execCommand(tokens, Dispatcher.CMD_IMAGE, ProtocolMessage.FULL);
 				
-				/*
-				 * } else if (action.equals("set_cursor")) { int x =
-				 * Integer.parseInt(controller.protocol.getWord(true)); int y =
-				 * Integer.parseInt(controller.protocol.getWord(true)); curX =
-				 * x+dX; curY = y+dY; }  else if
-				 * (action.equals("cursor")) { // have to repaint (draw or hide
-				 * cursor cross) useCursor = true; useDynCursor = false; if
-				 * (controller.cScreen.scr != anyRemote.WMAN_FORM) { return; } }
-				 * else if (action.equals("dynamic_cursor")) { useCursor = true;
-				 * useDynCursor = true; if (controller.cScreen.scr !=
-				 * anyRemote.WMAN_FORM) { return; } } else if
-				 * (action.equals("nocursor")) { useCursor = false; useDynCursor
-				 * = false; if (controller.cScreen.scr != anyRemote.WMAN_FORM) {
-				 * return; } } else if (action.equals("remove_all")) {
-				 * controller.rmsClean(); return; } else if
-				 * (action.equals("clear_cache")) {
-				 * controller.cScreen.iconNameCache.removeAllElements();
-				 * controller.cScreen.iconCache.removeAllElements(); return; }
-				 * else if (!action.equals("show")) {
-				 * //System.out.println("WinManager NOT SHOW ???");
-				 * controller.showAlert("WM:unknown cmd"); return;
-				 */
+			/*
+			} else if (action.equals("set_cursor")) { 
+			
+			    int x =  Integer.parseInt(controller.protocol.getWord(true)); 
+			    int y =  Integer.parseInt(controller.protocol.getWord(true)); 
+			    curX = x+dX; 
+			    curY = y+dY;
+			
+			}  else if (action.equals("cursor")) { // have to repaint (draw or hide cursor cross)
+			
+				useCursor = true; 
+				useDynCursor = false; 
+				if (controller.cScreen.scr != anyRemote.WMAN_FORM) { 
+				    return; 
+				} 
+			} else if (action.equals("dynamic_cursor")) { 
+			
+			    useCursor = true;
+				useDynCursor = true; 
+				if (controller.cScreen.scr != anyRemote.WMAN_FORM) { 
+				    return; 
+				} 
+				 
+			} else if (action.equals("nocursor")) { 
+			    
+			    useCursor = false; 
+			    useDynCursor = false; 
+			    if (controller.cScreen.scr != anyRemote.WMAN_FORM) {
+				    return; 
+				} 
+			} else if (action.equals("remove_all")) {
+			
+				controller.rmsClean(); return; 
+			
+			} else if (action.equals("clear_cache")) {
+				
+				controller.cScreen.iconNameCache.removeAllElements();
+				controller.cScreen.iconCache.removeAllElements(); return; 
+			
+			} else if (!action.equals("show")) {
+				 //System.out.println("WinManager NOT SHOW ???");
+				 controller.showAlert("WM:unknown cmd"); return;
+		    */
 			}
 
 		} catch (Exception e1) {

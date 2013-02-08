@@ -124,6 +124,8 @@ public class TextScreen extends arActivity implements OnGestureListener {
 
         redraw();
 		popup();
+		
+		exiting = false;
 	}
 	
 	@Override
@@ -169,8 +171,8 @@ public class TextScreen extends arActivity implements OnGestureListener {
 	@Override
 	protected void onUserLeaveHint() {
 		log("onUserLeaveHint - make disconnect");
-		if (!exiting) {
-		    anyRemote.protocol.disconnect(true);
+		if (!exiting && anyRemote.protocol.messageQueueSize() == 0) {
+		    anyRemote.protocol.disconnect(false);
 		}
 	}
 	

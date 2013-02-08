@@ -137,7 +137,10 @@ public class SearchForm extends arActivity
 					log("onCreate: autoconnect to "+auto.name);
 					doConnect(auto);
 				}
+			} else {
+			    anyRemote.protocol.resumeConnection();
 			}
+			
 		}
 	}
 

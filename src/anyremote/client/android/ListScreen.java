@@ -101,8 +101,6 @@ public class ListScreen extends arActivity
 
 		super.onResume();
 		
-		exiting = false;	
-		
         if (anyRemote.status == anyRemote.DISCONNECTED) {
         	log("onResume no connection");	
         	doFinish("");
@@ -115,6 +113,8 @@ public class ListScreen extends arActivity
         
 		redraw();
 		popup();
+		
+		exiting = false;	
 	}
 	
 	@Override
@@ -221,9 +221,9 @@ public class ListScreen extends arActivity
 	@Override
 	protected void onUserLeaveHint() {
 		log("onUserLeaveHint");
-		if (!exiting) {
+		if (!exiting && anyRemote.protocol.messageQueueSize() == 0) {
 			log("onUserLeaveHint - make disconnect");
-			anyRemote.protocol.disconnect(true);
+			anyRemote.protocol.disconnect(false);
 		}
 	}
 

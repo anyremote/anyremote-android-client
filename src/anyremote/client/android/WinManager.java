@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.MotionEvent;
@@ -39,7 +40,7 @@ public class WinManager extends arActivity
                         implements OnGestureListener {
 	
     ImageButton image;
-	Dispatcher.ArHandler hdlLocalCopy;
+ 	Dispatcher.ArHandler hdlLocalCopy;
 	private GestureDetector gestureScanner;
 
 	@Override
@@ -66,7 +67,7 @@ public class WinManager extends arActivity
 	void redraw()  {
 		log("redraw");
 		anyRemote.protocol.setFullscreen(this);
-		image.setImageBitmap(anyRemote.protocol.imScreen);
+		image.setImageBitmap(anyRemote.protocol.imScreen);		
 	}
 	
 	@Override
@@ -81,8 +82,6 @@ public class WinManager extends arActivity
 	protected void onResume() {
 		log("onResume");
 		super.onResume();
-
-		exiting = false;
 		
         if (anyRemote.status == anyRemote.DISCONNECTED) {
           	log("onResume no connection");
@@ -91,6 +90,8 @@ public class WinManager extends arActivity
 
         redraw();
 		popup();
+
+		exiting = false;
 	}
 	
 	@Override
@@ -102,7 +103,7 @@ public class WinManager extends arActivity
 	
 	@Override 
     public boolean dispatchTouchEvent(MotionEvent ev) { 
-		//log("dispatchTouchEvent");
+		log("dispatchTouchEvent");
         super.dispatchTouchEvent(ev); 
         return gestureScanner.onTouchEvent(ev); 
 	}
@@ -133,8 +134,8 @@ public class WinManager extends arActivity
 	@Override
 	protected void onUserLeaveHint() {
 		log("onUserLeaveHint - make disconnect");
-		if (!exiting) {
-			anyRemote.protocol.disconnect(true);
+		if (!exiting && anyRemote.protocol.messageQueueSize() == 0) {
+			anyRemote.protocol.disconnect(false);
 		}
 	}
 	
@@ -186,7 +187,7 @@ public class WinManager extends arActivity
 	}	
 	
     public boolean onDown(MotionEvent e) {
-        //log("onDown");
+        log("onDown");
         return true;
     }
    
@@ -230,7 +231,35 @@ public class WinManager extends arActivity
     }    
    
     public boolean onSingleTapUp(MotionEvent e) {
-        //log("onSingleTapUp");
+    	//final int pointerCount = e.getPointerCount();
+        //log("onSingleTapUp "+e.getX(0) + " " + e.getY(0));
+         
+		Display display = this.getWindowManager().getDefaultDisplay(); 
+        
+		int sw = display.getWidth();
+		int sh = display.getHeight();
+	    
+		int dx = (sw - anyRemote.protocol.imScreen.getWidth())/2;
+		int dy = (sh - anyRemote.protocol.imScreen.getHeight())/2;
+		
+		int px = (int) e.getX(0);
+		int py = (int) e.getY(0);
+		
+		if (py < dy) {
+			py = dy;
+		} else if (py > sh - dy) {
+			py = sh - dy;
+		}
+		
+		if (px < dx) {
+			px = dx;
+		} else if (px > sw - dx) {
+			px = sw - dx;
+		}
+     
+        commandAction("PressedX("+(px - dx)+",)");
+        commandAction("PressedY("+(py - dy)+",)");
+        
         return true;
     }
 }

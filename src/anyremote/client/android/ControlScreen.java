@@ -162,8 +162,6 @@ public class ControlScreen extends arActivity
 
 		super.onResume();
 		
-		exiting = false;
-		
         if (anyRemote.status == anyRemote.DISCONNECTED) {
         	log("onResume no connection");	
         	doFinish("");
@@ -172,6 +170,8 @@ public class ControlScreen extends arActivity
  
         redraw();
 		popup();
+		
+		exiting = false;
 	}
 	
 	@Override
@@ -192,9 +192,9 @@ public class ControlScreen extends arActivity
 		log("onUserLeaveHint");
 		// no time to sending events
 		//commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
-		if (!exiting) {
+		if (!exiting && anyRemote.protocol.messageQueueSize() == 0) {
 			log("onUserLeaveHint - make disconnect");
-	    	anyRemote.protocol.disconnect(true);
+	    	anyRemote.protocol.disconnect(false);
 		}
 	}
 
@@ -355,10 +355,14 @@ public class ControlScreen extends arActivity
 
 			for (int i=0;i<NUM_ICONS;i++) {
 				
-				log("setSkinSimple get bitmap "+anyRemote.protocol.cfIcons[i]);
+				if (anyRemote.protocol.cfIcons[i] != "none") {
+					log("setSkinSimple get bitmap "+anyRemote.protocol.cfIcons[i]);
+				}
 				Bitmap ic = anyRemote.getIconBitmap(getResources(), anyRemote.protocol.cfIcons[i]);
 				if (ic == null) { // no to squeze
-					log("setSkinSimple failed to get bitmap "+anyRemote.protocol.cfIcons[i]);
+					if (anyRemote.protocol.cfIcons[i] != "none") {
+						log("setSkinSimple failed to get bitmap "+anyRemote.protocol.cfIcons[i]);
+					}
 					ic = anyRemote.getIconBitmap(getResources(), "transparent"); 
 				}
 				
@@ -448,7 +452,6 @@ public class ControlScreen extends arActivity
 		title.setTypeface (anyRemote.protocol.cfTFace);
 	    status.setTypeface(anyRemote.protocol.cfTFace);
 	    
-	    //log("SetFont " +anyRemote.protocol.cfFSize);
 	    title.setTextSize (anyRemote.protocol.cfFSize);
 	    status.setTextSize(anyRemote.protocol.cfFSize);
 	}
@@ -695,12 +698,11 @@ public class ControlScreen extends arActivity
 	protected void doFinish(String action) {
     	
     	log("doFinish "+action);
+        exiting = true;
     	
 	    final Intent intent = new Intent();  
 	    intent.putExtra(anyRemote.ACTION, action);
         setResult(RESULT_OK, intent);
-        
-        exiting = true;
        
         finish();  	
     }

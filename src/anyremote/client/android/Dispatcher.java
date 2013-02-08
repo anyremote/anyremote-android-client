@@ -356,14 +356,12 @@ public class Dispatcher {
 	
 	public void resumeConnection(){
 
-		log("resumeConnection");
-
 		if (currentConnection.length() > 0) {      
 			log("resumeConnection to "+currentConnection);
 			doConnect(currentConnName, currentConnection, currentConnPass);
 			return;
 		}	
-		anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
+		//anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
 	}
 
 	public void pauseConnection(){
@@ -844,9 +842,16 @@ public class Dispatcher {
 		pm.stage          = stage;
 		pm.attemptsToSend = 0;
 		
-		msgQueue.add(0,pm);
-		
+		synchronized (msgQueue) {
+		    msgQueue.add(0,pm);
+		}
 		processMessageQueue();
+	}
+	
+	public int messageQueueSize() {
+		synchronized (msgQueue) {
+		    return msgQueue.size();
+		}
 	}
 		
 	private synchronized void processMessageQueue() {
@@ -858,37 +863,42 @@ public class Dispatcher {
 			final QueueMessage pm = msgItr.next();
 			
 			boolean sent = false;
-
-			final Iterator<ArHandler> itr = actHandlers.iterator();
-			log("processMessageQueue MSG " + cmdStr(pm.id) + " handlers #" + actHandlers.size());
-
-			while (itr.hasNext()) {
-				try {
-					final ArHandler handler = itr.next();
-					if (pm.activity < 0 || // send to all
-					    handler.actId == pm.activity) {
-
-						log("processMessageQueue MSG " + cmdStr(pm.id) + 
-						    " to " + anyRemote.getScreenStr(pm.activity) + 
-						    " SENT (attempt " + pm.attemptsToSend + ")");
-												
-						InfoMessage im = new InfoMessage();
-						im.id    = pm.id;
-						im.stage = pm.stage;
-						
-						Message msg = handler.hdl.obtainMessage(im.id, im);
-						msg.sendToTarget();
-
-						sent = true;
+			
+			synchronized (actHandlers) {
+				
+			    final Iterator<ArHandler> itr = actHandlers.iterator();
+				log("processMessageQueue MSG " + cmdStr(pm.id) + " handlers #" + actHandlers.size());
+	
+				while (itr.hasNext()) {
+					try {
+						final ArHandler handler = itr.next();
+						if (pm.activity < 0 || // send to all
+						    handler.actId == pm.activity) {
+	
+							log("processMessageQueue MSG " + cmdStr(pm.id) + 
+							    " to " + anyRemote.getScreenStr(pm.activity) + 
+							    " SENT (attempt " + pm.attemptsToSend + ")");
+													
+							InfoMessage im = new InfoMessage();
+							im.id    = pm.id;
+							im.stage = pm.stage;
+							
+							Message msg = handler.hdl.obtainMessage(im.id, im);
+							msg.sendToTarget();
+	
+							sent = true;
+						}
+					} catch (Exception e) {
+						log("processMessageQueue exception " + e.getMessage());
 					}
-				} catch (Exception e) {
-					log("processMessageQueue exception " + e.getMessage());
 				}
 			}
 
 			if (sent) {
 				// just drop it from queue
-				msgItr.remove();
+				synchronized (msgQueue) {
+					msgItr.remove();
+				}
 				break;
 				
 			} else {
@@ -900,7 +910,9 @@ public class Dispatcher {
 				    pm.attemptsToSend > MAX_ATTEMPTS) {
 					// just drop it from queue
 					log("processMessageQueue MSG " + cmdStr(pm.id) + " to " + anyRemote.getScreenStr(pm.activity) + " DROP");					
-					msgItr.remove();
+					synchronized (msgQueue) {
+						msgItr.remove();
+					}
 					break;
 				}
 			}
@@ -918,6 +930,8 @@ public class Dispatcher {
             });			
 		}
 	}
+	
+	
 
 	private synchronized void scheduleKeepaliveTask() {
 		MainLoop.schedule(
@@ -1119,11 +1133,11 @@ public class Dispatcher {
 	public void setFullscreen(arActivity act) {
 		if (fullscreen) {
 			act.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
-					WindowManager.LayoutParams.FLAG_FULLSCREEN);
+					                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			act.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 		} else {
 			act.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN, 
-					WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+					                 WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
 			act.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
 	}
@@ -1133,14 +1147,18 @@ public class Dispatcher {
 	
 	public synchronized void addMessageHandler(ArHandler h) {
 		log("addMessageHandler");
-		if (!actHandlers.contains(h)) {
-			log("addMessageHandler DONE");
-			actHandlers.add(h);
-		}
+		synchronized (actHandlers) {
+			if (!actHandlers.contains(h)) {
+			    log("addMessageHandler DONE");
+			    actHandlers.add(h);
+		    }
+	    }
 	}
 	
   	public synchronized void removeMessageHandler(ArHandler h) {
- 		actHandlers.remove(h);
+  		synchronized (actHandlers) {
+  			actHandlers.remove(h);
+  		}
 	}
   	
 	//

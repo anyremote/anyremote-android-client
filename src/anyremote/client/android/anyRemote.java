@@ -98,7 +98,7 @@ public class anyRemote extends Activity
 	public static StringBuilder logData;
 	
 	// Wait indicator stuff
-	public static ProgressDialog waiting;
+	private static ProgressDialog waiting = null;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
