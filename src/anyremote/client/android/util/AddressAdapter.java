@@ -57,6 +57,7 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 		
 		ImageView type = (ImageView) v.findViewById(R.id.peer_type_icon);
 		ImageView secu = (ImageView) v.findViewById(R.id.peer_security_icon);
+		ImageView auto = (ImageView) v.findViewById(R.id.peer_autoconnect_icon);
 		
 		TextView name = (TextView) v.findViewById(R.id.peer_list_item);
 		TextView addr = (TextView) v.findViewById(R.id.peer_list_address);
@@ -71,6 +72,8 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 		} else{
 			secu.setImageResource(R.drawable.encrypted);	
 		}
+		
+        auto.setVisibility((a.autoconnect ? View.VISIBLE : View.GONE));
 		
 		name.setText(a.name);
 		addr.setText(a.URL);
@@ -92,6 +95,16 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 		return null;
  	}
 	
+	public Address getAutoconnectItem() {
+		for (int i=0;i<items.size();i++) {
+			Address a = items.get(i);
+			if (a.autoconnect) {
+				return a;
+			}
+		}
+		return null;
+ 	}
+	
 	public void remove(String name) {
 		for (int i=0;i<items.size();i++) {
 			Address a = items.get(i);
@@ -102,7 +115,7 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 		}
     }
 
-	public boolean addIfNew(String name, String host, String pass) {
+	public boolean addIfNew(String name, String host, String pass, boolean autoconnect) {
 		if (name == null || host == null) {
 			return false;
 		}
@@ -123,6 +136,10 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 						update = true;
 					}
 				}
+				if (autoconnect != a.autoconnect) {
+					a.autoconnect = autoconnect;
+					update = true;
+				}
 				
 				//anyRemote._log("AddressAdapter", "addIfNew "+update+" "+name+"/"+host+"/"+pass);
 				if (update) {
@@ -137,7 +154,17 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 		a.name = name;
 		a.URL  = host;
 		a.pass = pass;		
+		a.autoconnect = autoconnect;		
 		add(a);
+		
+		if (autoconnect) {  // only single auto connect item is allowed
+			for (int i=0;i<items.size();i++) {
+				Address p = items.get(i);
+				if (name.compareTo(p.name) != 0) {
+					p.autoconnect = false;
+				}
+			}
+		}
 		
 		//anyRemote._log("AddressAdapter", "addIfNew 1 "+name+"/"+host+"/"+pass);
 		notifyDataSetChanged();

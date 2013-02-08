@@ -167,6 +167,7 @@ public class ControlScreen extends arActivity
         if (anyRemote.status == anyRemote.DISCONNECTED) {
         	log("onResume no connection");	
         	doFinish("");
+        	return;
         }
  
         redraw();
@@ -188,10 +189,11 @@ public class ControlScreen extends arActivity
 	
 	@Override
 	protected void onUserLeaveHint() {
-		log("onUserLeaveHint - make disconnect");
+		log("onUserLeaveHint");
 		// no time to sending events
 		//commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
 		if (!exiting) {
+			log("onUserLeaveHint - make disconnect");
 	    	anyRemote.protocol.disconnect(true);
 		}
 	}

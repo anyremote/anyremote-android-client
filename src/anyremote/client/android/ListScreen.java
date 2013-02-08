@@ -220,8 +220,9 @@ public class ListScreen extends arActivity
 	
 	@Override
 	protected void onUserLeaveHint() {
-		log("onUserLeaveHint - make disconnect");
+		log("onUserLeaveHint");
 		if (!exiting) {
+			log("onUserLeaveHint - make disconnect");
 			anyRemote.protocol.disconnect(true);
 		}
 	}

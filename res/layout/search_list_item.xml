@@ -26,19 +26,31 @@
         android:ellipsize="marquee"
         android:text="" >
     </TextView>
-     <TextView
+    <TextView
         android:id="@+id/peer_list_address"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
  		android:layout_toRightOf="@id/peer_type_icon"
  		android:layout_below="@id/peer_list_item"
  		android:singleLine="true"
+ 		android:layout_marginRight="36dp"
  		style="?android:attr/textAppearanceSmall"
         android:textColor="@color/address_color"
         android:ellipsize="marquee"
         android:text="" >
     </TextView>
 
+   <ImageView
+        android:id="@+id/peer_autoconnect_icon"
+        android:layout_width="16dip"
+        android:layout_height="16dip"        
+        android:layout_marginRight="18dp"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/peer_list_item"
+        android:src="@drawable/autoconnect"
+        android:contentDescription="@string/dummy" >
+    </ImageView>
+    
     <ImageView
         android:id="@+id/peer_security_icon"
         android:layout_width="16dip"
@@ -47,5 +59,5 @@
         android:layout_below="@+id/peer_list_item"
         android:contentDescription="@string/dummy" >
    </ImageView>
-
+      
 </RelativeLayout>

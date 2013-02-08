@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 	<item android:title="@string/connect_item"     android:id="@+id/connect_to"></item>
-	<item android:title="@string/autoconnect_item" android:id="@+id/autoconnect_to"></item>
+	<!--item android:title="@string/autoconnect_item" android:id="@+id/autoconnect_to"></item-->
     <item android:title="@string/enter_item_addr"  android:id="@+id/enter_item_addr"></item>
     <item android:title="@string/clean_item"       android:id="@+id/clean_item"></item>
 </menu>

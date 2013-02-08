@@ -22,15 +22,10 @@
 package anyremote.client.android;
 
 import java.io.IOException;
-//import java.io.InputStream;
-//import java.io.InputStreamReader;
-//import java.io.LineNumberReader;
-//import java.io.OutputStream;
-//import java.io.PipedInputStream;
-//import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.TimerTask;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -91,7 +86,8 @@ public class SearchForm extends arActivity
 	String connectTo   = "";
 	String connectName = "";
 	String connectPass = "";
-	String connectOpts = "";
+	boolean connectAuto = false;
+	
 	boolean skipDismissDialog = false;
 	boolean deregStateRcv = false;
 
@@ -134,9 +130,13 @@ public class SearchForm extends arActivity
 		if (dataSource.size() == 0) { // first-time run
 			Toast.makeText(this, "Press Menu ...", Toast.LENGTH_SHORT).show();
 		} else {
-	        Address auto = dataSource.getItem("__AUTOCONNECT__");
-			if (auto != null) {
-				doConnect(auto.URL, anyRemote.AUTOCONNECT_TO);
+			if (anyRemote.firstConnect) {
+				anyRemote.firstConnect = false;
+		        final Address auto = dataSource.getAutoconnectItem();
+				if (auto != null) {
+					log("onCreate: autoconnect to "+auto.name);
+					doConnect(auto);
+				}
 			}
 		}
 	}
@@ -145,7 +145,7 @@ public class SearchForm extends arActivity
 	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
 		Address a = dataSource.getItem(arg2);
 		if (a != null) {
-		    doConnect(a.name,anyRemote.CONNECT_TO);
+		    doConnect(a);
 	    }
 	}
 	
@@ -187,19 +187,18 @@ public class SearchForm extends arActivity
 		final AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		
 		Address a = dataSource.getItem(info.position);
-		final String address = a.name;
 
 		switch (item.getItemId()) {
 
 		case R.id.connect_to:
 
-			doConnect(address,anyRemote.CONNECT_TO);
+			doConnect(a);
 			break;
 
-		case R.id.autoconnect_to:
+		/*case R.id.autoconnect_to:
 
-			doConnect(address,anyRemote.AUTOCONNECT_TO);
-			break;
+			doConnect(address);
+			break;*/
 						
 		case R.id.enter_item_addr:
 
@@ -207,7 +206,8 @@ public class SearchForm extends arActivity
 			break;
 
 		case R.id.clean_item:
-
+			
+			final String address = a.name;
 			cleanAddress(address);
 			dataSource.remove(address);
 			break;
@@ -222,7 +222,7 @@ public class SearchForm extends arActivity
 		cancelSearch(false);
 
 		final Intent intent = new Intent();  
-		intent.putExtra(anyRemote.CONNECT_TO, "");
+		intent.putExtra(anyRemote.CONN_ADDR, "");
 
 		setResult(RESULT_OK, intent);
 
@@ -274,7 +274,7 @@ public class SearchForm extends arActivity
 
 				// If it's already paired, skip it, because it's been listed already
 				//if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-					if (dataSource.addIfNew(device.getName(), "btspp://"+device.getAddress(), "")) {
+					if (dataSource.addIfNew(device.getName(), "btspp://"+device.getAddress(), "",false)) {
 						//addAddress(device.getName(),"btspp://"+device.getAddress(),"");
 					}
 				//}
@@ -441,7 +441,7 @@ public class SearchForm extends arActivity
         	// dynamically add discovered hosts
 		    synchronized (hosts) {
 			    for (int h = 0;h<hosts.size();h++) {
-			        dataSource.addIfNew("socket://"+hosts.get(h), "socket://"+hosts.get(h) + ":" + DEFAULT_IP_PORT, "");
+			        dataSource.addIfNew("socket://"+hosts.get(h), "socket://"+hosts.get(h) + ":" + DEFAULT_IP_PORT, "",false);
 			    }
 			    hosts.clear();
 		    }
@@ -761,21 +761,25 @@ public class SearchForm extends arActivity
 		startActivityForResult(new Intent(actionRequestEnable), 0);
 	}
 
-	public void doConnect(String address, String option) {
+	public void doConnect(String address) {
+		
 		log("doConnect:  "+address);
-
 		Address a = dataSource.getItem(address);
 		if (a == null) {
 			log("doConnect: can not get information for "+address);
 			return;
 		}
+		doConnect(a);
+	}
+	
+	private void doConnect(Address a) {
+
 		log("doConnect: host is "+a.URL);
 
 		connectTo   = a.URL;
-		connectName = address;
+		connectName = a.name;
 		connectPass = a.pass;
-
-		connectOpts = option;
+		connectAuto = a.autoconnect;
 
 		if (connectTo.startsWith("btspp:") && mBtAdapter != null &&  !mBtAdapter.isEnabled()) {
 			btUseFlag = BT_USE_CONNECT;
@@ -790,16 +794,13 @@ public class SearchForm extends arActivity
 		cancelSearch(false);
 
 		log("doRealConnect: address is "+connectTo);
-		if (connectOpts.contentEquals(anyRemote.CONNECT_TO)) {
-			cleanAddress("__AUTOCONNECT__"); // clean auto-connect flag if user uses manual connect
-		}
 
 		// be sure peer is stored
-		addAddress(connectName,connectTo,connectPass);
+		addAddress(connectName,connectTo,connectPass,connectAuto);
 		
 		final Intent intent = new Intent();  
 
-		intent.putExtra(connectOpts, connectTo);
+		intent.putExtra(anyRemote.CONN_ADDR, connectTo);
 		intent.putExtra(anyRemote.CONN_NAME, connectName);
 		intent.putExtra(anyRemote.CONN_PASS, connectPass);
 
@@ -807,7 +808,7 @@ public class SearchForm extends arActivity
 		connectTo   = "";
 		connectName = "";
 		connectPass = "";
-		connectOpts = "";
+		connectAuto = false;
 		
 		log("SearchForm::doRealConnect: finish");
 		finish();
@@ -829,6 +830,7 @@ public class SearchForm extends arActivity
 		connectPass = (a.pass == null ? "" : a.pass);
 		connectTo   = a.URL;
 		connectName = a.name;
+		connectAuto = a.autoconnect;
 
 		showDialog(Dispatcher.CMD_EDIT_FORM_ADDR);	
 	}			    
@@ -839,8 +841,8 @@ public class SearchForm extends arActivity
 	}
 
 	// save new address in preferences
-	public void addAddress(String name, String URL, String pass) {		        
-		anyRemote.protocol.addAddress(name, URL, pass);
+	public void addAddress(String name, String URL, String pass,boolean autoconnect) {		        
+		anyRemote.protocol.addAddress(name, URL, pass, autoconnect);
 	}
 
 	// Got result from AddressDialog dialog ("Ok"/"Cancel" was pressed)
@@ -852,6 +854,7 @@ public class SearchForm extends arActivity
 			String n = stripNewLines(((AddressDialog) dialog).getPeerName());
 			String a = stripNewLines(((AddressDialog) dialog).getPeerAddress());
 			String p = stripNewLines(((AddressDialog) dialog).getPeerPassword());
+			boolean ac = ((AddressDialog) dialog).getPeerAutoConnect();
 			
 			log("onDismiss AddressDialog >"+n+"< >"+a+"< >"+p+"<");
 			
@@ -870,8 +873,8 @@ public class SearchForm extends arActivity
 				dataSource.remove(connectName);
 			}
 			
-			if (dataSource.addIfNew(n,a,p)) {
-			    addAddress(n,a,p);
+			if (dataSource.addIfNew(n,a,p,ac)) {
+			    addAddress(n,a,p,ac);
 			}
 		}
 	}
@@ -922,7 +925,7 @@ public class SearchForm extends arActivity
 	
 		    case Dispatcher.CMD_EDIT_FORM_ADDR:
 	
-				((AddressDialog) d).setupDialog(connectName,connectTo,connectPass);
+				((AddressDialog) d).setupDialog(connectName,connectTo,connectPass,connectAuto);
 				break;
 			
 			case Dispatcher.CMD_EDIT_FORM_IP:
@@ -931,7 +934,7 @@ public class SearchForm extends arActivity
 				connectTo   = "";
 				connectName = "";
 				
-				((AddressDialog) d).setupDialog("",getResources().getString(R.string.default_ip),"");
+				((AddressDialog) d).setupDialog("",getResources().getString(R.string.default_ip),"",false);
 		
 				break;
 		
@@ -941,7 +944,7 @@ public class SearchForm extends arActivity
 				connectTo   = "";
 				connectName = "";
 				
-				((AddressDialog) d).setupDialog("",getResources().getString(R.string.default_bt),"");
+				((AddressDialog) d).setupDialog("",getResources().getString(R.string.default_bt),"",false);
 				break;
 				
 			case Dispatcher.CMD_SEARCH_DIALOG:

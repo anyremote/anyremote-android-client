@@ -887,7 +887,6 @@ public class Dispatcher {
 			}
 
 			if (sent) {
-				
 				// just drop it from queue
 				msgItr.remove();
 				break;
@@ -977,7 +976,16 @@ public class Dispatcher {
 			while (it.hasNext()) {
 				Map.Entry<String, String> pairs = (Map.Entry<String, String>) it.next();
 
-				String url_pass = (String)  pairs.getValue();
+				// format a|c+:+address+\n+pass
+				// old format is address+\n+pass
+				String cf_url_pass = (String)  pairs.getValue();
+				
+				boolean autoconnect = cf_url_pass.startsWith("a");
+				
+				String url_pass = (cf_url_pass.charAt(1) == ':' ?  
+						           cf_url_pass.substring(2) : 
+						           cf_url_pass);
+				
 				int p = url_pass.lastIndexOf('\n');
 				if (p > 0) {
 					Address a = new Address();
@@ -985,7 +993,10 @@ public class Dispatcher {
 					a.name  = (String) pairs.getKey();
 					a.URL =  url_pass.substring(0, p).trim();
 					a.pass = url_pass.substring(p+1);
-
+					a.autoconnect = autoconnect;
+					
+					log("loadPrefs "+cf_url_pass.charAt(0)+":"+a.name+":"+a.URL+":"+a.pass);
+					
 					addresses.add(a);
 				}
 			}		    
@@ -1004,13 +1015,36 @@ public class Dispatcher {
 	}
 
 	// save new address in preferences
-	public void addAddress(String name, String URL, String pass) {		        
+	public void addAddress(String name, String URL, String pass, boolean autoConnect) {		        
 		//log("addAddress "+name+"/"+URL+"/"+pass);
 
 		SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = preference.edit();
+		
+		if (autoConnect) {   // only one peer can have auto connect flag
+			try {
+				Map<String, String> datam = (Map<String, String>) preference.getAll();    
 
-		String UP = URL.trim() + "\n" + pass;
+				Iterator<Map.Entry<String, String>> it = datam.entrySet().iterator();
+				
+				while (it.hasNext()) {
+					Map.Entry<String, String> pairs = (Map.Entry<String, String>) it.next();
+
+					// format a|c+:+address+\n+pass
+					// old format is address+\n+pass
+					String cf_url_pass = (String)  pairs.getValue();
+					
+					boolean autoconnect = cf_url_pass.startsWith("a");
+					
+                    if (autoconnect) {
+                    	cf_url_pass = "c" + cf_url_pass.substring(1);
+                    	editor.putString((String) pairs.getKey(), cf_url_pass);
+					}
+				}		    
+			} catch(Exception z) { }
+		}
+
+		String UP = (autoConnect ? "a:" : "c:") + URL.trim() + "\n" + pass;
 
 		editor.putString(name, UP);
 		editor.commit();

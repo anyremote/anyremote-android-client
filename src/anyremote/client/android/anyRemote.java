@@ -73,8 +73,7 @@ public class anyRemote extends Activity
 
 	static final int  LOG_CAPACITY = 16384;
 
-	static final String  CONNECT_TO     = "CON";
-	static final String  AUTOCONNECT_TO = "ACN";
+	static final String  CONN_ADDR      = "ADR";
 	static final String  CONN_NAME      = "CNM";
 	static final String  CONN_PASS      = "CNP";
 	static final String  ACTION         = "ACT";
@@ -85,7 +84,8 @@ public class anyRemote extends Activity
 	static int         status;
 	static Dispatcher  protocol;
 
-	public static boolean  finishFlag = false;
+	public static boolean finishFlag   = false;
+	public static boolean firstConnect = true;
 	
 	static TreeMap<String,Bitmap> iconMap = new TreeMap<String,Bitmap>();
 
@@ -288,10 +288,9 @@ public class anyRemote extends Activity
 		if (requestCode == SEARCH_FORM) {
 			if (resultCode == RESULT_OK) {
 
-				String connTo     = intent.getStringExtra(CONNECT_TO);               
-				String autoConnTo = intent.getStringExtra(AUTOCONNECT_TO);
 				String connName   = intent.getStringExtra(CONN_NAME);
 				String connPass   = intent.getStringExtra(CONN_PASS);
+				String connAddr   = intent.getStringExtra(CONN_ADDR);
 				String act        = intent.getStringExtra(ACTION);
 
 				if (act != null && act.length() > 0) {
@@ -301,12 +300,9 @@ public class anyRemote extends Activity
 						// show log
 						setCurrentView(LOG_FORM, "");
 					}
-				} else if (autoConnTo != null && autoConnTo.length() > 0) {
+				} else if (connAddr != null && connAddr.length() > 0) {
 					setProgressBarIndeterminateVisibility(true);	
-					protocol.doConnect(connName, autoConnTo, connPass);
-				} else if (connTo != null && connTo.length() > 0) {
-					setProgressBarIndeterminateVisibility(true);	
-					protocol.doConnect(connName, connTo, connPass);
+					protocol.doConnect(connName, connAddr, connPass);
 				} else {
 					setCurrentView(DUMMY_FORM, "");
 				}

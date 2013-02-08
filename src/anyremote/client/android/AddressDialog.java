@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import anyremote.client.android.R;
 
@@ -36,12 +37,13 @@ public class AddressDialog extends Dialog implements OnClickListener {
 	EditText name = null;
 	EditText addr;
 	EditText pass;
+	CheckBox auto;
 
 	public AddressDialog(Context context) {
 		super(context);
 	}
 	
-	public void setupDialog(String n, String a, String p) {
+	public void setupDialog(String n, String a, String p, boolean autoConnect) {
     	
     	if (name == null) {
     		setupDialog();		
@@ -51,16 +53,18 @@ public class AddressDialog extends Dialog implements OnClickListener {
      	name.setText(n);
      	addr.setText(a);
      	pass.setText(p);
+     	auto.setChecked(autoConnect);
     }
 	
 	private void setupDialog() {
 		
-	   okButton     = (Button) findViewById(R.id.editAddrButtonOk);
-	   cancelButton = (Button) findViewById(R.id.editAddrButtonCancel);
-	   name    = (EditText) findViewById(R.id.edit_name);
-	   addr    = (EditText) findViewById(R.id.edit_addr);
-	   pass    = (EditText) findViewById(R.id.edit_pass);
-
+	    okButton     = (Button) findViewById(R.id.editAddrButtonOk);
+	    cancelButton = (Button) findViewById(R.id.editAddrButtonCancel);
+	    name    = (EditText) findViewById(R.id.edit_name);
+	    addr    = (EditText) findViewById(R.id.edit_addr);
+	    pass    = (EditText) findViewById(R.id.edit_pass);
+	    auto    = (CheckBox) findViewById(R.id.autoConnect);
+	    
 	    // setup listener
 	    okButton.setOnClickListener(this);
 	    cancelButton.setOnClickListener(this);
@@ -95,5 +99,9 @@ public class AddressDialog extends Dialog implements OnClickListener {
 	
 	public String getPeerPassword(){
 		return pass.getText().toString();
+	}
+	
+	public boolean getPeerAutoConnect(){
+		return auto.isChecked();
 	}
 }

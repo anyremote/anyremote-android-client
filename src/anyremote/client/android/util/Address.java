@@ -25,4 +25,5 @@ public class Address {
 	public String name;
 	public String URL;
 	public String pass;	
+	public boolean autoconnect;	
 }
