@@ -55,7 +55,8 @@ public class anyRemote extends Activity
 
 	public static final int DISCONNECTED = 0;
 	public static final int CONNECTED    = 1;
-	public static final int COMMAND      = 2;
+	public static final int LOSTFOCUS    = 2;
+	public static final int COMMAND      = 3;
 	
 	public static final int SWIPE_MIN_DISTANCE = 120;
     public static final int SWIPE_THRESHOLD_VELOCITY = 200; 
@@ -413,16 +414,16 @@ public class anyRemote extends Activity
 
 		switch(msg.what){
 		
-		case anyRemote.CONNECTED:
+		case CONNECTED:
 			
 			anyRemote._log("handleMessage: CONNECTED");
 			//Toast.makeText(client, R.string.connection_successful, Toast.LENGTH_SHORT).show();
 			
 			protocol.connected((Connection) msg.obj);
-			handleEvent(anyRemote.CONNECTED);
+			handleEvent(CONNECTED);
 			break;
 			
-		case anyRemote.DISCONNECTED:
+		case DISCONNECTED:
 			
 			anyRemote._log("handleMessage: DISCONNECTED");
 			
@@ -436,8 +437,16 @@ public class anyRemote extends Activity
 			    Toast.makeText(this, alert, Toast.LENGTH_LONG).show();
 			}
 			
-			protocol.disconnected();
-			handleEvent(anyRemote.DISCONNECTED);
+			protocol.disconnected(true);
+			handleEvent(DISCONNECTED);
+			break;	
+			
+		case LOSTFOCUS:
+			
+			anyRemote._log("handleMessage: LOST FOCUS");
+			
+			protocol.disconnected(false);
+			handleEvent(LOSTFOCUS);
 			break;	
 			
 		case anyRemote.COMMAND:
@@ -453,38 +462,41 @@ public class anyRemote extends Activity
 		
 		_log("handleEvent");
 		switch (what) {
-		case CONNECTED:
-			_log("handleEvent: Connection established");
-
-			status = CONNECTED;
-			setProgressBarIndeterminateVisibility(false);
-
-			if (currForm != LOG_FORM) {
-			    setCurrentView(CONTROL_FORM,"");
-			}
-			break;
-
-		case DISCONNECTED:
-			_log("handleEvent: Connection lost");
-			status = DISCONNECTED;
-			//protocol.closeCurrentScreen(currForm);
-			
-			if (!finishFlag) {   // this happens on exit
+			case CONNECTED:
 				
-				// send quit to all registered activity
-				protocol.sendToActivity(-1, Dispatcher.CMD_CLOSE,ProtocolMessage.FULL);
-
+				_log("handleEvent: Connection established");
+		
+				status = CONNECTED;
+				setProgressBarIndeterminateVisibility(false);
+		
 				if (currForm != LOG_FORM) {
-					currForm = DUMMY_FORM;  // trick
+				    setCurrentView(CONTROL_FORM,"");
 				}
-			}
-
-			if (currForm != LOG_FORM) {
-			    setCurrentView(SEARCH_FORM,"");
-			}
-			break;
-		default:
-			_log("handleEvent: unknown event");
+				break;
+		
+			case DISCONNECTED:
+			case LOSTFOCUS:
+				
+				_log("handleEvent: Connection or focus lost");
+				status = DISCONNECTED;
+				//protocol.closeCurrentScreen(currForm);
+				
+				if (!finishFlag) {   // this happens on exit
+					
+					// send quit to all registered activity
+					protocol.sendToActivity(-1, Dispatcher.CMD_CLOSE,ProtocolMessage.FULL);
+		
+					if (currForm != LOG_FORM) {
+						currForm = DUMMY_FORM;  // trick
+					}
+				}
+		
+				if (currForm != LOG_FORM) {
+				    setCurrentView(SEARCH_FORM,"");
+				}
+				break;
+			default:
+				_log("handleEvent: unknown event");
 		}
 	}
 

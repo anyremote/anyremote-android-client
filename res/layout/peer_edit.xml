@@ -75,20 +75,15 @@
                 android:inputType="textPassword"
                 android:singleLine="true" />
         </TableRow>
-        
-        <TableRow
-            android:id="@+id/tableRow4"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
-         
-         <CheckBox
+
+    </TableLayout>
+    
+    <CheckBox
             android:id="@+id/autoConnect"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/autoconnect_item" />
-        </TableRow>
-    </TableLayout>
-
+     
     <LinearLayout
         android:id="@+id/EditAddrBtnBar"
         android:layout_width="fill_parent"

@@ -336,21 +336,30 @@ public class Dispatcher {
 
 		log("disconnect");
 		
-		disconnected();
+		disconnected(full);
 
 		if (full) {         // real close
 			currentConnection = "";
 		} // else           // pause connection
-	    anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
+	    
+		if (full) {
+		    anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
+		} else {
+			anyRemote.sendGlobal(anyRemote.LOSTFOCUS, "");	
+		}
 
 	}
 
-	public void disconnected() {
+	public void disconnected(boolean full) {
 
 		if (connection != null) {
 			connection.close();
 			autoPass = false;
 		}
+		if (full) {
+			currentConnection = "";	
+		}
+		
 		setDefValues();
 	}
 	

@@ -20,6 +20,8 @@
     <string name="enter_item_addr">Изменить адрес</string>
     <string name="enter_item_pass">Изменить пароль</string>
     <string name="enter_pass">Введите пароль</string>
+    <string name="label_addr">Адрес</string>
+    <string name="label_name">Имя</string>
     <string name="label_pass">Пароль</string>
     <string name="clean_item">Удалить адрес</string>
     <string name="autoconnect_item">Автоподсоединение</string>
