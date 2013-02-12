@@ -145,9 +145,7 @@ public class anyRemote extends Activity
 	@Override
 	protected void onPause() {
 		_log("onPause "+currForm);		
-		//protocol.pauseConnection();
 		super.onPause();
-		//runningCount--;
 	}
 
 	@Override
@@ -155,8 +153,6 @@ public class anyRemote extends Activity
 		//logData = ""; // remove old log
 		_log("onResume "+currForm);	
 		super.onResume();
-		//protocol.resumeConnection();
-		//runningCount++;
 	}
 	
 	@Override
@@ -177,20 +173,6 @@ public class anyRemote extends Activity
 		protocol.disconnect(true);
 		MainLoop.disable();
 	}
-
-	//@Override
-	//protected void onResume() {
-	//	_log("onResume");
-	//	super.onStart();				
-	//	//protocol.resumeConnection(); // get result by notification
-	//}
-
-	//@Override
-	//protected void onPause() {
-	//	_log("onPause");		
-	//	super.onStop();	
-	//	//protocol.pauseConnection();
-	//}
 
 	public void setCurrentView(int which, String subCommand) {
 		_log("setCurrentView " + getScreenStr(which) + " (was " + getScreenStr(currForm) + ") finish="+finishFlag);

@@ -340,6 +340,7 @@ public class Dispatcher {
 
 		if (full) {         // real close
 			currentConnection = "";
+			currentConnName   = "";
 		} // else           // pause connection
 	    
 		if (full) {
@@ -364,19 +365,10 @@ public class Dispatcher {
 		
 		if (full) {
 			currentConnection = "";	
+			currentConnName   = "";	
 		}
 		
 		setDefValues();
-	}
-	
-	public void resumeConnection(){
-
-		if (currentConnection.length() > 0) {      
-			log("resumeConnection to "+currentConnection);
-			doConnect(currentConnName, currentConnection, currentConnPass);
-			return;
-		}	
-		//anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
 	}
 
 	public void pauseConnection(){
@@ -892,7 +884,8 @@ public class Dispatcher {
 	
 							log("processMessageQueue MSG " + cmdStr(pm.id) + 
 							    " to " + anyRemote.getScreenStr(pm.activity) + 
-							    " SENT (attempt " + pm.attemptsToSend + ")");
+							    " SENT (attempt " + pm.attemptsToSend + ") to "+ 
+							    anyRemote.getScreenStr(handler.actId));
 													
 							InfoMessage im = new InfoMessage();
 							im.id    = pm.id;

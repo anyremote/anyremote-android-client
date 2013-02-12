@@ -138,7 +138,15 @@ public class SearchForm extends arActivity
 					doConnect(auto);
 				}
 			} else {
-			    anyRemote.protocol.resumeConnection();
+			    
+				if (anyRemote.protocol.currentConnName.length() > 0) {
+					
+					final Address conn = dataSource.getItem(anyRemote.protocol.currentConnName);
+					if (conn != null) {
+						log("onCreate: resume connect to "+conn.name);
+						doConnect(conn);
+					}
+				}
 			}
 			
 		}
@@ -612,7 +620,7 @@ public class SearchForm extends arActivity
 		}
 		return true;
 	}
-
+	
 	// Selection handlers
 	//@Override
 	public void onItemSelected(AdapterView<?> parentView, View childView, int position, long id) {
