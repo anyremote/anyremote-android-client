@@ -641,16 +641,6 @@ public class SearchForm extends arActivity
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch(item.getItemId()) {
-
-			/*case R.id.bt_search_item:
-	
-				doDiscovery();
-				break;
-	
-			case R.id.tcp_search_item:
-	
-				tcpSearch();
-				break;*/
 				
 			case R.id.search_item:
 				
@@ -662,19 +652,12 @@ public class SearchForm extends arActivity
 				stopSearch();
 				break;
 	
-			case R.id.enter_bt_item:
+			case R.id.enter_item:
 	
 				stopSearch();
-				showDialog(Dispatcher.CMD_EDIT_FORM_BT);
+				showDialog(Dispatcher.CMD_NEW_ADDR_DIALOG);
 				break;
-	
-			case R.id.enter_ip_item:
-	
-				stopSearch();
-				showDialog(Dispatcher.CMD_EDIT_FORM_IP);
-				break;
-	
-				
+					
 			case R.id.exit_item:
 	
 				doExit();
@@ -891,16 +874,25 @@ public class SearchForm extends arActivity
 	}
 	
 	// Got result from SearchDialog dialog ("Ok"/"Cancel" was pressed)
-	public void onDismissSearchDialog (DialogInterface dialog) {
+	public void onDismissProtoChooseDialog (DialogInterface dialog) {
 	
 		if (skipDismissDialog) {
 			skipDismissDialog = false;
 		} else {
+			
+			boolean isBT = ((BT_IP_Choose_Dialog) dialog).isBluetooth();
 
-			if (((SearchDialog) dialog).isBluetooth()) {
-				doDiscovery();
-			} else {
-				tcpSearch();
+			if (((BT_IP_Choose_Dialog) dialog).id() == Dispatcher.CMD_NEW_ADDR_DIALOG) {
+				
+				int id = (isBT ? Dispatcher.CMD_EDIT_FORM_BT : Dispatcher.CMD_EDIT_FORM_IP);
+				showDialog(id);
+				
+			} else if (((BT_IP_Choose_Dialog) dialog).id() == Dispatcher.CMD_SEARCH_DIALOG) {
+				if (isBT) {
+					doDiscovery();
+				} else {
+					tcpSearch();
+				}
 			}
 		}
 	}
@@ -919,8 +911,11 @@ public class SearchForm extends arActivity
 		    case Dispatcher.CMD_EDIT_FORM_BT:
 			    return new AddressDialog(this);
 			    
+		    case Dispatcher.CMD_NEW_ADDR_DIALOG:
+			    return new BT_IP_Choose_Dialog(this, Dispatcher.CMD_NEW_ADDR_DIALOG);
+			    
 		    case Dispatcher.CMD_SEARCH_DIALOG:
-			    return new SearchDialog(this);
+			    return new BT_IP_Choose_Dialog(this, Dispatcher.CMD_SEARCH_DIALOG);
 		}
 		return null;
 	}
@@ -958,6 +953,11 @@ public class SearchForm extends arActivity
 				((AddressDialog) d).setupDialog("",getResources().getString(R.string.default_bt),"",false);
 				break;
 				
+			case Dispatcher.CMD_NEW_ADDR_DIALOG:
+				
+				// nothing
+				break;
+
 			case Dispatcher.CMD_SEARCH_DIALOG:
 				
 				// nothing
@@ -978,10 +978,11 @@ public class SearchForm extends arActivity
 		        });	
 		        break;
 		        
+		    case Dispatcher.CMD_NEW_ADDR_DIALOG:
 		    case Dispatcher.CMD_SEARCH_DIALOG:
 				d.setOnDismissListener(new OnDismissListener() {
 		            public void onDismiss(DialogInterface dialog) {
-		                onDismissSearchDialog(dialog);
+		                onDismissProtoChooseDialog(dialog);
 		            }
 		        });	
 			    

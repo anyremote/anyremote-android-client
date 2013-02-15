@@ -90,6 +90,7 @@ public class Dispatcher {
 	static final int  CMD_EDIT_FORM_BT    = 104;
 	static final int  CMD_EDIT_FORM_ADDR  = 105;
 	static final int  CMD_SEARCH_DIALOG   = 106;
+	static final int  CMD_NEW_ADDR_DIALOG = 107;
 
 	static final int  CMD_LIST_UPDATE     = 110;
 

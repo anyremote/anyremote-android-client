@@ -28,19 +28,22 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.RadioButton;
 
-public class SearchDialog extends Dialog  implements OnClickListener {
+public class BT_IP_Choose_Dialog extends Dialog  implements OnClickListener {
 
 	Button   okButton = null;
 	Button   cancelButton;
+	int      opId;
 	
-	public SearchDialog(Context context) {
+	public BT_IP_Choose_Dialog(Context context, int ident) {
 		super(context);
+		opId = ident;
 	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		setContentView(R.layout.start_search);
-	
+		
+		setContentView(R.layout.bt_ip_choose);
+			
     	if (okButton == null) {
     		setupDialog();		
     	}
@@ -60,8 +63,16 @@ public class SearchDialog extends Dialog  implements OnClickListener {
 		
 	   setTitle(R.string.search_item);
 	   
-	    okButton     = (Button) findViewById(R.id.searchDialogButtonOk);
-	    cancelButton = (Button) findViewById(R.id.searchDialogButtonCancel);
+	    okButton     = (Button) findViewById(R.id.btipDialogButtonOk);
+	    cancelButton = (Button) findViewById(R.id.btipDialogButtonCancel);
+	    
+	    if (opId == Dispatcher.CMD_NEW_ADDR_DIALOG) {
+	    	setTitle(R.string.label_addr);
+	    	okButton.setText(R.string.btnOk);
+	    } else {
+	    	setTitle(R.string.search_item);
+	    	okButton.setText(R.string.search_item);
+	    }
 
 	    // setup listener
 	    okButton.setOnClickListener(this);
@@ -69,8 +80,12 @@ public class SearchDialog extends Dialog  implements OnClickListener {
 	}	
 	
 	public boolean isBluetooth() {
-		RadioButton rb = (RadioButton) findViewById(R.id.searchBtCheckbox);
+		RadioButton rb = (RadioButton) findViewById(R.id.BTCheckbox);
 		return rb.isChecked();
+	}
+	
+	public int id() {
+		return opId;
 	}
 }
 

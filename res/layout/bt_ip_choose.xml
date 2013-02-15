@@ -10,14 +10,14 @@
         android:layout_height="wrap_content" >
 
         <RadioButton
-            android:id="@+id/searchBtCheckbox"
+            android:id="@+id/BTCheckbox"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/bluetooth" />
 
         <RadioButton
-            android:id="@+id/searchIPCheckbox"
+            android:id="@+id/IPCheckbox"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/tcpip" />
@@ -25,21 +25,20 @@
         </RadioGroup>
     
    <LinearLayout
-        android:id="@+id/searchBtnBar"
+        android:id="@+id/btipBtnBar"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
         <Button
-            android:id="@+id/searchDialogButtonOk"
+            android:id="@+id/btipDialogButtonOk"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="fill_horizontal"
-            android:text="@string/search_item" >
+            android:layout_gravity="fill_horizontal" >
         </Button>
 
         <Button
-            android:id="@+id/searchDialogButtonCancel"
+            android:id="@+id/btipDialogButtonCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="fill_horizontal"
