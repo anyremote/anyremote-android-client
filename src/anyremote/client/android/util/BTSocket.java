@@ -40,8 +40,6 @@ public class BTSocket implements ISocket {
 	private OutputStream os;
 	private BluetoothSocket sock;
 
-	private boolean isClosed = false;
-
 	// service UUID
 	private final UUID USE_UUID = UUID.fromString(
 			//"00001101-0000-0000-0000-00000000ABCD");
@@ -57,60 +55,57 @@ public class BTSocket implements ISocket {
 	 */
 	public BTSocket(String host) throws UserException {
 
-        anyRemote._log("BTSocket start ",host);
-	     
+		anyRemote._log("BTSocket start ", host);
+
 		int attempts = 0;
-		
+
 		while (true) {
-		  try {
-	        anyRemote._log("BTSocket","connection preparations");
-            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            anyRemote._log("BTSocket","got BluetoothAdapter");
-            BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(host);
-            anyRemote._log("BTSocket","got BluetoothDevice");
-			this.sock = device.createRfcommSocketToServiceRecord(USE_UUID);
-            anyRemote._log("BTSocket","got createRfcommSocketToServiceRecord");
-            
-            this.sock.connect();
-            anyRemote._log("BTSocket","connected");
-            
-            isClosed = false;
-		  } catch (SecurityException e) {
-			  
-			anyRemote._log("BTSocket","SecurityException "+e.getMessage());
-			throw new UserException("Connection Error", e.getMessage());
-		  
-		  } catch (IOException e) {
-			anyRemote._log("BTSocket","IOException "+e.getMessage());
-			if (attempts > 10) {
-			    throw new UserException("Connection Error", e.getMessage());
+			try {
+				anyRemote._log("BTSocket", "connection preparations");
+				BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+				// anyRemote._log("BTSocket","got BluetoothAdapter");
+				BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(host);
+				// anyRemote._log("BTSocket","got BluetoothDevice");
+				sock = device.createRfcommSocketToServiceRecord(USE_UUID);
+				anyRemote._log("BTSocket","got createRfcommSocketToServiceRecord");
+
+				sock.connect();
+				anyRemote._log("BTSocket", "connected");
+
+				break;
+
+			} catch (SecurityException e) {
+				anyRemote._log("BTSocket","SecurityException " + e.getMessage());
+				throw new UserException("Connection Error", e.getMessage());
+			} catch (IOException e) {
+				anyRemote._log("BTSocket","IOException " + " " + e.getMessage());
+				if (attempts > 10) {
+					throw new UserException("Connection Error", e.getMessage());
+				}
+			} catch (Exception e) {
+				anyRemote._log("BTSocket", "Exception " + e.getMessage());
+				if (attempts > 10) {
+					throw new UserException("Connection Error", e.getMessage());
+				}
 			}
-		  } catch (Exception e) {
-			anyRemote._log("BTSocket","Exception "+e.getMessage());
-			if (attempts > 10) {
-		     	throw new UserException("Connection Error", e.getMessage());
-			}
-	      }
-		  if (isClosed) {
-			anyRemote._log("BTSocket","Attempt "+attempts);
+
+			anyRemote._log("BTSocket", "Attempt " + attempts);
 			try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
 			}
 			attempts++;
-		  } else {
-			break;
-		  }
 		}
-		
-		anyRemote._log("BTSocket","setup streams");
+
+		anyRemote._log("BTSocket", "setup streams");
 		try {
 			is = sock.getInputStream();
 		} catch (IOException e) {
 			try {
 				sock.close();
-			} catch (IOException e1) { }
-			anyRemote._log("BTSocket","Exception on input stream "+e.getMessage());
+			} catch (IOException e1) {
+			}
+			anyRemote._log("BTSocket", "Exception on input stream " + e.getMessage());
 			throw new UserException("Connecting failed", e.getMessage());
 		}
 
@@ -120,17 +115,17 @@ public class BTSocket implements ISocket {
 			try {
 				is.close();
 				sock.close();
-			} catch (IOException e1) { }
-			anyRemote._log("BTSocket","Exception on output stream "+e.getMessage());
+			} catch (IOException e1) {
+			}
+			anyRemote._log("BTSocket",
+					"Exception on output stream " + e.getMessage());
 			throw new UserException("Connecting failed", e.getMessage());
 		}
-		anyRemote._log("BTSocket","CONNECTED");
+		anyRemote._log("BTSocket", "CONNECTED");
 	}
 
 	//@Override
 	public void close() {
-        if (isClosed) return;
-		
         try {
 			sock.close();
 		} catch (IOException e) { }
@@ -142,8 +137,6 @@ public class BTSocket implements ISocket {
 		try {
 			is.close();
 		} catch (IOException e) { }
-		
-        isClosed = true;
 	}
 	
 	// API level 14 or higher

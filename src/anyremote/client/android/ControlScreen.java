@@ -355,9 +355,9 @@ public class ControlScreen extends arActivity
 
 			for (int i=0;i<NUM_ICONS;i++) {
 				
-				if (anyRemote.protocol.cfIcons[i] != "none") {
-					log("setSkinSimple get bitmap "+anyRemote.protocol.cfIcons[i]);
-				}
+				//if (anyRemote.protocol.cfIcons[i] != "none") {
+				//	log("setSkinSimple get bitmap "+anyRemote.protocol.cfIcons[i]);
+				//}
 				Bitmap ic = anyRemote.getIconBitmap(getResources(), anyRemote.protocol.cfIcons[i]);
 				if (ic == null) { // no to squeze
 					if (anyRemote.protocol.cfIcons[i] != "none") {

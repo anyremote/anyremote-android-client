@@ -30,9 +30,10 @@
 	        android:layout_height="wrap_content"
 	        android:editable="false"
 	        android:ellipsize="marquee"
+	        android:lines="1"
 	        android:marqueeRepeatLimit="marquee_forever"
-	        android:scrollHorizontally="true"
-	        android:lines="1" >
+	        android:scrollHorizontally="true" >
+
 	    </TextView>
     
     </LinearLayout>

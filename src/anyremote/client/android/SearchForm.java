@@ -205,11 +205,6 @@ public class SearchForm extends arActivity
 
 			doConnect(a);
 			break;
-
-		/*case R.id.autoconnect_to:
-
-			doConnect(address);
-			break;*/
 						
 		case R.id.enter_item_addr:
 
@@ -351,7 +346,7 @@ public class SearchForm extends arActivity
 	}
 
 	private void cancelSearch(boolean onlyCancel) { 
-		log("cancelSearch");
+		//log("cancelSearch");
 		
 		stopBluetoothDiscovery();
 		stopTcpDiscovery();
@@ -380,11 +375,11 @@ public class SearchForm extends arActivity
 	}
 
 	private void stopTcpDiscovery() {
-		log("stopTcpDiscovery");
 		synchronized (asyncNum) {
 			asyncNum = -1;
 		}
 		if (ipSearchTask != null) {
+			log("stopTcpDiscovery");
 			ipSearchTask.cancel(true);
 		}
 	}
@@ -736,7 +731,6 @@ public class SearchForm extends arActivity
 	}
 	
 	public void stopBluetoothDiscovery() {
-		log("stopBluetoothDiscovery");
 		
 		btUseFlag = BT_USE_NO;
 
@@ -769,7 +763,9 @@ public class SearchForm extends arActivity
 	private void doConnect(Address a) {
 
 		log("doConnect: host is "+a.URL);
-
+		
+		stopSearch();
+		
 		connectTo   = a.URL;
 		connectName = a.name;
 		connectPass = a.pass;
