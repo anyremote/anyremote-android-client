@@ -1207,7 +1207,7 @@ public class Dispatcher {
 			
 		    case CMD_ICONS:
 		    	
-		    	if (vR.size() < 3) {
+		    	if (vR.size() < 2) {
 		    		return;
 		    	}
 				controlSetIconLayout(vR);
@@ -1356,6 +1356,9 @@ public class Dispatcher {
 			cfCaption = (String) data.elementAt(1);
         }
 		
+		if (data.size() < 3) {
+			return;
+		}
 		int maxIcon = (cfSkin == ControlScreen.SK_BOTTOMLINE ?  ControlScreen.NUM_ICONS_BTM : ControlScreen.NUM_ICONS);
 		
         for (int idx=2;idx<data.size()-1;idx+=2) {
