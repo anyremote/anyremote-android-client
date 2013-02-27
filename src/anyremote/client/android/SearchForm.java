@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.TimerTask;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -803,7 +802,6 @@ public class SearchForm extends arActivity
 		log("SearchForm::doRealConnect: finish");
 		finish();
 	}
-	
 	
 	public void changeAddress(Address a) {
 		log("changeAddress");

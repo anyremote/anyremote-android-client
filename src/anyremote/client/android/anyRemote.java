@@ -452,6 +452,7 @@ public class anyRemote extends Activity
 				setProgressBarIndeterminateVisibility(false);
 		
 				if (currForm != LOG_FORM) {
+					_log("handleEvent: switch to CONTROL_FORM");
 				    setCurrentView(CONTROL_FORM,"");
 				}
 				break;
@@ -474,7 +475,8 @@ public class anyRemote extends Activity
 				}
 		
 				if (currForm != LOG_FORM) {
-				    setCurrentView(SEARCH_FORM,"");
+					_log("handleEvent: switch to SEARCH_FORM");
+					setCurrentView(SEARCH_FORM,"");
 				}
 				break;
 			default:
@@ -608,7 +610,7 @@ public class anyRemote extends Activity
 	}
 	
 	public static void popup(Activity cxt, boolean show, String msg) {
-		_log("popup " + show);
+		_log("popup " + show + " " +msg);
 		
 		//cxt.setProgressBarIndeterminateVisibility(show);
 		if (waiting != null) {
@@ -616,9 +618,7 @@ public class anyRemote extends Activity
 			waiting = null; 
 		}
 		if (show) {
-			if (waiting == null) {
-				waiting = new ProgressDialog(cxt, ProgressDialog.STYLE_HORIZONTAL);
-			}
+			waiting = new ProgressDialog(cxt, ProgressDialog.STYLE_HORIZONTAL);
 			waiting.setMessage(msg);
 			waiting.show();
 		} 

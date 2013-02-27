@@ -151,9 +151,9 @@ public class ControlScreen extends arActivity
 	protected void onPause() {
 		log("onPause");	
 		
-		popup();
-		
 	    super.onPause();	
+
+	    popup();
 	}
 
 	@Override
@@ -168,8 +168,8 @@ public class ControlScreen extends arActivity
         	return;
         }
  
+		popup(); // before redraw
         redraw();
-		popup();
 		
 		exiting = false;
 	}
@@ -621,6 +621,7 @@ public class ControlScreen extends arActivity
 	public boolean onKeyUp(int keyCode, KeyEvent event) { 
 		log("onKeyUp "+keyCode);
 		if (keyCode == KeyEvent.KEYCODE_BACK) {
+			log("onKeyUp KEYCODE_BACK do disconnect");
 			commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
 			return true;
 		}		
@@ -630,6 +631,7 @@ public class ControlScreen extends arActivity
             anyRemote.protocol.queueCommand(key, false);
             return true;
 		}
+		log("onKeyUp TRANSFER "+keyCode);
         return false;
     }
 	

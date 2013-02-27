@@ -474,6 +474,7 @@ public class Dispatcher {
 				boolean isActive = (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM);
 				if (!(id == CMD_BG || id == CMD_FG ||  id == CMD_FONT) &&
 					!isActive) {
+					log("handleCommand switch to CONTROL_FORM");
 					context.setCurrentView(anyRemote.CONTROL_FORM, "");
 				} 
 				
@@ -557,6 +558,7 @@ public class Dispatcher {
 
 			if (doClose) { 
 				// Close List Activity (even it was not started ;-)) and open ControlForm
+				log("handleCommand switch to CONTROL_FORM (L)");
 				context.setCurrentView(anyRemote.CONTROL_FORM, "");
 				return;
 			}
@@ -566,6 +568,7 @@ public class Dispatcher {
 			// Create activity with (possibly) empty list
 			if ((switchTo == NOTUPDATE_SWITCH || switchTo == UPDATE_SWITCH) &&
 			    !isActive) {
+				log("handleCommand switch to LIST_FORM");
 				context.setCurrentView(anyRemote.LIST_FORM, "");
 			}
 			
@@ -639,6 +642,7 @@ public class Dispatcher {
 			
 			if (doCloset) { 
 				// Close Text Activity (even it was not started ;-)) and open ControlForm
+				log("handleCommand switch to CONTROL_FORM (T)");
 				context.setCurrentView(anyRemote.CONTROL_FORM, "");
 				return;
 			}
@@ -646,6 +650,7 @@ public class Dispatcher {
 			// Create activity with (possibly) empty list
 			int scr = anyRemote.getCurScreen();
 			if (needSwitch && scr != anyRemote.TEXT_FORM) {
+				log("handleCommand switch to TEXT_FORM");
 				context.setCurrentView(anyRemote.TEXT_FORM, "");
 			}
 			
@@ -695,6 +700,7 @@ public class Dispatcher {
 
 			if (doCloseW) { 
 				// Close WinManager Activity (even it was not started ;-)) and open ControlForm
+				log("handleCommand switch to CONTROL_FORM (W)");
 				context.setCurrentView(anyRemote.CONTROL_FORM, "");
 				return;
 			}
@@ -702,6 +708,7 @@ public class Dispatcher {
 			if (((String) cmdTokens.elementAt(1)).equals("window")) {
 				// Create activity
 				if (anyRemote.getCurScreen() != anyRemote.WMAN_FORM) {
+					log("handleCommand switch to WMAN_FORM");
 					context.setCurrentView(anyRemote.WMAN_FORM, "");
 				}
 				
