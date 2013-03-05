@@ -102,7 +102,7 @@ public class TextScreen extends arActivity implements OnGestureListener {
 	protected void onPause() {
 		log("onPause");
 		
-		popup();
+		//popup();
 		
 	    super.onPause();	
 	}

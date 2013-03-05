@@ -90,7 +90,7 @@ public class ListScreen extends arActivity
 	protected void onPause() {
 		log("onPause");
 		
-		popup();
+		//popup();
 		
 	    super.onPause();	
 	}

@@ -74,7 +74,7 @@ public class WinManager extends arActivity
 	protected void onPause() {
 		log("onPause");
 		
-		popup();
+		//popup();
 	    super.onPause();	
 	}
 	

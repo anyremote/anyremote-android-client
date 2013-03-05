@@ -153,7 +153,7 @@ public class ControlScreen extends arActivity
 		
 	    super.onPause();	
 
-	    popup();
+	    //popup();
 	}
 
 	@Override
@@ -700,7 +700,7 @@ public class ControlScreen extends arActivity
 	protected void doFinish(String action) {
     	
     	log("doFinish "+action);
-        exiting = true;
+        //exiting = true;
     	
 	    final Intent intent = new Intent();  
 	    intent.putExtra(anyRemote.ACTION, action);
