@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.TreeMap;
+import java.util.Vector;
+
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -560,6 +562,19 @@ public class anyRemote extends Activity
 		}
 	}
 
+	public static int parseColor(Vector vR, int start) {
+		if (vR.size() < start + 3) {
+			// what about "yellow" ?
+			//if (!c.startsWith("#")) {
+			//	c = "#" + c;
+			//}
+		    return Color.parseColor((String) vR.elementAt(start));
+		} 
+		return parseColor((String) vR.elementAt(start),
+                          (String) vR.elementAt(start+1),
+                          (String) vR.elementAt(start+2));
+	}
+	
 	public static int parseColor(String r, String g, String b) {
 		int[] RGB = new int[3];
 		try {

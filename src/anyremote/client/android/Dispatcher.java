@@ -1180,7 +1180,7 @@ public class Dispatcher {
 	//
 	// Control Screen activity persistent data handling
 	//
-    public void controlDataProcess(Vector vR) {
+  	private void controlDataProcess(Vector vR) {
     	
     	//log("processData >"+vR+"<");
     	
@@ -1222,25 +1222,13 @@ public class Dispatcher {
 				
   		    case CMD_BG:
   		    	
-  		    	if (vR.size() < 4) {
-  		    		return;
-  		    	}
- 		    	cfBkgr = anyRemote.parseColor(
-                        (String) vR.elementAt(1),
-                        (String) vR.elementAt(2),
-                        (String) vR.elementAt(3));
-   				break; 
+  		    	cfBkgr = anyRemote.parseColor(vR,1);
+  		    	break; 
   		
   		    case CMD_FG:
 
-  		    	if (vR.size() < 4) {
-  		    		return;
-  		    	}
- 		    	cfFrgr = anyRemote.parseColor(
-                        (String) vR.elementAt(1),
-                        (String) vR.elementAt(2),
-                        (String) vR.elementAt(3));
-  		    	break;  
+  		    	cfFrgr = anyRemote.parseColor(vR,1);
+   		    	break;  
   		  
   		    case CMD_FONT:
   		    	
@@ -1277,7 +1265,7 @@ public class Dispatcher {
 		}
     }
     
-	public void controlSetSkin(Vector vR) {
+    private void controlSetSkin(Vector vR) {
 		
         String name   = (String) vR.elementAt(1);
 
@@ -1464,7 +1452,7 @@ public class Dispatcher {
 	//         1 - need update data source + switch to list screen
 	//         2 - need update data, do not switch to list screen
 	// 
-	public int listDataProcess(int id, Vector vR, int stage) {	
+	private int listDataProcess(int id, Vector vR, int stage) {	
 		log("listDataProcess "+id+" "+vR); 
 
 		if (stage == ProtocolMessage.INTERMED ||
@@ -1491,20 +1479,14 @@ public class Dispatcher {
 			
 		} else if (oper.equals("fg")) {
 
-			int color = anyRemote.parseColor(
-					(String) vR.elementAt(2),
-					(String) vR.elementAt(3),
-					(String) vR.elementAt(4));
+			int color = anyRemote.parseColor(vR,2);
 			listText = color;
 			listCustomTextColor = true;
 			return UPDATE_NOTSWITCH;
 			
 		} else if (oper.equals("bg")) {
 
-			int color = anyRemote.parseColor(
-					(String) vR.elementAt(2),
-					(String) vR.elementAt(3),
-					(String) vR.elementAt(4));
+			int color = anyRemote.parseColor(vR,2);
 			listBkgr = color;
 			listCustomBackColor = true;
 			return UPDATE_NOTSWITCH;
@@ -1548,7 +1530,7 @@ public class Dispatcher {
 		return NOTUPDATE_NOTSWITCH;
 	}
 
-	public void listAdd(int id, Vector vR, int start, boolean fullCmd) {
+	private void listAdd(int id, Vector vR, int start, boolean fullCmd) {
 
 		//log("addToList "+vR); 
 
@@ -1580,7 +1562,7 @@ public class Dispatcher {
 		}
 	}
 
-	public void listAddWithIcon(int id, String content) {
+	private void listAddWithIcon(int id, String content) {
 
 		ListItem item = new ListItem();
 
@@ -1597,7 +1579,7 @@ public class Dispatcher {
 		}
 	}	
 
-	public void listClean() {
+	private void listClean() {
 		log("listClean");
 		
 		listSelectPos = -1;
@@ -1639,7 +1621,7 @@ public class Dispatcher {
 	//
 	// Set(list,close) does NOT processed here !
 	//
-	public boolean textDataProcess(Vector vR, int stage) {   // message = add|replace|show|clear,title,long_text
+	private boolean textDataProcess(Vector vR, int stage) {   // message = add|replace|show|clear,title,long_text
 		//log("textDataProcess VSIZE "+vR.size() + " stage " + stage); 
 		if (vR.size() == 0) {
 			return false;	
@@ -1679,18 +1661,12 @@ public class Dispatcher {
 			
 		} else if (oper.equals("fg")) {
 
-			textFrgr = anyRemote.parseColor(
-					(String) vR.elementAt(2),
-					(String) vR.elementAt(3),
-					(String) vR.elementAt(4));
+			textFrgr = anyRemote.parseColor(vR,2);
 			return false;
 			
 		} else if (oper.equals("bg")) {
 
-			textBkgr = anyRemote.parseColor(
-					(String) vR.elementAt(2),
-					(String) vR.elementAt(3),
-					(String) vR.elementAt(4));
+			textBkgr = anyRemote.parseColor(vR,2);
 			return false;
 
 		} else if (oper.equals("font")) {
