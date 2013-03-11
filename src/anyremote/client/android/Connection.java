@@ -847,6 +847,8 @@ public final class Connection implements Runnable {
 	private int cmdId(String header) {
 		if (header.equals("Set(bg")) {
 			return Dispatcher.CMD_BG;
+		} else if (header.equals("Set(caption")) {
+			return Dispatcher.CMD_CAPTION;
 		} else if (header.equals("Set(editfield")) {
 			return Dispatcher.CMD_EFIELD;
 		} else if (header.equals("Set(fg")) {

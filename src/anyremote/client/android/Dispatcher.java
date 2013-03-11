@@ -32,6 +32,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Environment;
 import android.os.Handler;
@@ -51,27 +52,28 @@ public class Dispatcher {
 
 	static final int CMD_NO       	= 0;	// commands
 	static final int CMD_BG     	= 1;
-	static final int CMD_EFIELD     = 2;
-	static final int CMD_FG     	= 3;
-	static final int CMD_FMAN       = 4;
-	static final int CMD_FONT     	= 5;
-	static final int CMD_FSCREEN    = 6;
-	static final int CMD_ICONLIST   = 7;
-	static final int CMD_ICONS      = 8;
-	static final int CMD_LIST       = 9;
-	static final int CMD_MENU       = 10;
-	static final int CMD_PARAM      = 11;
-	static final int CMD_REPAINT    = 12;
-	static final int CMD_LAYOUT  	= 13;
-	static final int CMD_STATUS     = 14;
-	static final int CMD_TEXT       = 15;
-	static final int CMD_TITLE      = 16;
-	static final int CMD_IMAGE  	= 17;
-	static final int CMD_VIBRATE    = 18;
-	static final int CMD_VOLUME     = 19;
-	static final int CMD_COVER      = 20;
-	static final int CMD_POPUP      = 21;
-	
+	static final int CMD_CAPTION    = 2;
+	static final int CMD_EFIELD     = 3;
+	static final int CMD_FG     	= 4;
+	static final int CMD_FMAN       = 5;
+	static final int CMD_FONT     	= 6;
+	static final int CMD_FSCREEN    = 7;
+	static final int CMD_ICONLIST   = 8;
+	static final int CMD_ICONS      = 9;
+	static final int CMD_LIST       = 10;
+	static final int CMD_MENU       = 11;
+	static final int CMD_PARAM      = 12;
+	static final int CMD_REPAINT    = 13;
+	static final int CMD_LAYOUT  	= 14;
+	static final int CMD_STATUS     = 15;
+	static final int CMD_TEXT       = 16;
+	static final int CMD_TITLE      = 17;
+	static final int CMD_IMAGE  	= 18;
+	static final int CMD_VIBRATE    = 19;
+	static final int CMD_VOLUME     = 20;
+	static final int CMD_COVER      = 21;
+	static final int CMD_POPUP      = 22;
+
 	static final int CMD_GETSCRSIZE = 51;
 	static final int CMD_GETPLTF    = 52;
 	static final int CMD_GETICON    = 53;
@@ -236,8 +238,8 @@ public class Dispatcher {
 		cfUpEvent   = "UP";
 		cfDownEvent = "DOWN";
 		cfInitFocus = 5;
-		cfFrgr = anyRemote.parseColor("255","255","255");
-		cfBkgr = anyRemote.parseColor("0",  "0",  "0");		
+		cfFrgr = Color.parseColor("#FFFFFF");
+		cfBkgr = Color.parseColor("#000000");		
 		cfTitle   = "";
 		cfStatus  = "";
 		cfCaption = "";		
@@ -260,8 +262,8 @@ public class Dispatcher {
 		menuAddDefault(anyRemote.LIST_FORM);
 		listBufferedItem.delete(0, listBufferedItem.length());
 
-		textFrgr = anyRemote.parseColor("255","255","255");
-		textBkgr = anyRemote.parseColor("0",  "0",  "0");
+		textFrgr = Color.parseColor("#FFFFFF");
+		textBkgr = Color.parseColor("#000000");
 		textContent.delete(0, textContent.length());
 		textFSize = SIZE_MEDIUM;
 		textTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
@@ -398,6 +400,7 @@ public class Dispatcher {
 		switch (cmd) {
 	        case CMD_NO:       return "CMD_NO";
 	        case CMD_BG :      return "Set(bg)";
+	        case CMD_CAPTION : return "Set(caption)";
 	        case CMD_EFIELD:   return "Set(editfield)";
 	        case CMD_FG:       return "Set(fg)";
 	        case CMD_FMAN:     return "Set(filemanager)";
@@ -458,6 +461,7 @@ public class Dispatcher {
 			break;*/
 
 		case CMD_BG:
+		case CMD_CAPTION:
 		case CMD_FG:
 		case CMD_FONT:
 		case CMD_ICONS:
@@ -1211,6 +1215,14 @@ public class Dispatcher {
 		    	}
 		    	cfTitle = (String) vR.elementAt(1);
 				break;
+
+		    case CMD_CAPTION:
+		    	
+		    	if (vR.size() < 2) {
+		    		return;
+		    	}
+		    	cfCaption = (String) vR.elementAt(1);
+				break;
 			
 		    case CMD_ICONS:
 		    	
@@ -1495,6 +1507,13 @@ public class Dispatcher {
 
 			listSetFont(vR);
 			return UPDATE_NOTSWITCH;
+		
+		} else if (oper.equals("caption")) {
+
+			if (vR.size() > 2) {
+				listTitle = (String) vR.elementAt(2);;
+			}
+			return UPDATE_SWITCH;
 
 		} else if (oper.equals("select")) {
 
@@ -1674,10 +1693,17 @@ public class Dispatcher {
 			textFontParams(vR);
 			return false;
 
-		} else if (oper.equals("wrap")) {
+		} else if (oper.equals("caption")) {
+
+			if (vR.size() > 2) {
+				textTitle = (String) vR.elementAt(2);;
+			}
+			return true;
+
+		//} else if (oper.equals("wrap")) {
 
 			// not supported
-			return false;
+			//return false;
 
 		} else if (oper.equals("close")) {
 

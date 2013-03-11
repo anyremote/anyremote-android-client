@@ -568,14 +568,18 @@ public class anyRemote extends Activity
 			//if (!c.startsWith("#")) {
 			//	c = "#" + c;
 			//}
-		    return Color.parseColor((String) vR.elementAt(start));
+			try {
+		        return Color.parseColor((String) vR.elementAt(start));
+		    } catch (Exception e) {
+		    	return Color.parseColor("#000000");
+		    }
 		} 
 		return parseColor((String) vR.elementAt(start),
                           (String) vR.elementAt(start+1),
                           (String) vR.elementAt(start+2));
 	}
 	
-	public static int parseColor(String r, String g, String b) {
+	private static int parseColor(String r, String g, String b) {
 		int[] RGB = new int[3];
 		try {
 			RGB[0] = Integer.parseInt(r);
@@ -624,10 +628,13 @@ public class anyRemote extends Activity
 		return "UNKNOWN";
 	}
 	
-	public static void popup(Activity cxt, boolean show, String msg) {
+	public static void popup(Activity cxt, boolean show, boolean update, String msg) {
 		_log("popup " + show + " " +msg);
 		
 		//cxt.setProgressBarIndeterminateVisibility(show);
+		if (show && !update && waiting != null) {  // do not recreate
+		    return;	
+		}
 		if (waiting != null) {
 			waiting.dismiss();
 			waiting = null; 
@@ -671,7 +678,7 @@ public class anyRemote extends Activity
 		if (logData.length() > LOG_CAPACITY) {
 			logData.delete(0,LOG_CAPACITY);		
 		}
-		
+	
 		teraz.setTime(java.lang.System.currentTimeMillis());
 		logData.append("\n" + "[" + now_format.format(teraz) + "] ["+prefix+"] "+msg);
 		Log.i(prefix,msg);

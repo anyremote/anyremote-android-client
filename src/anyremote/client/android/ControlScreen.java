@@ -150,10 +150,8 @@ public class ControlScreen extends arActivity
 	@Override
 	protected void onPause() {
 		log("onPause");	
-		
+		hidePopup();
 	    super.onPause();	
-
-	    //popup();
 	}
 
 	@Override
@@ -168,7 +166,6 @@ public class ControlScreen extends arActivity
         	return;
         }
  
-		popup(); // before redraw
         redraw();
 		
 		exiting = false;
@@ -202,7 +199,9 @@ public class ControlScreen extends arActivity
 	   
     	log("handleEvent " + Dispatcher.cmdStr(data.id));
 		
-		if (data.stage != ProtocolMessage.FULL &&	// process only full commands
+    	//checkPopup();
+    	
+    	if (data.stage != ProtocolMessage.FULL &&	// process only full commands
 		    data.stage == ProtocolMessage.FIRST) {
 			return;
 		}

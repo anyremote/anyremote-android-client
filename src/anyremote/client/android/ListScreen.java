@@ -89,9 +89,7 @@ public class ListScreen extends arActivity
 	@Override
 	protected void onPause() {
 		log("onPause");
-		
-		//popup();
-		
+		hidePopup();
 	    super.onPause();	
 	}
 
@@ -112,7 +110,6 @@ public class ListScreen extends arActivity
 		dataSource.notifyDataSetChanged();
         
 		redraw();
-		popup();
 		
 		exiting = false;	
 	}
@@ -241,7 +238,9 @@ public class ListScreen extends arActivity
 
 		log("handleEvent " + Dispatcher.cmdStr(data.id) + " " + data.stage);
 
-		if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
+    	checkPopup();
+
+    	if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
 			
 			if (handleCommonCommand(data.id)) {
 				return;

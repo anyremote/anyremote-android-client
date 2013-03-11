@@ -247,8 +247,18 @@ public class arActivity extends Activity
 	protected void doFinish(String reason) {
 		log("doFinish "+reason);	
 	}
-	
+
+	public void hidePopup() {
+		anyRemote.popup(this, false, true, "");
+	}
+
+	public void checkPopup() {
+		if (anyRemote.protocol.popupState) {
+		    anyRemote.popup(this, true, false, anyRemote.protocol.popupMsg.toString());
+		}
+	}
+
 	public void popup() {
-		anyRemote.popup(this, anyRemote.protocol.popupState, anyRemote.protocol.popupMsg.toString());
+		anyRemote.popup(this, anyRemote.protocol.popupState, true, anyRemote.protocol.popupMsg.toString());
 	}
 }

@@ -73,8 +73,7 @@ public class WinManager extends arActivity
 	@Override
 	protected void onPause() {
 		log("onPause");
-		
-		//popup();
+		hidePopup();
 	    super.onPause();	
 	}
 	
@@ -89,7 +88,6 @@ public class WinManager extends arActivity
         }
 
         redraw();
-		popup();
 
 		exiting = false;
 	}
@@ -168,6 +166,8 @@ public class WinManager extends arActivity
 	public void handleEvent(InfoMessage data) {
 		
 		log("handleEvent " + Dispatcher.cmdStr(data.id) + " " + data.stage);
+		
+		checkPopup();
 
 		if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
 			

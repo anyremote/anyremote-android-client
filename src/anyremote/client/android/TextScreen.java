@@ -101,9 +101,7 @@ public class TextScreen extends arActivity implements OnGestureListener {
 	@Override
 	protected void onPause() {
 		log("onPause");
-		
-		//popup();
-		
+		hidePopup();
 	    super.onPause();	
 	}
 	
@@ -123,7 +121,6 @@ public class TextScreen extends arActivity implements OnGestureListener {
         }
 
         redraw();
-		popup();
 		
 		exiting = false;
 	}
@@ -243,7 +240,9 @@ public class TextScreen extends arActivity implements OnGestureListener {
 		
 		if (isLog) return; 
 
-		if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
+    	checkPopup();
+
+    	if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
 
 			if (handleCommonCommand(data.id)) {
 				return;
