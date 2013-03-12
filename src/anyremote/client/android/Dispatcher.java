@@ -1359,16 +1359,24 @@ public class Dispatcher {
      	    return;
     	}
     	
-		if (!((String) data.elementAt(1)).equals("SAME")) {
+    	// want to support new&old format for now:
+    	// Set(icons,caption,1,icon,...)
+       	// Set(icons,1,icon,...)
+    	int start = 1;
+    	if (btn2int((String) data.elementAt(start)) < 0) {
+    		start++;
+    	}
+    	
+		if (start == 2 && !((String) data.elementAt(1)).equals("SAME")) {
 			cfCaption = (String) data.elementAt(1);
         }
 		
-		if (data.size() < 3) {
+		if (data.size() < start+1) {
 			return;
 		}
 		int maxIcon = (cfSkin == ControlScreen.SK_BOTTOMLINE ?  ControlScreen.NUM_ICONS_BTM : ControlScreen.NUM_ICONS);
 		
-        for (int idx=2;idx<data.size()-1;idx+=2) {
+        for (int idx=start;idx<data.size()-1;idx+=2) {
          	try {
         		int i = btn2int((String) data.elementAt(idx));
 
