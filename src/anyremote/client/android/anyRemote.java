@@ -128,15 +128,13 @@ public class anyRemote extends Activity
 
 		currForm        = DUMMY_FORM;
 		status          = DISCONNECTED;
-        
+		finishFlag      = false;
+		
 		if (globalHandler == null) {
 		    globalHandler = new Handler(this);
 		}
 
 		MainLoop.enable();
-		
-		currForm = DUMMY_FORM;
-		status = DISCONNECTED;
 	}
 	
 
@@ -144,11 +142,6 @@ public class anyRemote extends Activity
 	protected void onStart() {
 		_log("onStart "+currForm);		
 		super.onStart();
-		
-		finishFlag = false;
-		if (currForm != LOG_FORM && status == DISCONNECTED) {
-		    setCurrentView(SEARCH_FORM,"");
-		}
 	}
 	
 	@Override
@@ -162,6 +155,15 @@ public class anyRemote extends Activity
 		//logData = ""; // remove old log
 		_log("onResume "+currForm);	
 		super.onResume();
+
+		if (finishFlag) {
+			doExit();
+			return;
+		}
+
+		if (currForm != LOG_FORM && status == DISCONNECTED) {
+		    setCurrentView(SEARCH_FORM,"");
+		}
 	}
 	
 	@Override
@@ -177,10 +179,12 @@ public class anyRemote extends Activity
 		super.onDestroy();
 		
 		finishFlag = true;
-		setCurrentView(NO_FORM,"");
+		currForm = NO_FORM;
 		status = DISCONNECTED;
 		protocol.disconnect(true);
 		MainLoop.disable();
+		
+		super.onDestroy();
 	}
 
 	public void setPrevView(int which) {
@@ -282,7 +286,7 @@ public class anyRemote extends Activity
 	// Collect data from Search Form
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		_log("onActivityResult " + requestCode);
-
+        /*
 		if (requestCode == SEARCH_FORM) {
 			if (resultCode == RESULT_OK) {
 
@@ -342,7 +346,7 @@ public class anyRemote extends Activity
 				prevForm = CONTROL_FORM; // still have issues with activity stop/start synchronizations
 			}
 			setCurrentView(prevForm, "show");
-		}
+		}*/
 	}
 
 	@Override
@@ -381,11 +385,8 @@ public class anyRemote extends Activity
 			return true;
 
 		case R.id.exit_main:
-			finishFlag = true;
 			_log("onOptionsItemSelected exit_main");
-			setCurrentView(NO_FORM,"");
-			protocol.disconnect(true);
-			finish();
+			doExit();
 			return true;
 
 		case R.id.log_main:
@@ -471,9 +472,12 @@ public class anyRemote extends Activity
 			break;			
 
 		case anyRemote.DO_EXIT:
-			
+
 			anyRemote._log("handleMessage: DO_EXIT");
-			doExit();
+			//doExit(); -- do exit from onResume()
+			currForm = NO_FORM;
+			finishFlag = true;
+
 			break;			
 
 		case anyRemote.DO_DISCONNECT:
@@ -487,8 +491,6 @@ public class anyRemote extends Activity
 			anyRemote._log("handleMessage: SHOW_LOG");
 			setCurrentView(LOG_FORM, "");
 			break;			
-			
-		
 		}
 		return true;
 	}
@@ -655,9 +657,10 @@ public class anyRemote extends Activity
 		// how to do exit ?
 		_log("doExit");
 		finishFlag = true;
-		setCurrentView(NO_FORM, "");
+		currForm = NO_FORM;
 		protocol.disconnect(true);
-		super.onBackPressed();
+		//super.onBackPressed();
+		finish();
 	}
 
 	public static int getCurScreen() {

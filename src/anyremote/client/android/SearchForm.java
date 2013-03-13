@@ -247,8 +247,6 @@ public class SearchForm extends arActivity
 
 	@Override
 	public void onBackPressed() {
-
-		super.onBackPressed();
 		
 		/*cancelSearch(false);
 
@@ -256,9 +254,10 @@ public class SearchForm extends arActivity
 		intent.putExtra(anyRemote.CONN_ADDR, "");
 
 		setResult(RESULT_OK, intent);*/
+		
 		doExit();
 
-		finish();
+		//super.onBackPressed();
 	}
 
 	private void doDiscovery() {
