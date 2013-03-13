@@ -118,7 +118,8 @@ public class ControlScreen extends arActivity
 	static final int[] lbtns7x1 = { R.id.tl_bb1, R.id.tl_bb2, R.id.tl_bb3,
 			R.id.tl_bb4, R.id.tl_bb5, R.id.tl_bb6, R.id.tl_bb7 };    
    
-    boolean fullscreen  = false;
+    boolean fullscreen    = false;
+    boolean switchedToLog = false;
     Dispatcher.ArHandler hdlLocalCopy;
     
     ImageButton  [] buttons;
@@ -160,6 +161,8 @@ public class ControlScreen extends arActivity
 
 		super.onResume();
 		
+		switchedToLog = false;
+		
         if (anyRemote.status == anyRemote.DISCONNECTED) {
         	log("onResume no connection");	
         	doFinish("");
@@ -189,7 +192,7 @@ public class ControlScreen extends arActivity
 		log("onUserLeaveHint");
 		// no time to sending events
 		//commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
-		if (!exiting && anyRemote.protocol.messageQueueSize() == 0) {
+		if (!switchedToLog && !exiting && anyRemote.protocol.messageQueueSize() == 0) {
 			log("onUserLeaveHint - make disconnect");
 	    	anyRemote.protocol.disconnect(false);
 		}
@@ -683,11 +686,16 @@ public class ControlScreen extends arActivity
 		log("commandAction "+command);
 		
         if (command.equals(anyRemote.protocol.context.getString(R.string.exit_item))) {	
-        	doFinish("exit");		  
+        	//doFinish("exit");	
+        	anyRemote.sendGlobal(anyRemote.DO_EXIT, null);	  
         } else if (command.equals(anyRemote.protocol.context.getString(R.string.disconnect_item))) {
-        	doFinish("disconnect");	
+        	//doFinish("disconnect");
+        	anyRemote.sendGlobal(anyRemote.DO_DISCONNECT, null);	
         } else if (command.equals(anyRemote.protocol.context.getString(R.string.log_item))) {
-        	doFinish("log");	
+        	//doFinish("log");
+        	//anyRemote.sendGlobal(anyRemote.SHOW_LOG, null);
+        	switchedToLog = true;
+        	showLog();
         } else if (command.equals(anyRemote.protocol.context.getString(R.string.back_item))) {
         	anyRemote.protocol.queueCommand("Back");  // avoid national alphabets	
 	    } else {

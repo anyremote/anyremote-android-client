@@ -28,6 +28,7 @@ import android.app.Dialog;
 import android.os.Handler;
 import android.os.Message;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.view.Menu;
 import anyremote.client.android.R;
 import anyremote.client.android.util.InfoMessage;
@@ -41,6 +42,7 @@ public class arActivity extends Activity
 	protected String prefix = "";	
 	private boolean skipDismissEditDialog = false;
 	protected boolean exiting = false;
+	protected boolean privateMenu = false;
 	
 	public boolean handleMessage(Message msg) {
 		handleEvent((InfoMessage) msg.obj);
@@ -82,14 +84,20 @@ public class arActivity extends Activity
 	public boolean onPrepareOptionsMenu(Menu menu) { 
     	
     	menu.clear();
-     	
-       	Vector<String> menuItems = anyRemote.protocol.getMenu();
-    	if (menuItems != null) {
-		    for(int i = 0;i<menuItems.size();i++) {
-			    menu.add(menuItems.elementAt(i));
+    	
+    	if (privateMenu) { // LOG screen
+    		menu.add(getString(R.string.clear_log_item));
+			menu.add(getString(R.string.report_bug_item));
+			menu.add(getString(R.string.back_item));
+    	} else {
+    		Vector<String> menuItems = anyRemote.protocol.getMenu();
+
+	    	if (menuItems != null) {
+			    for(int i = 0;i<menuItems.size();i++) {
+				    menu.add(menuItems.elementAt(i));
+			    }
 		    }
 	    }
-   	
   		return true;
 	}
     
@@ -247,7 +255,14 @@ public class arActivity extends Activity
 	protected void doFinish(String reason) {
 		log("doFinish "+reason);	
 	}
-
+	
+	protected void showLog() {
+	    log("showLog");
+	    final Intent showLog = new Intent(getBaseContext(), TextScreen.class);
+	    showLog.putExtra("SUBID", "__LOG__");
+	    startActivity(showLog); 
+	}
+	
 	public void hidePopup() {
 		anyRemote.popup(this, false, true, "");
 	}

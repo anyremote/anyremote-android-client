@@ -74,7 +74,7 @@ public class ConnectTask extends TimerTask {
 				
 				int  port = Integer.valueOf(sport);
 
-				anyRemote._log("ConnectTask", "connectWifi connection is "+hostname+" : " + port);
+				anyRemote._log("ConnectTask", "connect IP to "+hostname+" : " + port);
 				s = new IPSocket(hostname, port);
 
 			} catch (UserException e) {
@@ -94,6 +94,7 @@ public class ConnectTask extends TimerTask {
 			// to not block the UI.
 
 			try {
+				anyRemote._log("ConnectTask", "connect BT to "+host);
 				s = new BTSocket(host.substring(8)); // strip btspp://
 			} catch (UserException e) {
 				// tell the view that we have no connection

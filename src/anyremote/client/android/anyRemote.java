@@ -49,16 +49,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
+import anyremote.client.android.util.Address;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.R;
 
 public class anyRemote extends Activity 
                        implements Handler.Callback {
 
-	public static final int DISCONNECTED = 0;
-	public static final int CONNECTED    = 1;
-	public static final int LOSTFOCUS    = 2;
-	public static final int COMMAND      = 3;
+	public static final int DISCONNECTED  = 0;
+	public static final int CONNECTED     = 1;
+	public static final int LOSTFOCUS     = 2;
+	public static final int COMMAND       = 3;
+	public static final int DO_EXIT       = 4;
+	public static final int DO_CONNECT    = 5;
+	public static final int DO_DISCONNECT = 6;
+	public static final int SHOW_LOG      = 7;
 	
 	public static final int SWIPE_MIN_DISTANCE = 120;
     public static final int SWIPE_THRESHOLD_VELOCITY = 200; 
@@ -102,6 +107,8 @@ public class anyRemote extends Activity
 	
 	// Wait indicator stuff
 	private static ProgressDialog waiting = null;
+
+	private static int numeratorVar = 0;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -176,6 +183,11 @@ public class anyRemote extends Activity
 		MainLoop.disable();
 	}
 
+	public void setPrevView(int which) {
+		_log("setPrevView " + which);
+		prevForm = which;
+	}
+
 	public void setCurrentView(int which, String subCommand) {
 		_log("setCurrentView " + getScreenStr(which) + " (was " + getScreenStr(currForm) + ") finish="+finishFlag);
 
@@ -183,7 +195,8 @@ public class anyRemote extends Activity
 
 		if (currForm == which) {
 			_log("setCurrentView TRY TO SWITCH TO THE SAME FORM ???");
-			//if (currForm == SEARCH_FORM) {
+			//if (currForm != SEARCH_FORM) {
+				_log("setCurrentView SKIP SWITCH TO THE SAME FORM ???");
 				return;
 			//}
 		}
@@ -221,16 +234,19 @@ public class anyRemote extends Activity
 
 		switch (currForm) { 
 		case SEARCH_FORM:
-			_log("setCurrentView start SearchForm");
 			final Intent doSearch = new Intent(getBaseContext(), SearchForm.class);
-			startActivityForResult(doSearch, which); 
+			String id = String.format("%d",numerator());
+			doSearch.putExtra("SUBID", id);
+			_log("setCurrentView start SearchForm "+id);
+			//startActivityForResult(doSearch, which); 
+			startActivity(doSearch); 
 			break;
 
 		case CONTROL_FORM:
 			_log("setCurrentView start ControlScreen");
 			final Intent control = new Intent(getBaseContext(), ControlScreen.class);
-			startActivityForResult(control, which); 
-			//startActivity(control); 
+			//startActivityForResult(control, which); 
+			startActivity(control); 
 			break;
 
 		case LIST_FORM:
@@ -243,7 +259,8 @@ public class anyRemote extends Activity
 			_log("setCurrentView start TextScreen");
 			final Intent showText = new Intent(getBaseContext(), TextScreen.class);
 			showText.putExtra("SUBID", subCommand);
-			startActivityForResult(showText, which); 
+			//startActivityForResult(showText, which); 
+			startActivity(showText); 
 			break;
 			
 		case WMAN_FORM:
@@ -256,16 +273,12 @@ public class anyRemote extends Activity
 			_log("setCurrentView start TextScreen (LOG)");
 			final Intent showLog = new Intent(getBaseContext(), TextScreen.class);
 			showLog.putExtra("SUBID", "__LOG__");
-			startActivityForResult(showLog, which); 
+			//startActivityForResult(showLog, which); 
+			startActivity(showLog); 
 			break;
 		}
 	}
 	
-	public void setPrevView(int which) {
-		_log("setPrevView " + which);
-		prevForm = which;
-	}
-
 	// Collect data from Search Form
 	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 		_log("onActivityResult " + requestCode);
@@ -387,6 +400,7 @@ public class anyRemote extends Activity
 	}
 	
 	public static void sendGlobal(int id, Object obj) {
+		anyRemote._log("sendGlobal: "+id);
 		if (globalHandler != null) {
 			Message msg = globalHandler.obtainMessage(id, obj);
 		    msg.sendToTarget();
@@ -403,7 +417,12 @@ public class anyRemote extends Activity
 			anyRemote._log("handleMessage: CONNECTED");
 			//Toast.makeText(client, R.string.connection_successful, Toast.LENGTH_SHORT).show();
 			
-			protocol.connected((Connection) msg.obj);
+			try {
+			    protocol.connected((Connection) msg.obj);
+			} catch (Exception e) {  // once got ClassCastException here
+				protocol.disconnect(true);
+				return true;
+			}
 			handleEvent(CONNECTED);
 			break;
 			
@@ -438,11 +457,43 @@ public class anyRemote extends Activity
 			//anyRemote._log("handleMessage: COMMAND");
 			protocol.handleCommand((ProtocolMessage) msg.obj);
 			break;			
+
+		case anyRemote.DO_CONNECT:
+			
+			anyRemote._log("handleMessage: DO_CONNECT");
+			if (msg.obj != null ) {
+				Address conn = (Address) msg.obj;
+				setProgressBarIndeterminateVisibility(true);
+				protocol.doConnect(conn.name, conn.URL, conn.pass);
+			} else {
+				setCurrentView(DUMMY_FORM, "");
+			}
+			break;			
+
+		case anyRemote.DO_EXIT:
+			
+			anyRemote._log("handleMessage: DO_EXIT");
+			doExit();
+			break;			
+
+		case anyRemote.DO_DISCONNECT:
+			
+			anyRemote._log("handleMessage: DO_DISCONNECT");
+			protocol.disconnect(true);
+			break;			
+
+		case anyRemote.SHOW_LOG:
+			
+			anyRemote._log("handleMessage: SHOW_LOG");
+			setCurrentView(LOG_FORM, "");
+			break;			
+			
+		
 		}
 		return true;
 	}
 	
-	public void handleEvent(int what) {
+	private void handleEvent(int what) {
 		
 		_log("handleEvent");
 		switch (what) {
@@ -458,10 +509,10 @@ public class anyRemote extends Activity
 				    setCurrentView(CONTROL_FORM,"");
 				}
 				break;
-		
+
 			case DISCONNECTED:
 			case LOSTFOCUS:
-				
+
 				_log("handleEvent: Connection or focus lost");
 				status = DISCONNECTED;
 				//protocol.closeCurrentScreen(currForm);
@@ -474,12 +525,13 @@ public class anyRemote extends Activity
 					if (currForm != LOG_FORM) {
 						currForm = DUMMY_FORM;  // trick
 					}
+					
+					if (currForm != LOG_FORM) {
+						_log("handleEvent: switch to SEARCH_FORM");
+						setCurrentView(SEARCH_FORM,"");
+					}
 				}
 		
-				if (currForm != LOG_FORM) {
-					_log("handleEvent: switch to SEARCH_FORM");
-					setCurrentView(SEARCH_FORM,"");
-				}
 				break;
 			default:
 				_log("handleEvent: unknown event");
@@ -627,10 +679,10 @@ public class anyRemote extends Activity
 		}
 		return "UNKNOWN";
 	}
-	
+
 	public static void popup(Activity cxt, boolean show, boolean update, String msg) {
 		_log("popup " + show + " " +msg);
-		
+
 		//cxt.setProgressBarIndeterminateVisibility(show);
 		if (show && !update && waiting != null) {  // do not recreate
 		    return;	
@@ -682,5 +734,10 @@ public class anyRemote extends Activity
 		teraz.setTime(java.lang.System.currentTimeMillis());
 		logData.append("\n" + "[" + now_format.format(teraz) + "] ["+prefix+"] "+msg);
 		Log.i(prefix,msg);
+	}
+	
+	public static int numerator() {
+		numeratorVar++;
+		return numeratorVar;
 	}
 }

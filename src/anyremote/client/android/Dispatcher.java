@@ -337,34 +337,33 @@ public class Dispatcher {
 	 */
 	public void disconnect(boolean full) {
 
-		log("disconnect");
+		log("disconnect "+full);
+		boolean isConn = (connection != null && !connection.isClosed());
 		
 		disconnected(full);
-
-		if (full) {         // real close
-			currentConnection = "";
-			currentConnName   = "";
-		} // else           // pause connection
-	    
-		if (full) {
-		    anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
-		} else {
-			anyRemote.sendGlobal(anyRemote.LOSTFOCUS, "");	
+		
+		if (isConn) {  
+			if (full) {
+			    anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
+			} else {
+				anyRemote.sendGlobal(anyRemote.LOSTFOCUS, "");	
+			}
+		} else{
+			log("disconnect: alredy disconnected");
 		}
-
 	}
 
 	public void disconnected(boolean full) {
 
 		if (connection != null) {
 			connection.close();
+			connection = null;
 			autoPass = false;
 		}
 		
 		synchronized (msgQueue) {
 			msgQueue.clear();
 		}
-		
 		
 		if (full) {
 			currentConnection = "";	
@@ -1846,7 +1845,7 @@ public class Dispatcher {
 		menuAddDefault(screen); 	
 	}
 	
-	void menuAddDefault(int screen) {   	
+	private void menuAddDefault(int screen) {   	
 		switch(screen) {
 			case anyRemote.CONTROL_FORM:
 				cfMenu.add(context.getString(R.string.disconnect_item));

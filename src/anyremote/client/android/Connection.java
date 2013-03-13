@@ -189,8 +189,9 @@ public final class Connection implements Runnable {
 	}
 
 	private void downPrivate() {
-		closed = true;
 		sock.close();
+		closed = true;
+		anyRemote._log("Connection", "socket closed");
 	}
 
 	/** See {@link #notifyDisconnected(UserException)}. */

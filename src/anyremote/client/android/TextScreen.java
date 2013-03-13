@@ -61,6 +61,11 @@ public class TextScreen extends arActivity implements OnGestureListener {
 
 			prefix = "Log"; // log stuff
 			isLog = true;
+			privateMenu = true;
+			
+			hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.LOG_FORM, new Handler(this));
+			anyRemote.protocol.addMessageHandler(hdlLocalCopy);
+			
 			log("onCreate");
 			
 		} else {
@@ -101,7 +106,9 @@ public class TextScreen extends arActivity implements OnGestureListener {
 	@Override
 	protected void onPause() {
 		log("onPause");
-		hidePopup();
+		if (!isLog) {
+			hidePopup();
+		}
 	    super.onPause();	
 	}
 	
@@ -128,9 +135,7 @@ public class TextScreen extends arActivity implements OnGestureListener {
 	@Override
 	protected void onDestroy() {	
 		log("onDestroy");
-		if (!isLog) {
-	   	    anyRemote.protocol.removeMessageHandler(hdlLocalCopy);
-		}
+		anyRemote.protocol.removeMessageHandler(hdlLocalCopy);
 	   	isLog = false;
 	   	super.onDestroy();
 	}
@@ -176,13 +181,11 @@ public class TextScreen extends arActivity implements OnGestureListener {
 	@Override
 	protected void doFinish(String action) {
 		
-		log("doFinish");
-		
-		if (isLog) {
-		    final Intent intent = new Intent();  
-		    intent.putExtra(anyRemote.ACTION, action);	    
-		    setResult(RESULT_OK, intent);
-		}
+		//if (isLog) {
+		//    final Intent intent = new Intent();  
+		//    intent.putExtra(anyRemote.ACTION, action);	    
+		//    setResult(RESULT_OK, intent);
+		//}
 		
 		if (!isLog) {
 			log("doFinish finish");
@@ -192,8 +195,12 @@ public class TextScreen extends arActivity implements OnGestureListener {
 	}
 
 	@Override
-	public void onBackPressed() { 
-		commandAction(anyRemote.protocol.context.getString(R.string.back_item));
+	public void onBackPressed() {
+		if (isLog) {
+			doFinish("");	
+		} else {
+		    commandAction(anyRemote.protocol.context.getString(R.string.back_item));
+		}
 	}
 
 	@Override
@@ -205,7 +212,8 @@ public class TextScreen extends arActivity implements OnGestureListener {
 	public void commandAction(String command) {
 		if (isLog) {
 			if (command.equals(anyRemote.protocol.context.getString(R.string.back_item))) {
-				doFinish("log");  // just close Log form
+				//doFinish("log");  // just close Log form
+				doFinish("");
 			} else if (command.equals(anyRemote.protocol.context.getString(R.string.clear_log_item))) {
 				anyRemote.logData.delete(0,anyRemote.logData.length());
 				text.setText("");
@@ -238,10 +246,13 @@ public class TextScreen extends arActivity implements OnGestureListener {
 		
 		log("handleEvent " + Dispatcher.cmdStr(data.id) + " " + data.stage);
 		
-		if (isLog) return; 
-
-    	checkPopup();
-
+		if (isLog) {
+            if (data.id == Dispatcher.CMD_CLOSE) {
+            	doFinish("");
+            	return;
+            }
+	    }
+	
     	if (data.stage == ProtocolMessage.FULL || data.stage == ProtocolMessage.FIRST) {
 
 			if (handleCommonCommand(data.id)) {

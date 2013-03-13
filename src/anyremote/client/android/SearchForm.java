@@ -89,13 +89,19 @@ public class SearchForm extends arActivity
 	
 	boolean skipDismissDialog = false;
 	boolean deregStateRcv = false;
+	
+	String id;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
 		prefix = "SearchForm"; // log stuff
-		log("onCreate");
+		
+		Intent  intent = getIntent();
+		id = intent.getStringExtra("SUBID");
+		
+		log("onCreate " + id);
 
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
 		setContentView(R.layout.search_dialog);
@@ -151,17 +157,27 @@ public class SearchForm extends arActivity
 		}
 	}
 
-	//@Override
-	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-		Address a = dataSource.getItem(arg2);
-		if (a != null) {
-		    doConnect(a);
-	    }
+	@Override
+	protected void onPause() {
+		log("onPause "+id);	
+	    super.onPause();	
+	}
+
+	@Override
+	protected void onResume() {
+		log("onResume "+id);		
+		super.onResume();
 	}
 	
 	@Override
+	protected void onStop() {
+		log("onStop "+id);		
+	    super.onStop();	
+	}
+
+	@Override
 	protected void onDestroy() {
-		super.onDestroy();
+		log("onDestroy "+id);
 
 		// Make sure we're not doing discovery anymore
 		cancelSearch(false);
@@ -171,6 +187,14 @@ public class SearchForm extends arActivity
 		if (deregStateRcv) {
 			unregisterReceiver(mBTStateReceiver);
 		}
+		super.onDestroy();
+	}
+
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		Address a = dataSource.getItem(arg2);
+		if (a != null) {
+		    doConnect(a);
+	    }
 	}
 
 	// Handle long-click
@@ -224,15 +248,17 @@ public class SearchForm extends arActivity
 	@Override
 	public void onBackPressed() {
 
-		cancelSearch(false);
+		super.onBackPressed();
+		
+		/*cancelSearch(false);
 
 		final Intent intent = new Intent();  
 		intent.putExtra(anyRemote.CONN_ADDR, "");
 
-		setResult(RESULT_OK, intent);
+		setResult(RESULT_OK, intent);*/
+		doExit();
 
 		finish();
-		super.onBackPressed();
 	}
 
 	private void doDiscovery() {
@@ -661,11 +687,16 @@ public class SearchForm extends arActivity
 			case R.id.log_item:
 	
 				stopSearch();
-	
-				final Intent intentl = new Intent();
-				intentl.putExtra(anyRemote.ACTION, "log");
-				setResult(RESULT_OK, intentl);
-				finish();
+				
+				//anyRemote.sendGlobal(anyRemote.SHOW_LOG, null);
+				
+				//final Intent intentl = new Intent();
+				//intentl.putExtra(anyRemote.ACTION, "log");
+				//setResult(RESULT_OK, intentl);
+				//finish();
+				
+				showLog();
+				
 				break;	
 				
 		    case R.id.about_item:
@@ -679,12 +710,15 @@ public class SearchForm extends arActivity
 	}
 	
 	public void doExit() { 
-		
+
+		log("doExit");
 		stopSearch();
-	
-		final Intent intente = new Intent();
-		intente.putExtra(anyRemote.ACTION, "exit");
-		setResult(RESULT_OK, intente);
+		
+		anyRemote.sendGlobal(anyRemote.DO_EXIT, null);	  
+		
+		//final Intent intente = new Intent();
+		//intente.putExtra(anyRemote.ACTION, "exit");
+		//setResult(RESULT_OK, intente);
 		finish();
 	}
 	
@@ -787,17 +821,24 @@ public class SearchForm extends arActivity
 		// be sure peer is stored
 		addAddress(connectName,connectTo,connectPass,connectAuto);
 		
-		final Intent intent = new Intent();  
+		//final Intent intent = new Intent();  
 
-		intent.putExtra(anyRemote.CONN_ADDR, connectTo);
-		intent.putExtra(anyRemote.CONN_NAME, connectName);
-		intent.putExtra(anyRemote.CONN_PASS, connectPass);
+		//intent.putExtra(anyRemote.CONN_ADDR, connectTo);
+		//intent.putExtra(anyRemote.CONN_NAME, connectName);
+		//intent.putExtra(anyRemote.CONN_PASS, connectPass);
+		//setResult(RESULT_OK, intent);
 
-		setResult(RESULT_OK, intent);
+		Address conn = new Address();
+		conn.name = connectName;
+		conn.URL  = connectTo;
+		conn.pass = connectPass;
+		
 		connectTo   = "";
 		connectName = "";
 		connectPass = "";
 		connectAuto = false;
+		
+		anyRemote.sendGlobal(anyRemote.DO_CONNECT, conn);	  
 		
 		log("SearchForm::doRealConnect: finish");
 		finish();
