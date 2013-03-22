@@ -76,7 +76,7 @@ public class Dispatcher {
 
 	static final int CMD_GETSCRSIZE = 51;
 	static final int CMD_GETPLTF    = 52;
-	static final int CMD_GETICON    = 53;
+	static final int CMD_GETIMG     = 53;
 	static final int CMD_GETCVRSIZE = 54;
 	static final int CMD_GETVER     = 55;
 	static final int CMD_GETCURSOR  = 56;
@@ -134,7 +134,8 @@ public class Dispatcher {
 	
 	ArrayList<QueueMessage> msgQueue = new ArrayList<QueueMessage>();
 	
-	ArrayList<String> autoUploaded = new ArrayList<String>();
+	ArrayList<String> autoUploadedI = new ArrayList<String>();
+	ArrayList<String> autoUploadedC = new ArrayList<String>();
 	
 	Connection   connection = null;
 	anyRemote    context    = null;
@@ -159,6 +160,7 @@ public class Dispatcher {
 	int    cfFrgr;
 	int    cfBkgr;
 	Bitmap cfCover;
+	String cfNamedCover;
 	float  cfFSize;
 	Typeface cfTFace;
 	String cfVolume;
@@ -244,6 +246,7 @@ public class Dispatcher {
 		cfStatus  = "";
 		cfCaption = "";		
 		cfCover = null;
+		cfNamedCover = "";
 		cfIconSizeOverride = -1;
 		cfPadding  = 0;
 		cfIconSize = -1;
@@ -422,7 +425,7 @@ public class Dispatcher {
 	        case CMD_POPUP:      return "Set(popup)";
 	        case CMD_GETSCRSIZE: return "Get(screen_size)";
 	        case CMD_GETPLTF:    return "Get(model)";
-	        case CMD_GETICON:    return "Get(icon)";
+	        case CMD_GETIMG:    return "Get(is_exists)";
 	        case CMD_GETCVRSIZE: return "Get(cover_size)";
 	        case CMD_GETVER:     return "Get(version)";
 	        case CMD_GETCURSOR:  return "Get(cursor)";
@@ -627,7 +630,9 @@ public class Dispatcher {
 			break;
 
 		case CMD_REPAINT:
-			//screen.drawSync();
+			if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
+				sendToActivity(anyRemote.CONTROL_FORM,id,stage);
+			} 
 			break;
 
 		case CMD_TEXT:	
@@ -717,12 +722,34 @@ public class Dispatcher {
 				
 				sendToActivity(anyRemote.WMAN_FORM,id,stage);
 				
-			} else if (((String) cmdTokens.elementAt(1)).equals("icon")) {
+			} else if (((String) cmdTokens.elementAt(1)).equals("icon") ||
+					   ((String) cmdTokens.elementAt(1)).equals("cover")) {
 				
 				// redraw ControlForm if it is active
 				if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
 					sendToActivity(anyRemote.CONTROL_FORM,id,stage);	
 				}
+			} else if (((String) cmdTokens.elementAt(1)).equals("remove")) {
+				if (cmdTokens.size() < 3) {
+					log("Improper image remove command");
+					return;
+				}
+				
+				String rm = (String) cmdTokens.elementAt(2);
+				
+				File store = Environment.getExternalStorageDirectory();
+				
+                if (rm.equals("icons") || rm.equals("all")) {
+                	log("Remove all downloaded icons");
+     				File d = new File(store, "Android/data/anyremote.client.android/files/icons");
+    				emptyDir(d);
+                }
+                
+                if (rm.equals("covers") || rm.equals("all")) {
+                	log("Remove all downloaded covers");
+                	File d = new File(store, "Android/data/anyremote.client.android/files/icons");
+    				emptyDir(d);
+                }
 			}
 			break;    
 
@@ -820,28 +847,61 @@ public class Dispatcher {
 			queueCommand("Model(,"+android.os.Build.MODEL+"/Android-"+android.os.Build.VERSION.RELEASE+")");
 			break;
 
-		case CMD_GETICON:
-			String size = (String) cmdTokens.elementAt(1);
-			String icon = (String) cmdTokens.elementAt(2);		
+		case CMD_GETIMG:
 			
-			int iconId = anyRemote.icon2int(icon);
+			// old format Get(is_exists,sz,name)
+			// new format Get(is_exists,[icon,sz,name]|cover,name])
+			String item2 = (String) cmdTokens.elementAt(1);
 			
-			boolean isExists = false;
-			if (iconId == R.drawable.icon) {	// no such icon
-				File dir = Environment.getExternalStorageDirectory();
-				File iFile = new File(dir, "Android/data/anyremote.client.android/files/"+icon+".png");
-				isExists = iFile.canRead();
-			} else {
-				isExists = true;
-		    }
+			boolean isIcon = true;
+			String size;
+			String name;
 			
-			String resp;
-			if (isExists) {
-				resp = "IconExists("+size+","+icon+")";
-			} else {
-				resp = "IconNotExists("+size+","+icon+")";
+			if (item2.equals("icon")) {
+				size = (String) cmdTokens.elementAt(2);
+			    name = (String) cmdTokens.elementAt(3);	
+		    } else if (item2.equals("cover")) {
+		    	isIcon = false;
+		    	size = "";
+		    	name = (String) cmdTokens.elementAt(2);	
+		    } else {
+				size = (String) cmdTokens.elementAt(1);
+				name = (String) cmdTokens.elementAt(2);		
 			}
-			queueCommand(resp);
+			
+			if (isIcon) {
+				int iconId = anyRemote.icon2int(name);
+				
+				boolean isExists = false;
+				if (iconId == R.drawable.icon) {	// no such icon
+					File dir = Environment.getExternalStorageDirectory();
+					File iFile = new File(dir, "Android/data/anyremote.client.android/files/icons/"+name+".png");
+					isExists = iFile.canRead();
+				} else {
+					isExists = true;
+			    }
+				
+				String resp;
+				if (isExists) {
+					resp = "IconExists("+size+","+name+")";
+				} else {
+					resp = "IconNotExists("+size+","+name+")";
+				}
+				queueCommand(resp);
+			} else {
+				boolean isExists = false;
+				File dir = Environment.getExternalStorageDirectory();
+				File iFile = new File(dir, "Android/data/anyremote.client.android/files/covers/"+name+".png");
+				isExists = iFile.canRead();
+				
+				String resp;
+				if (isExists) {
+					resp = "CoverExists(,"+name+")";
+				} else {
+					resp = "CoverNotExists(,"+name+")";
+				}
+				queueCommand(resp);
+			}
 			break;
 
 		default:
@@ -1267,10 +1327,20 @@ public class Dispatcher {
 
 			case CMD_COVER:
 				
-		    	if (vR.size() < 2) {
-		    		cfCover = null;
+		    	if (vR.size() < 3) {
+	    		    if (vR.size() == 2 && !((String) vR.elementAt(1)).equals("clear")) {
+	    		    	log("processData wrong Set(cover...) command");
+	    		    } 
+			        cfCover = null;
+			        cfNamedCover = "";
 		    	} else {
-				    cfCover = (Bitmap) vR.elementAt(1);
+		    		if (((String) vR.elementAt(1)).equals("noname")) {
+				        cfCover = (Bitmap) vR.elementAt(2);
+				        cfNamedCover = "";
+		    		} else {
+		    			cfCover = null;
+		    			cfNamedCover = (String) vR.elementAt(2);
+		    		}
 		    	}
 				break;
 		}
@@ -1369,7 +1439,7 @@ public class Dispatcher {
 		if (start == 2 && !((String) data.elementAt(1)).equals("SAME")) {
 			cfCaption = (String) data.elementAt(1);
         }
-		
+
 		if (data.size() < start+1) {
 			return;
 		}
@@ -1381,6 +1451,7 @@ public class Dispatcher {
 
         		if (i >= 0 || i < maxIcon) {    
         			cfIcons[i] = (String) data.elementAt(idx+1);
+        			log("controlSetIconLayout "+i+" -> "+cfIcons[i]); 
        		    }  
 	         } catch (Exception e) { }
         }
@@ -1887,12 +1958,35 @@ public class Dispatcher {
 		return null;
 	}
 	
-	public void autoUpload(String icon) {
-		synchronized (autoUploaded) {
-			if (!autoUploaded.contains(icon)) {
-				anyRemote._log("Dispatcher", "autoUpload request for "+icon);
-				autoUploaded.add(icon);
-		        queueCommand("_GET_ICON_(128,"+ icon +")");
+	public void autoUploadIcon(String name) {
+		synchronized (autoUploadedI) {
+			if (!autoUploadedI.contains(name)) {
+				anyRemote._log("Dispatcher", "autoUploadIcon request for "+name);
+				autoUploadedI.add(name);
+		        queueCommand("_GET_ICON_(128,"+ name +")");
+			}
+		}
+	}
+	
+	public void autoUploadCover(String name) {
+		synchronized (autoUploadedC) {
+			if (!autoUploadedC.contains(name)) {
+				anyRemote._log("Dispatcher", "autoUploadCover request for "+name);
+				autoUploadedC.add(name);
+				
+				Display d = context.getWindowManager().getDefaultDisplay(); 
+				
+		        queueCommand("_GET_COVER_("+(d.getWidth()*2)/3+","+ name +")");
+			}
+		}
+	}  
+	
+	private void emptyDir(File dir) {
+		if (dir.isDirectory()) {
+			File[] files = dir.listFiles();
+			for (int i=0;i<files.length;i++) {
+				File one = files[i];
+				one.delete();
 			}
 		}
 	}

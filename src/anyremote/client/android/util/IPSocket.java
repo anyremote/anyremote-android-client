@@ -28,7 +28,6 @@ import java.net.UnknownHostException;
 
 public class IPSocket implements ISocket {
 
-	public static final int PORT_DEFAULT = 5000;
 	private final InputStream is;
 	private final OutputStream os;
 	private final java.net.Socket sock;

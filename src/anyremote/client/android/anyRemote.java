@@ -96,6 +96,7 @@ public class anyRemote extends Activity
 	public static boolean firstConnect = true;
 	
 	static TreeMap<String,Bitmap> iconMap = new TreeMap<String,Bitmap>();
+	static TreeMap<String,Bitmap> coverMap = new TreeMap<String,Bitmap>();
 
 	private static Handler globalHandler = null;
 	
@@ -594,18 +595,23 @@ public class anyRemote extends Activity
 			if (iconId == R.drawable.icon) {
 	
 				File dir = Environment.getExternalStorageDirectory();
-				File iFile = new File(dir, "Android/data/anyremote.client.android/files/"+icon+".png");
+				File iFile = new File(dir, "Android/data/anyremote.client.android/files/icons/"+icon+".png");
 	
 				if(iFile.canRead()) {
 					_log("getIconBitmap", icon+" found on SDCard"); 
 					Bitmap ic = BitmapFactory.decodeFile(iFile.getAbsolutePath());
-					iconMap.put(icon,ic);
+					if (ic == null) {
+						_log("getIconBitmap", "seems image "+icon+" is broken");	
+						iFile.delete();
+					} else {
+					    iconMap.put(icon,ic);
+					}
 					return ic;
 				} else {
 					_log("getIconBitmap", iFile.getAbsolutePath()+" absent on SDCard");
 					
 					// try to auto upload it
-					protocol.autoUpload(icon);
+					protocol.autoUploadIcon(icon);
 					return null;
 				}
 			}
@@ -614,6 +620,40 @@ public class anyRemote extends Activity
 			iconMap.put(icon,ic);
 			return ic;
 		}
+	}
+	
+	public static Bitmap getCoverBitmap(Resources resources, String name) {
+		
+		if (name.equals("none")) {	
+			return null;
+		}
+		
+		synchronized (coverMap) {	
+		
+			if (coverMap.containsKey(name)) {
+				return (Bitmap) coverMap.get(name);
+			}
+	
+			File dir = Environment.getExternalStorageDirectory();
+			File iFile = new File(dir, "Android/data/anyremote.client.android/files/covers/"+name+".png");
+
+			if(iFile.canRead()) {
+				_log("getCoverBitmap", name+" found on SDCard"); 
+				Bitmap ic = BitmapFactory.decodeFile(iFile.getAbsolutePath());
+				if (ic == null) {
+					_log("getCoverBitmap", "seems image "+name+" is broken");	
+					iFile.delete();
+				} else {
+				    coverMap.put(name,ic);
+				}
+				return ic;
+			}
+			_log("getCoverBitmap", iFile.getAbsolutePath()+" absent on SDCard");
+		}
+		
+		// try to auto upload it
+		protocol.autoUploadCover(name);
+		return null;
 	}
 
 	public static int parseColor(Vector vR, int start) {
@@ -627,7 +667,7 @@ public class anyRemote extends Activity
 		    } catch (Exception e) {
 		    	return Color.parseColor("#000000");
 		    }
-		} 
+		}
 		return parseColor((String) vR.elementAt(start),
                           (String) vR.elementAt(start+1),
                           (String) vR.elementAt(start+2));

@@ -216,8 +216,8 @@ public class ControlScreen extends arActivity
 	    if (data.id == Dispatcher.CMD_VOLUME) {
     	    Toast.makeText(this, "Volume is "+anyRemote.protocol.cfVolume +"%", Toast.LENGTH_SHORT).show();
 		    return;
-		} else if (data.id == Dispatcher.CMD_IMAGE) {
-			// some icon was uploaded, need to redraw
+		} else if (data.id == Dispatcher.CMD_IMAGE ||   // some icon was uploaded, need to redraw
+				   data.id == Dispatcher.CMD_REPAINT) {
 			log("handleEvent need to update icons");
 		}
 
@@ -272,6 +272,7 @@ public class ControlScreen extends arActivity
 				
 				if (ic == null) {
 					buttons[i].setVisibility(View.GONE);
+					log("setSkin SK_BOTTOMLINE hide "+i);
 				} else {
 					buttons[i].setVisibility(View.VISIBLE);
 				    realCnt++;
@@ -441,8 +442,17 @@ public class ControlScreen extends arActivity
 	private void setCover() {
 		if (anyRemote.protocol.cfSkin == SK_BOTTOMLINE) {
 			ImageView cover  = (ImageView) findViewById(R.id.cover);		
-			log("setCover "+(anyRemote.protocol.cfCover == null ? "NULL" : "Set"));
-			cover.setImageBitmap(anyRemote.protocol.cfCover);
+			
+			if (anyRemote.protocol.cfNamedCover.length() == 0) {
+				log("setCover "+(anyRemote.protocol.cfCover == null ? "NULL" : "Set"));
+			    cover.setImageBitmap(anyRemote.protocol.cfCover);
+		    } else {
+				log("setCover by_name "+anyRemote.protocol.cfNamedCover);
+		    	Bitmap ic = anyRemote.getCoverBitmap(getResources(), anyRemote.protocol.cfNamedCover);
+		    	if (ic != null) {
+		    	    cover.setImageBitmap(ic);
+		    	}
+		    }
 		}
 	}
 		

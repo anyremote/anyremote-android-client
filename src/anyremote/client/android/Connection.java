@@ -389,9 +389,8 @@ public final class Connection implements Runnable {
 					// this could happens if command was not readed fully
 					return;
 				}
-				
-				//anyRemote._log("Connection", "NEXT WORD "
-				//		+ aWord);
+
+				//anyRemote._log("Connection", "NEXT WORD " + aWord);
 
 				if (readStage == READ_NO) { // got header
 
@@ -463,11 +462,10 @@ public final class Connection implements Runnable {
 				} else if (readStage == READ_CMDID) {
 
 					if (curCmdId == Dispatcher.CMD_COVER) {
-						Bitmap cover = getBinaryCover();
-						if (cover != null) {
-							cmdTokens.addElement(cover);
-							execCommand(cmdTokens, Dispatcher.CMD_COVER,
-									ProtocolMessage.FULL);
+						//System.out.println ("CMD_COVER");
+						boolean ok = getBinaryCover();  // modify cmdTokens
+						if (ok) {
+							execCommand(cmdTokens, Dispatcher.CMD_COVER, ProtocolMessage.FULL);
 						}
 					} else if (curCmdId == Dispatcher.CMD_IMAGE) {
 						getBinaryImage();
@@ -621,16 +619,57 @@ public final class Connection implements Runnable {
 		}
 	}
 */
-	public Bitmap getBinaryCover() {
+	private boolean getBinaryCover() {
+		
+		Bitmap cover = null;
 		try {
-			Bitmap cover = receiveImage();
-			return cover;
+			int sz = dis.readInt();
+			anyRemote._log("Connection", "getBinaryCover size="+sz);
+			if (sz <= 0) {
+				return false;
+			}
+			if (sz == 1652121454) {  // trick: Set(cover,by_name,<name>)
+				anyRemote._log("Connection", "getBinaryCover by_name ");
+
+				String dummy = getWord(true);
+				cmdTokens.addElement("by_name");
+				String name = getWord(true);
+				cmdTokens.addElement(name);
+				
+				sz = 0;
+			} else if (sz == 1852796513) {  // trick: Set(cover,noname,<image data>)
+				anyRemote._log("Connection", "getBinaryCover noname ");
+
+				String dummy = getWord(true);
+				cmdTokens.addElement("noname");
+				
+				sz = dis.readInt();
+				anyRemote._log("Connection", "getBinaryCover size="+sz);
+			
+			} else if (sz == 1668048225) {  // trick: Set(cover,clear)
+				
+					anyRemote._log("Connection", "getBinaryCover clear ");
+
+					String dummy = getWord(true);
+					cmdTokens.addElement("clear");
+					
+					sz = 0;
+			} else {  // old syntax: Set(cover,,<image data>)
+				cmdTokens.addElement("noname");
+			}
+			
+			if (sz > 0) {
+			    cover = receiveImage(sz);
+			    cmdTokens.addElement(cover);
+			}
+			
 		} catch (Exception e1) {
-
+			return false;
 		} catch (Error me) {
-
+			return false;
 		}
-		return null;
+		
+		return true;
 	}
 
 	public void getBinaryImage() {
@@ -640,15 +679,16 @@ public final class Connection implements Runnable {
 			String action = getWord(true);
 
 			if (action.equals("window") ||
-			    action.equals("icon")) {
+			    action.equals("icon")   ||
+			    action.equals("cover")) {
 
-				boolean isIcon = false;
+				boolean justStore = false;
 				String iName = "";
-				if (action.equals("icon")) {
-					isIcon = true;
+				if (action.equals("icon") || action.equals("cover")) {
+					justStore = true;
 					iName = getWord(true);
 				}
-				anyRemote._log("Connection", "getBinaryImage icon " + iName);
+				anyRemote._log("Connection", "getBinaryImage " + action + " " + iName);
 				Bitmap screen = receiveImage();
 
 				// int imW = screen.getWidth();
@@ -656,7 +696,7 @@ public final class Connection implements Runnable {
 				// dX = (controller.cScreen.CW - imW)/2;
 				// dY = (controller.cScreen.CH - imH)/2;
 
-				if (isIcon) { // Just store it, not show
+				if (justStore) { // Just store it, not show
 
 					// if (imW == imH && (imW == 16 || imW == 32 || imW == 48 ||
 					// imW == 64 || imW == 128)) {
@@ -683,39 +723,39 @@ public final class Connection implements Runnable {
 					// store it in /sdcard/anyRemote/<name>.png
 					synchronized (anyRemote.iconMap) {
 						File dir = Environment.getExternalStorageDirectory();
-	
-						File arDir = new File(dir,
-								"Android/data/anyremote.client.android/files");
-	
+						
+						File arDir;
+						String path;
+						
+						if (action.equals("icon")) {
+						    path = "Android/data/anyremote.client.android/files/icons";
+						} else { // cover
+						    path = "Android/data/anyremote.client.android/files/covers";	
+						}
+						arDir = new File(dir, path);	
+						
 						if (!arDir.isDirectory()) {
 							arDir.mkdirs();
 						}
 	
 						File file = new File(arDir, iName + ".png");
 	
-						anyRemote._log("Connection",
-										"getBinaryImage going to save it to /sdcard/Android/data/anyremote.client.android/files/"
-									    + iName + ".png");
+						anyRemote._log("Connection", "getBinaryImage going to save it to " + path + "/" + iName + ".png");
 						try {
 	
 							OutputStream outStream = new FileOutputStream(file);
-							screen.compress(Bitmap.CompressFormat.PNG, 100,
-									outStream);
+							screen.compress(Bitmap.CompressFormat.PNG, 100, outStream);
 							outStream.flush();
 							outStream.close();
 	
-							anyRemote._log("Connection",
-									"Saved /sdcard/Android/data/anyremote.client.android/files/"
-											+ iName + ".png");
+							anyRemote._log("Connection", "Saved " + path + "/" + iName + ".png");
 	
 						} catch (FileNotFoundException e) {
 							anyRemote._log("Connection",
-									"Can not save /sdcard/Android/data/anyremote.client.android/files/"
-											+ iName + ".png " + e.toString());
+									"Can not save " + path + "/" + iName + ".png " + e.toString());
 						} catch (IOException e) {
 							anyRemote._log("Connection",
-									"Can not save /sdcard/Android/data/anyremote.client.android/files//"
-											+ iName + ".png " + e.toString());
+									"Can not save " + path + "/" + iName + ".png " + e.toString());
 						}
 					}
 				} else {
@@ -766,11 +806,26 @@ public final class Connection implements Runnable {
 			    if (controller.cScreen.scr != anyRemote.WMAN_FORM) {
 				    return; 
 				} 
+			*/
 			} else if (action.equals("remove_all")) {
+				
+				Vector tokens = new Vector();
+				tokens.add(Dispatcher.CMD_IMAGE);
+				tokens.add("remove");
+				tokens.add("all");
+				execCommand(tokens, Dispatcher.CMD_IMAGE, ProtocolMessage.FULL);
+
+			} else if (action.equals("remove")) {
+				
+				String what = getWord(true);
+				
+				Vector tokens = new Vector();
+				tokens.add(Dispatcher.CMD_IMAGE);
+				tokens.add("remove");
+				tokens.add(what);
+				execCommand(tokens, Dispatcher.CMD_IMAGE, ProtocolMessage.FULL);
 			
-				controller.rmsClean(); return; 
-			
-			} else if (action.equals("clear_cache")) {
+			/*} else if (action.equals("clear_cache")) {
 				
 				controller.cScreen.iconNameCache.removeAllElements();
 				controller.cScreen.iconCache.removeAllElements(); return; 
@@ -785,14 +840,22 @@ public final class Connection implements Runnable {
 
 		}
 	}
-
-	public Bitmap receiveImage() throws IOException {
+	
+	private Bitmap receiveImage() throws IOException {
 
 		int sz = dis.readInt();
 		anyRemote._log("Connection", "receiveImage size="+sz);
 		if (sz <= 0) {
 			return null;
 		}
+		if (sz > 10000000) {
+			anyRemote._log("Connection", "receiveImage image too big, skip it");
+			return null;
+		}
+		return receiveImage(sz);
+	}
+	
+	private Bitmap receiveImage(int sz) throws IOException {
 		
 		btoRead -= 4;
 
@@ -896,7 +959,7 @@ public final class Connection implements Runnable {
 		} else if (header.equals("Get(model")) {
 			return Dispatcher.CMD_GETPLTF;
 		} else if (header.equals("Get(is_exists")) {
-			return Dispatcher.CMD_GETICON;
+			return Dispatcher.CMD_GETIMG;
 		} else if (header.equals("Get(cover_size")) {
 			return Dispatcher.CMD_GETCVRSIZE;
 		} else if (header.equals("Get(version")) {
