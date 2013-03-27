@@ -178,6 +178,7 @@ public class Dispatcher {
 	int     listText;
 	int     listBkgr;
 	float   listFSize;
+	String  listIcon;
 	StringBuilder  listBufferedItem;
 
 	// Text Screen stuff
@@ -256,6 +257,7 @@ public class Dispatcher {
 		menuAddDefault(anyRemote.CONTROL_FORM);
 		
 		listTitle     = "";
+		listIcon      = "";
 		listSelectPos = -1;
 		listCustomBackColor = false;
 		listCustomTextColor = false;
@@ -722,9 +724,17 @@ public class Dispatcher {
 				
 				sendToActivity(anyRemote.WMAN_FORM,id,stage);
 				
-			} else if (((String) cmdTokens.elementAt(1)).equals("icon") ||
-					   ((String) cmdTokens.elementAt(1)).equals("cover")) {
+			} else if (((String) cmdTokens.elementAt(1)).equals("icon")) {
 				
+				// redraw ControlForm if it is active
+				if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
+					sendToActivity(anyRemote.CONTROL_FORM,id,stage);	
+				}
+				// redraw ListForm if it is active (list can show icons!)
+				if (anyRemote.getCurScreen() == anyRemote.LIST_FORM) {
+					sendToActivity(anyRemote.LIST_FORM,id,stage);	
+				}
+			} else if (((String) cmdTokens.elementAt(1)).equals("cover")) {
 				// redraw ControlForm if it is active
 				if (anyRemote.getCurScreen() == anyRemote.CONTROL_FORM) {
 					sendToActivity(anyRemote.CONTROL_FORM,id,stage);	
@@ -1604,6 +1614,15 @@ public class Dispatcher {
 				listSelectPos = -1;	
 			}
 			return UPDATE_SWITCH;
+			
+		} else if (oper.equals("icon")) {
+
+			try { 
+				listIcon = (String) vR.elementAt(2);
+			} catch(Exception z) { 
+				listIcon = "";
+			}
+			return UPDATE_NOTSWITCH;
 
 		} else if (oper.equals("add") || oper.equals("replace")) {
 

@@ -105,7 +105,7 @@ public class ListScreen extends arActivity
         }
         
 		//log("onResume UPDATE DATA SOURCE");
-		dataSource.update(anyRemote.protocol.listContent);
+		dataSource.update(anyRemote.protocol.listContent, anyRemote.protocol.listIcon);
 		//log("onResume notifyDataSetChanged");
 		dataSource.notifyDataSetChanged();
         
@@ -247,10 +247,11 @@ public class ListScreen extends arActivity
 			}
 				
 			// get info about data update
-			if (data.id == Dispatcher.CMD_LIST_UPDATE) {
-				log("handleEvent UPDATE DATA SOURCE");
-				dataSource.update(anyRemote.protocol.listContent);
-				log("handleEvent notifyDataSetChanged");
+			if (data.id == Dispatcher.CMD_LIST_UPDATE || 
+			    data.id == Dispatcher.CMD_IMAGE       ||   // some icon was uploaded, need to redraw
+				data.id == Dispatcher.CMD_REPAINT) {
+
+				dataSource.update(anyRemote.protocol.listContent, anyRemote.protocol.listIcon);
 				dataSource.notifyDataSetChanged();
 			}
 			
@@ -258,7 +259,7 @@ public class ListScreen extends arActivity
 			redraw();
 			
 		} else  if (data.stage == ProtocolMessage.INTERMED || data.stage == ProtocolMessage.LAST) {
-			dataSource.update(anyRemote.protocol.listContent);
+			dataSource.update(anyRemote.protocol.listContent, anyRemote.protocol.listIcon);
 			dataSource.notifyDataSetChanged();
 		}
 		

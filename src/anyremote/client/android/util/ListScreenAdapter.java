@@ -39,6 +39,7 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 
 	
 	private ArrayList<ListItem> items;
+	private String  icon;
 	private Context context;
 	private int selectedPosition = -1; //0;
 	private boolean customTextColor = false;
@@ -55,12 +56,13 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
 		}
 	}
 	
-	public void update(ArrayList<ListItem> data) {
+	public void update(ArrayList<ListItem> data, String defIcon) {
 		clear();
 		synchronized (items) {
 		   	for(ListItem item : data) {
 	    	    items.add(item);
 	        }
+		   	icon = defIcon;
 		}
 	   	//anyRemote._log("ListScreenAdapter","update #"+items.size());
 	}
@@ -90,8 +92,12 @@ public class ListScreenAdapter extends ArrayAdapter<ListItem> {
     	im.setScaleType(ScaleType.CENTER_INSIDE);
     	
     	synchronized (items) {
-	    	Bitmap iconBM = (items.get(position).icon == null ?  
-	    			         null : anyRemote.getIconBitmap(im.getResources(),items.get(position).icon));
+    		
+    		String icon_name = (icon.length() > 0 && !icon.equals("none") ? 
+    				            icon : items.get(position).icon);
+    		
+	    	Bitmap iconBM = (icon_name == null ?  
+	    			         null : anyRemote.getIconBitmap(im.getResources(),icon_name));
 	    	if (iconBM == null) {
 	     		im.setVisibility(View.GONE);
 	    	} else {

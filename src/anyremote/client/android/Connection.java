@@ -648,12 +648,12 @@ public final class Connection implements Runnable {
 			
 			} else if (sz == 1668048225) {  // trick: Set(cover,clear)
 				
-					anyRemote._log("Connection", "getBinaryCover clear ");
+				anyRemote._log("Connection", "getBinaryCover clear ");
 
-					String dummy = getWord(true);
-					cmdTokens.addElement("clear");
-					
-					sz = 0;
+				String dummy = getWord(true);
+				cmdTokens.addElement("clear");
+				
+				sz = 0;
 			} else {  // old syntax: Set(cover,,<image data>)
 				cmdTokens.addElement("noname");
 			}
