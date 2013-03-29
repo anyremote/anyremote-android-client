@@ -27,7 +27,7 @@
     <string name="back_item">Back</string>
     <string name="report_bug_item">"Report Bug"</string>
     <string name="default_bt">btspp://0008F4163049</string>
-    <string name="default_ip">socket://192.168.1.1:5000</string>
+    <string name="default_ip">socket://192.168.1.1:5197</string>
     <string name="connect_to">Connect To</string>
     <string name="autoconnect_to">Auto-Connect To</string>
     <string name="connection_successful">Connected</string>

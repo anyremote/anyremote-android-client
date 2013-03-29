@@ -26,8 +26,6 @@
 <string name="clear_log_item">Log leeren</string>
 <string name="back_item">Zurück</string>
 <string name="report_bug_item">"Fehler melden"</string>
-<string name="default_bt">btspp://0008F4163049</string>
-<string name="default_ip">socket://192.168.1.1:5000</string>
 <string name="connect_to">Verbinden mit</string>
 <string name="autoconnect_to">Automatisch verbinden mit</string>
 <string name="connection_successful">Verbunden</string>

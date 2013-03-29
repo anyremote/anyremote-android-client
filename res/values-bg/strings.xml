@@ -26,8 +26,6 @@
     <string name="clear_log_item">Изчистване на лог</string>
     <string name="back_item">Назад</string>
     <string name="report_bug_item">"Докладване за грешка"</string>
-    <string name="default_bt">btspp://0008F4163049</string>
-    <string name="default_ip">socket://192.168.1.1:5000</string>
     <string name="connect_to">Свързване към</string>
     <string name="autoconnect_to">Автоматично свързване към</string>
     <string name="connection_successful">Свързване успешно</string>
