@@ -327,7 +327,7 @@ public class ControlScreen extends arActivity
 					buttons[b]        = (ImageButton)  findViewById(btns3x4_r90[b]);
 					buttonsLayout[b]  = (LinearLayout) findViewById(lbtns3x4_r90[b]);
 				}
-				
+		
 			} else if (display.getOrientation() == Surface.ROTATION_270) {
 	        	
 			    setContentView(R.layout.control_form_default_r270);
