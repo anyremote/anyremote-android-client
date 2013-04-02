@@ -860,12 +860,29 @@ public final class Connection implements Runnable {
 		btoRead -= 4;
 
 		byte[] rgbArray = new byte[sz];
-		byte[] bufArray = new byte[1];
+		int haveRead = 0;
+		
+		while (haveRead < sz) {
 
-		dis.readFully(rgbArray);
-		btoRead -= sz;
+			int av = dis.available();
+			
+			if (haveRead + av > sz) {
+				av = sz - haveRead;
+			}
+			
+			try {
+			    dis.readFully(rgbArray,haveRead,av);
+			    haveRead += av;
+			    btoRead  -= av; 
+			} catch (EOFException e) {
+				anyRemote._log("Connection", "EOFException");
+				btoRead = 0;
+				return null;
+			}
+		}
 
 		// get trailing ");"
+		byte[] bufArray = new byte[1];
 		dis.read(bufArray, 0, 1);
 		dis.read(bufArray, 0, 1);
 		btoRead -= 2;
