@@ -1,6 +1,7 @@
-* Fri Mar 29 2013 Mikhail Fedotov <anyremote at mail.ru> - 1.6
+* Fri Apr 05 2013 Mikhail Fedotov <anyremote at mail.ru> - 1.6
 - Support Set(list,icon,name|none)syntaxes. Support named cover uploading 
   and named over auto-uploading. Some bugfixes.
+
 * Fri Feb 15 2013 Mikhail Fedotov <anyremote at mail.ru> - 1.5
 - Support Set(*fg|bg,#XXXXXX) syntax and Set(*caption,...) command.
   Some bugfixes.
