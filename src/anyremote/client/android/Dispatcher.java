@@ -754,11 +754,17 @@ public class Dispatcher {
      				File d = new File(store, "Android/data/anyremote.client.android/files/icons");
     				emptyDir(d);
                 }
-                
+                log("000000000000000000000");
                 if (rm.equals("covers") || rm.equals("all")) {
-                	log("Remove all downloaded covers");
-                	File d = new File(store, "Android/data/anyremote.client.android/files/icons");
-    				emptyDir(d);
+                	log("Remove all downloaded covers Android/data/anyremote.client.android/files/covers");
+                	try {
+                	    File d = new File(store, "Android/data/anyremote.client.android/files/covers");
+                	    log("AAAAAAAAAAAAAAAAA");
+                	    emptyDir(d);
+                	    log("BBBBBBBBBBBBBBBBB");
+    				} catch (Exception e) {
+    					log("exception "+e.getMessage());
+    				}
                 }
 			}
 			break;    
@@ -2001,12 +2007,16 @@ public class Dispatcher {
 	}  
 	
 	private void emptyDir(File dir) {
+		anyRemote._log("Dispatcher", "cleanup directory "+dir.getAbsolutePath());
 		if (dir.isDirectory()) {
 			File[] files = dir.listFiles();
 			for (int i=0;i<files.length;i++) {
 				File one = files[i];
+				anyRemote._log("Dispatcher", "remove "+one.getAbsolutePath());
 				one.delete();
 			}
+		} else {
+			anyRemote._log("Dispatcher", "no directory "+dir.getAbsolutePath());
 		}
 	}
 }
