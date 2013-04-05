@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011-2012 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2013 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -199,10 +199,10 @@ public class Dispatcher {
 	
 	// Popup stuff
 	boolean popupState     = false;
-    StringBuilder popupMsg = new StringBuilder(16);
+	StringBuilder popupMsg = new StringBuilder(16);
 
-    // Edit Field stuff
-    String efCaption = "";
+	// Edit Field stuff
+	String efCaption = "";
 	String efLabel   = "";
 	String efValue   = "";
 	int efId; 
@@ -748,24 +748,21 @@ public class Dispatcher {
 				String rm = (String) cmdTokens.elementAt(2);
 				
 				File store = Environment.getExternalStorageDirectory();
-				
-                if (rm.equals("icons") || rm.equals("all")) {
-                	log("Remove all downloaded icons");
-     				File d = new File(store, "Android/data/anyremote.client.android/files/icons");
-    				emptyDir(d);
-                }
-                log("000000000000000000000");
-                if (rm.equals("covers") || rm.equals("all")) {
-                	log("Remove all downloaded covers Android/data/anyremote.client.android/files/covers");
-                	try {
-                	    File d = new File(store, "Android/data/anyremote.client.android/files/covers");
-                	    log("AAAAAAAAAAAAAAAAA");
-                	    emptyDir(d);
-                	    log("BBBBBBBBBBBBBBBBB");
-    				} catch (Exception e) {
-    					log("exception "+e.getMessage());
-    				}
-                }
+
+                		if (rm.equals("icons") || rm.equals("all")) {
+                			log("Remove all downloaded icons");
+     					File d = new File(store, "Android/data/anyremote.client.android/files/icons");
+    					emptyDir(d);
+                		}
+
+                		if (rm.equals("covers") || rm.equals("all")) {
+                			log("Remove all downloaded covers Android/data/anyremote.client.android/files/covers");
+                			File d = new File(store, "Android/data/anyremote.client.android/files/covers");
+                			emptyDir(d);
+				}
+			} else if (((String) cmdTokens.elementAt(1)).equals("clear_cache")) {
+				anyRemote.clearCache();
+				clearRequested();
 			}
 			break;    
 
@@ -1988,7 +1985,7 @@ public class Dispatcher {
 			if (!autoUploadedI.contains(name)) {
 				anyRemote._log("Dispatcher", "autoUploadIcon request for "+name);
 				autoUploadedI.add(name);
-		        queueCommand("_GET_ICON_(128,"+ name +")");
+		        	queueCommand("_GET_ICON_(128,"+ name +")");
 			}
 		}
 	}
@@ -2001,10 +1998,19 @@ public class Dispatcher {
 				
 				Display d = context.getWindowManager().getDefaultDisplay(); 
 				
-		        queueCommand("_GET_COVER_("+(d.getWidth()*2)/3+","+ name +")");
+		        	queueCommand("_GET_COVER_("+(d.getWidth()*2)/3+","+ name +")");
 			}
 		}
 	}  
+	
+	public void clearRequested() {
+		synchronized (autoUploadedI) {
+			autoUploadedI.clear();
+		}
+		synchronized (autoUploadedC) {
+			autoUploadedC.clear();
+		}
+	}
 	
 	private void emptyDir(File dir) {
 		anyRemote._log("Dispatcher", "cleanup directory "+dir.getAbsolutePath());
@@ -2012,7 +2018,7 @@ public class Dispatcher {
 			File[] files = dir.listFiles();
 			for (int i=0;i<files.length;i++) {
 				File one = files[i];
-				anyRemote._log("Dispatcher", "remove "+one.getAbsolutePath());
+				//anyRemote._log("Dispatcher", "remove "+one.getAbsolutePath());
 				one.delete();
 			}
 		} else {

@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011-2012 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2013 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ public class anyRemote extends Activity
 	public static final int SHOW_LOG      = 7;
 	
 	public static final int SWIPE_MIN_DISTANCE = 120;
-    public static final int SWIPE_THRESHOLD_VELOCITY = 200; 
+	public static final int SWIPE_THRESHOLD_VELOCITY = 200; 
 
 	static final int  NO_FORM      = 0;
 	static final int  SEARCH_FORM  = 1;
@@ -654,6 +654,16 @@ public class anyRemote extends Activity
 		// try to auto upload it
 		protocol.autoUploadCover(name);
 		return null;
+	}
+
+	public static void clearCache() {
+		
+		synchronized (iconMap) {
+			iconMap.clear();
+		}	
+		synchronized (coverMap) {
+			coverMap.clear();	
+		}
 	}
 
 	public static int parseColor(Vector vR, int start) {
