@@ -761,6 +761,7 @@ public class Dispatcher {
                 			emptyDir(d);
 				}
 			} else if (((String) cmdTokens.elementAt(1)).equals("clear_cache")) {
+				//log("Clear image cache");
 				anyRemote.clearCache();
 				clearRequested();
 			}

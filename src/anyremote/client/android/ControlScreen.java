@@ -76,6 +76,7 @@ public class ControlScreen extends arActivity
 	static final String STR_STAR  = "*";
 	static final String STR_NUM0  = "0";
 	static final String STR_POUND = "#";
+	static final String STR_COVER = "COVER";
 	static final String STR_UNKNOWN = "";
 	
 	static final int SK_DEFAULT    = 0;
@@ -307,6 +308,7 @@ public class ControlScreen extends arActivity
 			cover.setMaxHeight((2*sz)/3);    	
 			cover.setMaxWidth ((2*sz)/3);
 			cover.setBackgroundColor(anyRemote.protocol.cfBkgr);
+			cover.setOnClickListener(this);
 			
 			if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
 				buttons[anyRemote.protocol.cfInitFocus-1].requestFocus();
@@ -555,7 +557,11 @@ public class ControlScreen extends arActivity
 		  case R.id.b12_r270: 
 			  key = STR_POUND;
 		      break;
-      
+		      
+		  case R.id.cover:
+		      key = STR_COVER;
+	          break;
+     
 		  default:
 			  log("onClick: Unknown button");
 			  return;

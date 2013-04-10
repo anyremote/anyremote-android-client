@@ -825,12 +825,14 @@ public final class Connection implements Runnable {
 				tokens.add(what);
 				execCommand(tokens, Dispatcher.CMD_IMAGE, ProtocolMessage.FULL);
 			
-			/*} else if (action.equals("clear_cache")) {
+		    } else if (action.equals("clear_cache")) {
 				
-				controller.cScreen.iconNameCache.removeAllElements();
-				controller.cScreen.iconCache.removeAllElements(); return; 
+				Vector tokens = new Vector();
+				tokens.add(Dispatcher.CMD_IMAGE);
+				tokens.add("clear_cache");
+				execCommand(tokens, Dispatcher.CMD_IMAGE, ProtocolMessage.FULL);
 			
-			} else if (!action.equals("show")) {
+			/*} else if (!action.equals("show")) {
 				 //System.out.println("WinManager NOT SHOW ???");
 				 controller.showAlert("WM:unknown cmd"); return;
 		    */
