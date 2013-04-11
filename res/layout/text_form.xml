@@ -7,14 +7,14 @@
     <ScrollView
         android:id="@+id/text_scroller"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="fill_parent"
         android:fillViewport="true"
         android:scrollbars="vertical" >
 
         <TextView
             android:id="@+id/text_form"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="fill_parent" >
         </TextView>
     </ScrollView>
 
