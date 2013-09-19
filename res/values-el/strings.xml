@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="about">Σχετικά</string>
+    <string name="app_name">anyRemote</string>
+    <string name="btnCancel">Ακύρωση</string>
+    <string name="btnOk">ΟΚ</string>
+    <string name="searchFormUnconnected">Αποσυνδεδεμένο</string>
+    <string name="exit_item">Έξοδος</string>
+    <string name="connect_item">Σύνδεση</string>
+    <string name="disconnect_item">Αποσύνδεση</string>
+    <string name="search_item">Αναζήτηση</string>
+    <string name="searching">Αναζήτηση &#8230;</string>
+    <string name="cancel_search_item">Ακύρωση αναζήτησης</string>
+    <string name="enter_address">Εισαγωγή διεύθυνσης</string>
+    <string name="enter_item_name">Αλλαγή οικείου ονόματος</string>
+    <string name="enter_item_addr">Αλλαγή διεύθυνσης</string>
+    <string name="enter_item_pass">Αλλαγή κωδικού</string>
+    <string name="enter_pass">Εισαγωγή κωδικού</string>
+    <string name="label_pass">Κωδικός</string>
+    <string name="label_addr">Διεύθυνση</string>
+    <string name="label_name">Όνομα</string>
+    <string name="clean_item">Καθαρισμός διεύθυνσης</string>
+    <string name="autoconnect_item">Αυτόματη σύνδεση</string>
+    <string name="log_item">Καταγραφή συστήματος</string>
+    <string name="clear_log_item">Καθαρισμός καταγραφής συστήματος</string>
+    <string name="back_item">Πίσω</string>
+    <string name="report_bug_item">"Αναφορά σφάλματος"</string>
+    <string name="default_bt">btspp://0008F4163049</string>
+    <string name="default_ip">socket://192.168.1.1:5197</string>
+    <string name="connect_to">Σύνδεση σε</string>
+    <string name="autoconnect_to">Αυτόματη σύνδεση σε</string>
+    <string name="connection_successful">Συνδεδεμένο</string>
+    <string name="connection_failed">Αποσυνδεδεμένο</string>
+    <string name="not_found">Δε βρέθηκαν εξυπηρετητές anyRemote</string>
+    <string name="bt_turning_on">"Ενεργοποίηση Bluetooth"</string>
+    <string name="bt_turning_off">"Απενεργοποίηση Bluetooth"</string>
+    <string name="bt_off">"Bluetooth ανενεργό"</string>
+    <string name="bt_on">"Bluetooth ενεργό"</string>
+    <string name="bluetooth">"Bluetooth"</string>
+    <string name="tcpip">"TCP/IP"</string>
+    
+    <string name="b1">"1"</string>
+    <string name="b2">"2"</string>
+    <string name="b3">"3"</string>
+    <string name="b4">"4"</string>
+    <string name="b5">"5"</string>
+    <string name="b6">"6"</string>
+    <string name="b7">"7"</string>
+    <string name="b8">"8"</string>
+    <string name="b9">"9"</string>
+    <string name="b10">"*"</string>
+    <string name="b11">"0"</string>
+    <string name="b12">"#"</string>
+    
+    <string name="cover_description">"Cover Image"</string>
+    <string name="dummy">""</string>
+    
+</resources>
