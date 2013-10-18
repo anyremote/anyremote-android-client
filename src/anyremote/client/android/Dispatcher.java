@@ -1939,7 +1939,7 @@ public class Dispatcher {
 			}
 		}
 	}
-
+	
 	void menuReplaceDefault(int screen) {
 		menuClean(screen);
 		menuAddDefault(screen); 	
