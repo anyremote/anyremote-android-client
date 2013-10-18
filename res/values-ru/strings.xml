@@ -24,6 +24,7 @@
     <string name="autoconnect_item">Автоподсоединение</string>
     <string name="log_item">Лог</string>
     <string name="clear_log_item">Очистить лог</string>
+    <string name="mouse_item">Мышь</string>
     <string name="back_item">Назад</string>
     <string name="report_bug_item">Сообщить об ошибке</string>
     <string name="connect_to">Подсоединиться к</string>

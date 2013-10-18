@@ -113,7 +113,7 @@ public class ControlScreen
             R.id.tl_bb7 };
 
     boolean fullscreen = false;
-    boolean switchedToLog = false;
+    boolean switchedToPrivateScreen = false;
     Dispatcher.ArHandler hdlLocalCopy;
 
     ImageButton[] buttons;
@@ -153,7 +153,7 @@ public class ControlScreen
 
         super.onResume();
 
-        switchedToLog = false;
+        switchedToPrivateScreen = false;
 
         if (anyRemote.status == anyRemote.DISCONNECTED) {
             log("onResume no connection");
@@ -184,7 +184,7 @@ public class ControlScreen
         log("onUserLeaveHint");
         // no time to sending events
         // commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
-        if (!switchedToLog && !exiting && anyRemote.protocol.messageQueueSize() == 0) {
+        if (!switchedToPrivateScreen && !exiting && anyRemote.protocol.messageQueueSize() == 0) {
             log("onUserLeaveHint - make disconnect");
             anyRemote.protocol.disconnect(false);
         }
@@ -678,7 +678,7 @@ public class ControlScreen
         return false;
     }
 
-    public void iconPressed(String key) {
+    /*public void iconPressed(String key) {
         log("iconPressed " + key);
         anyRemote.protocol.queueCommand(key, true);
     }
@@ -686,7 +686,7 @@ public class ControlScreen
     public void iconReleased(String key) {
         log("iconReleased " + key);
         anyRemote.protocol.queueCommand(key, false);
-    }
+    }*/
 
     public void clickOn(String key) {
         // log("clickOn "+key);
@@ -710,16 +710,15 @@ public class ControlScreen
         log("commandAction " + command);
 
         if (command.equals(anyRemote.protocol.context.getString(R.string.exit_item))) {
-            // doFinish("exit");
             anyRemote.sendGlobal(anyRemote.DO_EXIT, null);
         } else if (command.equals(anyRemote.protocol.context.getString(R.string.disconnect_item))) {
-            // doFinish("disconnect");
             anyRemote.sendGlobal(anyRemote.DO_DISCONNECT, null);
         } else if (command.equals(anyRemote.protocol.context.getString(R.string.log_item))) {
-            // doFinish("log");
-            // anyRemote.sendGlobal(anyRemote.SHOW_LOG, null);
-            switchedToLog = true;
+            switchedToPrivateScreen = true;
             showLog();
+        } else if (command.equals(anyRemote.protocol.context.getString(R.string.mouse_item))) {
+            switchedToPrivateScreen = true;
+            showMouse();
         } else if (command.equals(anyRemote.protocol.context.getString(R.string.back_item))) {
             anyRemote.protocol.queueCommand("Back"); // avoid national alphabets
         } else {
@@ -731,8 +730,7 @@ public class ControlScreen
     protected void doFinish(String action) {
 
         log("doFinish " + action);
-        // exiting = true;
-
+ 
         final Intent intent = new Intent();
         intent.putExtra(anyRemote.ACTION, action);
         setResult(RESULT_OK, intent);

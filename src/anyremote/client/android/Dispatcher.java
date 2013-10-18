@@ -193,6 +193,9 @@ public class Dispatcher {
 	// Image Screen stuff
 	Bitmap      imScreen;
 	Vector<String> winMenu = new Vector<String>();
+ 
+	// Mouse Screen stuff
+    Vector<String> mouseMenu = new Vector<String>();
 
 	// telephony handler
 	PhoneManager phoneManager;
@@ -274,11 +277,14 @@ public class Dispatcher {
 		textTFace = Typeface.defaultFromStyle(Typeface.NORMAL);
 		textMenu.clear();
 		menuAddDefault(anyRemote.TEXT_FORM);
-		
+ 
 		imScreen = null;
 		winMenu.clear();
 		menuAddDefault(anyRemote.WMAN_FORM);
 		
+        mouseMenu.clear();
+        menuAddDefault(anyRemote.MOUSE_FORM);
+        
 		autoPass  = false;
 	}
 	
@@ -1917,7 +1923,7 @@ public class Dispatcher {
 			if (item.length() > 0) {
 				switch(screen) {
 					case anyRemote.CONTROL_FORM:
-						anyRemote._log("Dispatcher", "menuAdd cfMenu "+item);
+						//anyRemote._log("Dispatcher", "menuAdd cfMenu "+item);
 						cfMenu.add(item);
 						break;
 					case anyRemote.TEXT_FORM:
@@ -1944,7 +1950,8 @@ public class Dispatcher {
 			case anyRemote.CONTROL_FORM:
 				cfMenu.add(context.getString(R.string.disconnect_item));
 				cfMenu.add(context.getString(R.string.exit_item));
-				cfMenu.add(context.getString(R.string.log_item));	
+				cfMenu.add(context.getString(R.string.mouse_item));	
+                cfMenu.add(context.getString(R.string.log_item));   
 				break;
 			case anyRemote.TEXT_FORM:
 				textMenu.add(context.getString(R.string.back_item));
@@ -1955,6 +1962,9 @@ public class Dispatcher {
 			case anyRemote.WMAN_FORM:
 				winMenu.add(context.getString(R.string.back_item));
 				break;
+            case anyRemote.MOUSE_FORM:
+                mouseMenu.add(context.getString(R.string.back_item));
+                break;
 			case anyRemote.LOG_FORM:
 				textMenu.add(context.getString(R.string.clear_log_item));
 				textMenu.add(context.getString(R.string.report_bug_item));
@@ -1975,8 +1985,10 @@ public class Dispatcher {
 				return textMenu;
 			case anyRemote.LIST_FORM:
 				return listMenu;
-			case anyRemote.WMAN_FORM:
-				return winMenu;
+			case anyRemote.MOUSE_FORM:
+				return mouseMenu;
+            case anyRemote.WMAN_FORM:
+                return winMenu;
 		}
 		return null;
 	}

@@ -76,8 +76,9 @@ public class anyRemote extends Activity
 	static final int  LIST_FORM    = 5;
 	static final int  EDIT_FORM    = 6;
 	static final int  WMAN_FORM    = 7;
-	static final int  LOG_FORM     = 8;
-	static final int  DUMMY_FORM   = 9;
+    static final int  LOG_FORM     = 8;
+    static final int  MOUSE_FORM   = 9;
+	static final int  DUMMY_FORM   = 10;
 
 	static final int  LOG_CAPACITY = 16384;
 
@@ -227,13 +228,15 @@ public class anyRemote extends Activity
 	            break;
 	
 			case LOG_FORM:
+            case MOUSE_FORM:
 			case DUMMY_FORM:
 				break;
 	
 			}
 		}
 		
-		if (prevForm != LOG_FORM) {
+		if (prevForm != LOG_FORM && 
+		    prevForm != MOUSE_FORM) {
 	     	protocol.menuReplaceDefault(currForm);
 		}
 
@@ -243,14 +246,12 @@ public class anyRemote extends Activity
 			String id = String.format("%d",numerator());
 			doSearch.putExtra("SUBID", id);
 			_log("setCurrentView start SearchForm "+id);
-			//startActivityForResult(doSearch, which); 
 			startActivity(doSearch); 
 			break;
 
 		case CONTROL_FORM:
 			_log("setCurrentView start ControlScreen");
 			final Intent control = new Intent(getBaseContext(), ControlScreen.class);
-			//startActivityForResult(control, which); 
 			startActivity(control); 
 			break;
 
@@ -264,7 +265,6 @@ public class anyRemote extends Activity
 			_log("setCurrentView start TextScreen");
 			final Intent showText = new Intent(getBaseContext(), TextScreen.class);
 			showText.putExtra("SUBID", subCommand);
-			//startActivityForResult(showText, which); 
 			startActivity(showText); 
 			break;
 			
@@ -274,80 +274,19 @@ public class anyRemote extends Activity
 			startActivity(showWman); 
 			break;
 
+		case MOUSE_FORM:
+            _log("setCurrentView start MouseWin");
+            final Intent showMou = new Intent(getBaseContext(), MouseScreen.class);
+            startActivity(showMou); 
+            break;
+
 		case LOG_FORM:
 			_log("setCurrentView start TextScreen (LOG)");
 			final Intent showLog = new Intent(getBaseContext(), TextScreen.class);
 			showLog.putExtra("SUBID", "__LOG__");
-			//startActivityForResult(showLog, which); 
 			startActivity(showLog); 
 			break;
 		}
-	}
-	
-	// Collect data from Search Form
-	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-		_log("onActivityResult " + requestCode);
-        /*
-		if (requestCode == SEARCH_FORM) {
-			if (resultCode == RESULT_OK) {
-
-				String connName   = intent.getStringExtra(CONN_NAME);
-				String connPass   = intent.getStringExtra(CONN_PASS);
-				String connAddr   = intent.getStringExtra(CONN_ADDR);
-				String act        = intent.getStringExtra(ACTION);
-
-				if (act != null && act.length() > 0) {
-					if (act.contentEquals("exit")) {
-						doExit();
-					} else if (act.contentEquals("log")) {
-						// show log
-						setCurrentView(LOG_FORM, "");
-					}
-				} else if (connAddr != null && connAddr.length() > 0) {
-					setProgressBarIndeterminateVisibility(true);	
-					protocol.doConnect(connName, connAddr, connPass);
-				} else {
-					setCurrentView(DUMMY_FORM, "");
-				}
-
-			} else if (resultCode == RESULT_CANCELED) {
-				_log("onActivityResult RESULT_CANCELED");
-				// Handle cancel
-				//super.onBackPressed();
-			}
-
-		} else if (requestCode == CONTROL_FORM) {
-
-			// we should come here on if user chooses "Exit"
-			_log("onActivityResult CONTROL_FORM EXIT (cur form is "+currForm+")");
-
-			String act = intent.getStringExtra(ACTION);
-
-			if (act != null && act.length() > 0) {
-				if (act.contentEquals("exit")) {
-					doExit(); 
-				} else if (act.contentEquals("disconnect")) {
-					protocol.disconnect(true);
-				} else if (act.contentEquals("log")) {               	
-					setCurrentView(LOG_FORM,"");
-				} else if (act.contentEquals("close")) {               	
-					//setCurrentView(DUMMY_FORM,"");
-				}
-			}
-
-		} else if (requestCode == LIST_FORM ||
-				   requestCode == TEXT_FORM ||
-				   requestCode == WMAN_FORM) {
-
-			_log("onActivityResult LIST/TEXT/WMAN");
-			
-		} else if (requestCode == LOG_FORM) {
-			_log("onActivityResult LOG ->"+prevForm);
-			if (prevForm  == LOG_FORM) {
-				prevForm = CONTROL_FORM; // still have issues with activity stop/start synchronizations
-			}
-			setCurrentView(prevForm, "show");
-		}*/
 	}
 
 	@Override

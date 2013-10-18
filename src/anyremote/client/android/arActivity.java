@@ -38,11 +38,10 @@ public class arActivity extends Activity
 				   DialogInterface.OnCancelListener,
 				   Handler.Callback {
 
-	//protected Vector<String> menuItems;
 	protected String prefix = "";	
 	private boolean skipDismissEditDialog = false;
 	protected boolean exiting = false;
-	protected boolean privateMenu = false;
+	protected int privateMenu = anyRemote.NO_FORM;
 	
 	public boolean handleMessage(Message msg) {
 		handleEvent((InfoMessage) msg.obj);
@@ -85,11 +84,13 @@ public class arActivity extends Activity
     	
     	menu.clear();
     	
-    	if (privateMenu) { // LOG screen
+    	if (privateMenu == anyRemote.LOG_FORM) { // LOG screen
     		menu.add(getString(R.string.clear_log_item));
 			menu.add(getString(R.string.report_bug_item));
 			menu.add(getString(R.string.back_item));
-    	} else {
+    	} else if (privateMenu == anyRemote.MOUSE_FORM) { // Mouse screen
+		    menu.add(getString(R.string.back_item));
+      	} else {
     		Vector<String> menuItems = anyRemote.protocol.getMenu();
 
 	    	if (menuItems != null) {
@@ -157,7 +158,7 @@ public class arActivity extends Activity
 		setupEditField(Dispatcher.CMD_NO, "", "", ""); // reset values
 	}
 
-	public void  handleEditFieldResult(int id, String button, String value) {
+	public void handleEditFieldResult(int id, String button, String value) {
 		
 		// override in child classes
 		switch(id){
@@ -262,6 +263,12 @@ public class arActivity extends Activity
 	    showLog.putExtra("SUBID", "__LOG__");
 	    startActivity(showLog); 
 	}
+	
+    protected void showMouse() {
+        log("showMouse");
+        final Intent showLog = new Intent(getBaseContext(), MouseScreen.class);
+        startActivity(showLog); 
+    }
 	
 	public void hidePopup() {
 		anyRemote.popup(this, false, true, "");

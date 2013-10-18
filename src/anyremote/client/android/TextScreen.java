@@ -61,7 +61,7 @@ public class TextScreen extends arActivity implements OnGestureListener {
 
 			prefix = "Log"; // log stuff
 			isLog = true;
-			privateMenu = true;
+			privateMenu = anyRemote.LOG_FORM;
 			
 			hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.LOG_FORM, new Handler(this));
 			anyRemote.protocol.addMessageHandler(hdlLocalCopy);
