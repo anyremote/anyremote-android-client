@@ -60,8 +60,12 @@ public class MouseScreen
     
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
+    
+    float mLastX, mLastY, mLastZ;
+    boolean mInitialized;
 
     static final int NUM_BUTTONS = 3;
+    static final float NOISE = 0.01f;
      
     static final int[] mBtns = {R.id.mouseButton1, R.id.mouseButton2, R.id.mouseButton3};
     
@@ -81,6 +85,7 @@ public class MouseScreen
         
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER); 
+        mInitialized = false;
     }
 
     /*
@@ -428,17 +433,44 @@ public class MouseScreen
          float y = event.values[1];
          float z = event.values[2];
          
+         float deltaX = 0;
+         float deltaY = 0;
+         float deltaZ = 0;
+         
+         if (!mInitialized) {
+             
+             mLastX = x;
+             mLastY = y;
+             mLastZ = z;
+             
+             mInitialized = true;
+             
+          } else {
+              
+             deltaX = Math.abs(mLastX - x);
+             deltaY = Math.abs(mLastY - y);
+             deltaZ = Math.abs(mLastZ - z);
+             
+             if (deltaX < NOISE) deltaX = 0.0f;
+             if (deltaY < NOISE) deltaY = 0.0f;
+             if (deltaZ < NOISE) deltaZ = 0.0f;
+             
+             mLastX = x;
+             mLastY = y;
+             mLastZ = z;
+         }
+         
          TextView tx = (TextView) findViewById(R.id.xval);
          if (tx != null) {
-             tx.setText("X axis" +"\t\t"+x);
+             tx.setText("X axis" +"\t\t"+deltaX);
          }
          TextView ty = (TextView) findViewById(R.id.yval);
          if (ty != null) {
-             ty.setText("Y axis" + "\t\t" +y);
+             ty.setText("Y axis" + "\t\t" +deltaY);
          }
          TextView tz = (TextView) findViewById(R.id.zval);
          if (tz != null) {
-             tz.setText("Z axis" +"\t\t" +z);
+             tz.setText("Z axis" +"\t\t" +deltaZ);
          }
     }
 }
