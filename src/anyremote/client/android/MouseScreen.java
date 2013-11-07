@@ -65,7 +65,9 @@ public class MouseScreen
     boolean mInitialized;
 
     static final int NUM_BUTTONS = 3;
-    static final float NOISE = 0.01f;
+    
+    static final float NOISE   = 0.16f;
+    static final float G_VALUE = 9.81f;
      
     static final int[] mBtns = {R.id.mouseButton1, R.id.mouseButton2, R.id.mouseButton3};
     
@@ -226,7 +228,8 @@ public class MouseScreen
             // return false;
         }
 
-        clickOn(key);
+        //clickOn(key);
+        anyRemote.protocol.queueCommand("_MB_("+key+",)");
     }
 
     @Override
@@ -331,8 +334,8 @@ public class MouseScreen
 
     public void clickOn(String key) {
         log("clickOn "+key);
-        //anyRemote.protocol.queueCommand(key, true);
-        //anyRemote.protocol.queueCommand(key, false);
+        anyRemote.protocol.queueCommand(key, true);
+        anyRemote.protocol.queueCommand(key, false);
     }
 
     @Override
@@ -447,13 +450,13 @@ public class MouseScreen
              
           } else {
               
-             deltaX = Math.abs(mLastX - x);
-             deltaY = Math.abs(mLastY - y);
-             deltaZ = Math.abs(mLastZ - z);
+             deltaX = mLastX - x;
+             deltaY = mLastY - y;
+             deltaZ = mLastZ - z;
              
-             if (deltaX < NOISE) deltaX = 0.0f;
-             if (deltaY < NOISE) deltaY = 0.0f;
-             if (deltaZ < NOISE) deltaZ = 0.0f;
+             if (Math.abs(deltaX) < NOISE) deltaX = 0.0f;
+             if (Math.abs(deltaY) < NOISE) deltaY = 0.0f;
+             if (Math.abs(deltaZ) < NOISE) deltaZ = 0.0f;
              
              mLastX = x;
              mLastY = y;
@@ -462,15 +465,38 @@ public class MouseScreen
          
          TextView tx = (TextView) findViewById(R.id.xval);
          if (tx != null) {
-             tx.setText("X axis" +"\t\t"+deltaX);
+             tx.setText("X axis" +"\t\t"+mLastX);
          }
          TextView ty = (TextView) findViewById(R.id.yval);
          if (ty != null) {
-             ty.setText("Y axis" + "\t\t" +deltaY);
+             ty.setText("Y axis" + "\t\t" +mLastY);
          }
          TextView tz = (TextView) findViewById(R.id.zval);
          if (tz != null) {
-             tz.setText("Z axis" +"\t\t" +deltaZ);
+             tz.setText("Z axis" +"\t\t" +mLastZ);
+         }
+         
+         int mx = 0;
+         int my = 0;
+         
+         //if (deltaX != 0) {        
+         if (Math.abs(x) > NOISE) {
+             mx = -(int) x*10;
+             //if (deltaX < 0) {
+             //    mx = -mx;
+             //}
+         }
+         
+         //if (deltaZ != 0) {
+         if (Math.abs(z-G_VALUE) > NOISE) {
+             my = (int) Math.abs((z-G_VALUE))*10;
+             if (y > 0) {
+                 my = -my;
+             }
+         }
+         
+         if (mx != 0 || my != 0) {
+             anyRemote.protocol.queueCommand("_MM_("+mx+","+ my +")");
          }
     }
 }

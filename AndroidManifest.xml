@@ -35,6 +35,12 @@
             android:name="MouseScreen"
             android:screenOrientation="portrait" >
         </activity>
+        <activity 
+            android:name="KeyboardScreen"
+            android:screenOrientation="landscape" 
+            android:windowSoftInputMode="stateVisible" 
+            android:configChanges="keyboard|orientation" >
+        </activity>
     </application>
 
     <uses-sdk android:minSdkVersion="7" >

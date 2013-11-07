@@ -68,17 +68,18 @@ public class anyRemote extends Activity
 	public static final int SWIPE_MIN_DISTANCE = 120;
 	public static final int SWIPE_THRESHOLD_VELOCITY = 200; 
 
-	static final int  NO_FORM      = 0;
-	static final int  SEARCH_FORM  = 1;
-	static final int  CONTROL_FORM = 2;
-	static final int  FMGR_FORM    = 3;
-	static final int  TEXT_FORM    = 4;
-	static final int  LIST_FORM    = 5;
-	static final int  EDIT_FORM    = 6;
-	static final int  WMAN_FORM    = 7;
-    static final int  LOG_FORM     = 8;
-    static final int  MOUSE_FORM   = 9;
-	static final int  DUMMY_FORM   = 10;
+	static final int  NO_FORM       = 0;
+	static final int  SEARCH_FORM   = 1;
+	static final int  CONTROL_FORM  = 2;
+	static final int  FMGR_FORM     = 3;
+	static final int  TEXT_FORM     = 4;
+	static final int  LIST_FORM     = 5;
+	static final int  EDIT_FORM     = 6;
+	static final int  WMAN_FORM     = 7;
+    static final int  LOG_FORM      = 8;
+    static final int  MOUSE_FORM    = 9;
+    static final int  KEYBOARD_FORM = 10;
+	static final int  DUMMY_FORM    = 11;
 
 	static final int  LOG_CAPACITY = 16384;
 
@@ -228,7 +229,8 @@ public class anyRemote extends Activity
 	            break;
 	
 			case LOG_FORM:
-            case MOUSE_FORM:
+	        case MOUSE_FORM:
+	        case KEYBOARD_FORM:
 			case DUMMY_FORM:
 				break;
 	
@@ -236,7 +238,8 @@ public class anyRemote extends Activity
 		}
 		
 		if (prevForm != LOG_FORM && 
-		    prevForm != MOUSE_FORM) {
+		    prevForm != MOUSE_FORM &&
+		    prevForm != KEYBOARD_FORM) {
 	     	protocol.menuReplaceDefault(currForm);
 		}
 
@@ -278,6 +281,12 @@ public class anyRemote extends Activity
             _log("setCurrentView start MouseWin");
             final Intent showMou = new Intent(getBaseContext(), MouseScreen.class);
             startActivity(showMou); 
+            break;
+
+		case KEYBOARD_FORM:
+            _log("setCurrentView start KeyboardWin");
+            final Intent showKbd = new Intent(getBaseContext(), KeyboardScreen.class);
+            startActivity(showKbd); 
             break;
 
 		case LOG_FORM:

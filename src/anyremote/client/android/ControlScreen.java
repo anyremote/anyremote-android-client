@@ -719,6 +719,9 @@ public class ControlScreen
         } else if (command.equals(anyRemote.protocol.context.getString(R.string.mouse_item))) {
             switchedToPrivateScreen = true;
             showMouse();
+        } else if (command.equals(anyRemote.protocol.context.getString(R.string.keyboard_item))) {
+            switchedToPrivateScreen = true;
+            showKbd();
         } else if (command.equals(anyRemote.protocol.context.getString(R.string.back_item))) {
             anyRemote.protocol.queueCommand("Back"); // avoid national alphabets
         } else {

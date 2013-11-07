@@ -90,6 +90,8 @@ public class arActivity extends Activity
 			menu.add(getString(R.string.back_item));
     	} else if (privateMenu == anyRemote.MOUSE_FORM) { // Mouse screen
 		    menu.add(getString(R.string.back_item));
+        } else if (privateMenu == anyRemote.KEYBOARD_FORM) { // Mouse screen
+            menu.add(getString(R.string.back_item));
       	} else {
     		Vector<String> menuItems = anyRemote.protocol.getMenu();
 
@@ -266,8 +268,14 @@ public class arActivity extends Activity
 	
     protected void showMouse() {
         log("showMouse");
-        final Intent showLog = new Intent(getBaseContext(), MouseScreen.class);
-        startActivity(showLog); 
+        final Intent showM = new Intent(getBaseContext(), MouseScreen.class);
+        startActivity(showM); 
+    }
+ 
+    protected void showKbd() {
+        log("showKbd");
+        final Intent showK = new Intent(getBaseContext(), KeyboardScreen.class);
+        startActivity(showK); 
     }
 	
 	public void hidePopup() {

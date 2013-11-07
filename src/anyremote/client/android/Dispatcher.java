@@ -197,6 +197,9 @@ public class Dispatcher {
 	// Mouse Screen stuff
     Vector<String> mouseMenu = new Vector<String>();
 
+    // Keyboard Screen stuff
+    Vector<String> keyboardMenu = new Vector<String>();
+
 	// telephony handler
 	PhoneManager phoneManager;
 	
@@ -284,6 +287,9 @@ public class Dispatcher {
 		
         mouseMenu.clear();
         menuAddDefault(anyRemote.MOUSE_FORM);
+
+        keyboardMenu.clear();
+        menuAddDefault(anyRemote.KEYBOARD_FORM);
         
 		autoPass  = false;
 	}
@@ -1951,6 +1957,7 @@ public class Dispatcher {
 				cfMenu.add(context.getString(R.string.disconnect_item));
 				cfMenu.add(context.getString(R.string.exit_item));
 				cfMenu.add(context.getString(R.string.mouse_item));	
+	            cfMenu.add(context.getString(R.string.keyboard_item)); 
                 cfMenu.add(context.getString(R.string.log_item));   
 				break;
 			case anyRemote.TEXT_FORM:
@@ -1964,6 +1971,9 @@ public class Dispatcher {
 				break;
             case anyRemote.MOUSE_FORM:
                 mouseMenu.add(context.getString(R.string.back_item));
+                break;
+            case anyRemote.KEYBOARD_FORM:
+                keyboardMenu.add(context.getString(R.string.back_item));
                 break;
 			case anyRemote.LOG_FORM:
 				textMenu.add(context.getString(R.string.clear_log_item));
@@ -1987,6 +1997,8 @@ public class Dispatcher {
 				return listMenu;
 			case anyRemote.MOUSE_FORM:
 				return mouseMenu;
+            case anyRemote.KEYBOARD_FORM:
+                return keyboardMenu;
             case anyRemote.WMAN_FORM:
                 return winMenu;
 		}
