@@ -111,10 +111,10 @@ public class MouseScreen
         try {
             mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
         } catch (Exception e) {
-            TextView tx = (TextView) findViewById(R.id.xval);
-            if (tx != null) {
-                tx.setText("Exception:"+e.getMessage());
-            }
+            //TextView tx = (TextView) findViewById(R.id.xval);
+            //if (tx != null) {
+            //    tx.setText("Exception:"+e.getMessage());
+            //}
         }
         if (anyRemote.status == anyRemote.DISCONNECTED) {
             log("onResume no connection");
@@ -463,7 +463,7 @@ public class MouseScreen
              mLastZ = z;
          }
          
-         TextView tx = (TextView) findViewById(R.id.xval);
+         /*TextView tx = (TextView) findViewById(R.id.xval);
          if (tx != null) {
              tx.setText("X axis" +"\t\t"+mLastX);
          }
@@ -474,7 +474,7 @@ public class MouseScreen
          TextView tz = (TextView) findViewById(R.id.zval);
          if (tz != null) {
              tz.setText("Z axis" +"\t\t" +mLastZ);
-         }
+         }*/
          
          int mx = 0;
          int my = 0;
@@ -488,12 +488,12 @@ public class MouseScreen
          }
          
          //if (deltaZ != 0) {
-         if (Math.abs(z-G_VALUE) > NOISE) {
-             my = (int) ((z-G_VALUE)*(z-G_VALUE)*5);
+         if (Math.abs(y) > NOISE) {
+             my = (int) (y*y);
              if (y > 0) {
                  my = -my;
              }
-         }
+        }
          
          if (mx != 0 || my != 0) {
              anyRemote.protocol.queueCommand("_MM_("+mx+","+ my +")");

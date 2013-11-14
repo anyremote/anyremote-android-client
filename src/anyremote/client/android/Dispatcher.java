@@ -2014,7 +2014,7 @@ public class Dispatcher {
 			}
 		}
 	}
-	
+
 	public void autoUploadCover(String name) {
 		synchronized (autoUploadedC) {
 			if (!autoUploadedC.contains(name)) {

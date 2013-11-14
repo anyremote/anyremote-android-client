@@ -41,7 +41,7 @@
                 android:src="@drawable/empty" />
         </TableRow>
 
-        <TableRow
+        <!--  TableRow
             android:id="@+id/tableRow2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" >
@@ -82,7 +82,7 @@
                 android:textColor="@android:color/white"
                 android:text="Y"
                 android:textSize="20sp" />
-        </TableRow>
+        </TableRow -->
     </TableLayout>
 
 </LinearLayout>
