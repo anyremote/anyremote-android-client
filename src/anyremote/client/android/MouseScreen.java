@@ -481,15 +481,15 @@ public class MouseScreen
          
          //if (deltaX != 0) {        
          if (Math.abs(x) > NOISE) {
-             mx = -(int) x*10;
-             //if (deltaX < 0) {
-             //    mx = -mx;
-             //}
+             mx = (int) (x*x);
+             if (x > 0) {
+                 mx = -mx;
+             }
          }
          
          //if (deltaZ != 0) {
          if (Math.abs(z-G_VALUE) > NOISE) {
-             my = (int) Math.abs((z-G_VALUE))*10;
+             my = (int) ((z-G_VALUE)*(z-G_VALUE)*5);
              if (y > 0) {
                  my = -my;
              }
