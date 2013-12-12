@@ -11,7 +11,23 @@
         <TableRow
             android:id="@+id/tableRow1"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/mouseButton4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_scrollup"
+                android:scaleType="centerInside"/>
+        </TableRow>
+        
+       <TableRow
+           android:id="@+id/tableRow2"
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:gravity="center" >
 
             <ImageButton
                 android:id="@+id/mouseButton1"
@@ -41,6 +57,23 @@
                 android:src="@drawable/empty" />
         </TableRow>
 
+        <TableRow
+            android:id="@+id/tableRow3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center" >
+
+            <ImageButton
+                android:id="@+id/mouseButton5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:background="@drawable/btn_scrolldown"
+                android:scaleType="centerInside" />
+
+        </TableRow>
+       
         <!--  TableRow
             android:id="@+id/tableRow2"
             android:layout_width="wrap_content"

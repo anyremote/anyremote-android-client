@@ -25,8 +25,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.widget.EditText;
 import android.widget.Toast;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
@@ -95,7 +98,52 @@ public class KeyboardScreen extends arActivity
             setContentView(R.layout.keyboard_form_default);
         }
         
-        findViewById(R.id.keyboard_view).post(
+        final EditText text = (EditText) findViewById(R.id.keyboard_view);
+
+        text.addTextChangedListener(new TextWatcher() {
+            
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                log("onTextChanged >"+s+"<"+start+" "+before+" "+count);
+                if (s.length() == 0 || count == 0) {
+                    log("skip input");
+                    return;
+                }
+                for (int idx = start; idx < start + count; idx++) { 
+                    char inputCh[] = new char[1];
+                    inputCh[0]= s.charAt(idx);
+                   
+                    String k = new String(inputCh,0,1);
+                    log("got input >"+k+"<");
+                    if (inputCh[0] == ',') {
+                        k = "comma";
+                    } else if (inputCh[0] == ';') {
+                        k = "semicolon";
+                    } else if (inputCh[0] == ' ') {
+                        k = "space";
+                    } else if (inputCh[0] == '(') {
+                        k = "parenleft";
+                    } else if (inputCh[0] == ')') {
+                        k = "parenright";
+                    }
+                    anyRemote.protocol.queueCommand("_KB_(,"+k+")");
+                }
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void afterTextChanged(Editable s) { 
+                if (s.length() > 0) {
+                    text.setText("");
+                }
+            }
+        });
+        
+        
+        
+        /*findViewById(R.id.keyboard_view).post(
             new Runnable() {
                 public void run() {
                    
@@ -110,7 +158,7 @@ public class KeyboardScreen extends arActivity
                     //imm.toggleSoftInputFromWindow(kView.getApplicationWindowToken(), InputMethodManager.SHOW_FORCED, 0);
                 }
             }
-        );
+        );*/
    }
 
     @Override
@@ -238,7 +286,7 @@ public class KeyboardScreen extends arActivity
         log("onKeyUp TRANSFER " + keyCode);
         return false;
     }
-
+ 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         log("onKeyDown " + keyCode);

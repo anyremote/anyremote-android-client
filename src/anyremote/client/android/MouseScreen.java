@@ -64,12 +64,12 @@ public class MouseScreen
     float mLastX, mLastY, mLastZ;
     boolean mInitialized;
 
-    static final int NUM_BUTTONS = 3;
+    static final int NUM_BUTTONS = 5;
     
     static final float NOISE   = 0.16f;
     static final float G_VALUE = 9.81f;
      
-    static final int[] mBtns = {R.id.mouseButton1, R.id.mouseButton2, R.id.mouseButton3};
+    static final int[] mBtns = {R.id.mouseButton1, R.id.mouseButton2, R.id.mouseButton3, R.id.mouseButton4, R.id.mouseButton5};
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,6 +220,14 @@ public class MouseScreen
 
         case R.id.mouseButton3:
             key = "3";
+            break;
+       
+        case R.id.mouseButton4:
+            key = "4";
+            break;
+        
+        case R.id.mouseButton5:
+            key = "5";
             break;
 
         default:

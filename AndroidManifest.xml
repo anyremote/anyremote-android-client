@@ -37,9 +37,7 @@
         </activity>
         <activity 
             android:name="KeyboardScreen"
-            android:screenOrientation="landscape" 
-            android:windowSoftInputMode="stateVisible" 
-            android:configChanges="keyboard|orientation" >
+            android:windowSoftInputMode="stateVisible">
         </activity>
     </application>
 
