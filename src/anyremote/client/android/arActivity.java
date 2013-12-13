@@ -92,7 +92,11 @@ public class arActivity extends Activity
 		    menu.add(getString(R.string.back_item));
         } else if (privateMenu == anyRemote.KEYBOARD_FORM) { // Mouse screen
             menu.add(getString(R.string.back_item));
-      	} else {
+            menu.add(getString(R.string.escape));
+            menu.add(getString(R.string.enter));
+            menu.add(getString(R.string.backspace));
+            menu.add(getString(R.string.alt_f4));
+     	} else {
     		Vector<String> menuItems = anyRemote.protocol.getMenu();
 
 	    	if (menuItems != null) {

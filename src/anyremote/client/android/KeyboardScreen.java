@@ -303,7 +303,17 @@ public class KeyboardScreen extends arActivity
         log("commandAction " + command);
         if (command.equals(anyRemote.protocol.context.getString(R.string.back_item))) {
             doFinish("");
-        }
+        } else if (command.equals(anyRemote.protocol.context.getString(R.string.escape))) {
+            anyRemote.protocol.queueCommand("_KB_(,Escape)");
+        } else if (command.equals(anyRemote.protocol.context.getString(R.string.enter))) {
+            anyRemote.protocol.queueCommand("_KB_(,Return)");
+        } else if (command.equals(anyRemote.protocol.context.getString(R.string.backspace))) {
+            anyRemote.protocol.queueCommand("_KB_(,BackSpace)");
+        } else if (command.equals(anyRemote.protocol.context.getString(R.string.alt_f4))) {
+            anyRemote.protocol.queueCommand("_KP_(,Alt_L)");
+            anyRemote.protocol.queueCommand("_KB_(,F4)");
+            anyRemote.protocol.queueCommand("_KR_(,Alt_L)");
+       }
     }
 
     @Override

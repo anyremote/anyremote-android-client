@@ -65,7 +65,7 @@ public class MouseScreen
     boolean mInitialized;
 
     static final int NUM_BUTTONS = 5;
-    
+ 
     static final float NOISE   = 0.16f;
     static final float G_VALUE = 9.81f;
      

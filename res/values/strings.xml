@@ -54,6 +54,11 @@
     <string name="b10">"*"</string>
     <string name="b11">"0"</string>
     <string name="b12">"#"</string>
+
+    <string name="alt_f4">AltF4</string>
+    <string name="escape">Escape</string>
+    <string name="enter">Enter</string>
+    <string name="backspace">Backspace</string>
     
     <string name="cover_description">"Cover Image"</string>
     <string name="dummy">""</string>
