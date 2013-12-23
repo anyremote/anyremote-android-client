@@ -246,7 +246,7 @@ public class Dispatcher {
 		cfSkin = ControlScreen.SK_DEFAULT;
 		cfUpEvent   = "UP";
 		cfDownEvent = "DOWN";
-		cfInitFocus = 5;
+		cfInitFocus = 4; // index of '5' button
 		cfFrgr = Color.parseColor("#FFFFFF");
 		cfBkgr = Color.parseColor("#000000");		
 		cfTitle   = "";

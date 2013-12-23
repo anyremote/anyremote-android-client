@@ -305,9 +305,9 @@ public class ControlScreen
             cover.setBackgroundColor(anyRemote.protocol.cfBkgr);
             cover.setOnClickListener(this);
 
-            if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
-                buttons[anyRemote.protocol.cfInitFocus - 1].requestFocus();
-                buttons[anyRemote.protocol.cfInitFocus - 1].requestFocusFromTouch();
+            if (anyRemote.protocol.cfInitFocus >= 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
+                buttons[anyRemote.protocol.cfInitFocus].requestFocus();
+                buttons[anyRemote.protocol.cfInitFocus].requestFocusFromTouch();
             }
         } else {
 
@@ -382,9 +382,9 @@ public class ControlScreen
                 buttonsLayout[i].setPadding(pd, pd, pd, pd);
             }
 
-            if (anyRemote.protocol.cfInitFocus > 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
-                buttons[anyRemote.protocol.cfInitFocus - 1].requestFocus();
-                buttons[anyRemote.protocol.cfInitFocus - 1].requestFocusFromTouch();
+            if (anyRemote.protocol.cfInitFocus >= 0 && anyRemote.protocol.cfInitFocus < NUM_ICONS_BTM) {
+                buttons[anyRemote.protocol.cfInitFocus].requestFocus();
+                buttons[anyRemote.protocol.cfInitFocus].requestFocusFromTouch();
             }
         }
     }
