@@ -27,6 +27,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -297,6 +298,16 @@ public class KeyboardScreen extends arActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         commandAction(item.getTitle().toString());
         return true;
+    }
+    
+    public void onToggleClicked(View view) {
+        boolean on = ((ToggleButton) view).isChecked();
+        int id = view.getId();
+        //log("onToggleClicked " + (id == R.id.ctrlButton ? "CTRL " : "ALT ") + on );
+        String btn = (id == R.id.ctrlButton ? "Ctrl" : "Alt");
+        char   v = (on ? '1' : '0');
+        
+        anyRemote.protocol.queueCommand("_KM_(" + v +"," + btn + ")");
     }
 
     public void commandAction(String command) {
