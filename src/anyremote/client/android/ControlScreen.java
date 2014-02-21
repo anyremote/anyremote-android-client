@@ -113,6 +113,7 @@ public class ControlScreen
             R.id.tl_bb7 };
 
     boolean fullscreen = false;
+    boolean ignoreOneClick = false;
     boolean switchedToPrivateScreen = false;
     Dispatcher.ArHandler hdlLocalCopy;
 
@@ -573,13 +574,19 @@ public class ControlScreen
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (gestureScanner.onTouchEvent(ev)) {
+             return true;
+        }
         super.dispatchTouchEvent(ev);
-        return gestureScanner.onTouchEvent(ev);
+        return true;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent me) {
-        return gestureScanner.onTouchEvent(me);
+        if (gestureScanner.onTouchEvent(me)) {
+             return true;
+        }
+        return super.onTouchEvent(me);
     }
 
     private String key2str(int keyCode) {
@@ -802,8 +809,8 @@ public class ControlScreen
     }
 
     public boolean onDown(MotionEvent e) {
-        // log("onDown");
-        return true;
+        //log("onDown");
+        return false;
     }
 
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
@@ -819,16 +826,20 @@ public class ControlScreen
             if (e1.getX() - e2.getX() > anyRemote.SWIPE_MIN_DISTANCE
                     && Math.abs(velocityX) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
                 clickOn("SlideLeft");
+                ignoreOneClick = true;
             } else if (e2.getX() - e1.getX() > anyRemote.SWIPE_MIN_DISTANCE
                     && Math.abs(velocityX) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
                 clickOn("SlideRight");
-            } else if (e1.getY() - e2.getY() > anyRemote.SWIPE_MIN_DISTANCE
+                ignoreOneClick = true;
+           } else if (e1.getY() - e2.getY() > anyRemote.SWIPE_MIN_DISTANCE
                     && Math.abs(velocityY) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
                 clickOn("SlideUp");
-            } else if (e2.getY() - e1.getY() > anyRemote.SWIPE_MIN_DISTANCE
+                ignoreOneClick = true;
+           } else if (e2.getY() - e1.getY() > anyRemote.SWIPE_MIN_DISTANCE
                     && Math.abs(velocityY) > anyRemote.SWIPE_THRESHOLD_VELOCITY) {
                 clickOn("SlideDown");
-            }
+                ignoreOneClick = true;
+           }
         } catch (Exception e) {
             // nothing
         }
@@ -837,20 +848,20 @@ public class ControlScreen
     }
 
     public void onLongPress(MotionEvent e) {
-        // log("onLongPress");
+        //log("onLongPress");
     }
 
     public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-        // log("onScroll");
-        return true;
+        //log("onScroll");
+        return false;
     }
 
     public void onShowPress(MotionEvent e) {
-        // log("onShowPress");
+        //log("onShowPress");
     }
 
     public boolean onSingleTapUp(MotionEvent e) {
-        // log("onSingleTapUp");
-        return true;
+        //log("onSingleTapUp");
+        return false;
     }
 }
