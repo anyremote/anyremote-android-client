@@ -10,6 +10,17 @@
         android:layout_height="fill_parent"
         android:layout_weight="1"
         android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/tabButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tab"            
+            android:gravity="left|center_vertical"
+            android:textOff="Tab"
+            android:textOn="Tab"  
+            android:onClick="onClicked"/>
+
     </LinearLayout>
 
     <LinearLayout

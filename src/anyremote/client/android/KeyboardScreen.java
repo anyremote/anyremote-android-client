@@ -309,6 +309,18 @@ public class KeyboardScreen extends arActivity
         
         anyRemote.protocol.queueCommand("_KM_(" + v +"," + btn + ")");
     }
+    
+    public void onClicked(View view) {
+        int id = view.getId();
+        
+        //log("onToggleClicked " + (id == R.id.ctrlButton ? "CTRL " : "ALT ") + on );
+        String btn = (id == R.id.tabButton ? "Tab" : "");
+        if (btn.length() == 0) {
+            return;
+        }
+        
+        anyRemote.protocol.queueCommand("_KB_(," + btn + ")");
+    }
 
     public void commandAction(String command) {
         log("commandAction " + command);
