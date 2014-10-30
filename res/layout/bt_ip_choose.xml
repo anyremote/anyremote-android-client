@@ -4,25 +4,38 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <RadioGroup
-        android:id="@+id/searchGroup"
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" >
-
-        <RadioButton
-            android:id="@+id/BTCheckbox"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+        
+        <RadioGroup
+            android:id="@+id/searchGroup"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="@string/bluetooth" />
+            android:layout_height="wrap_content" >
 
-        <RadioButton
-            android:id="@+id/IPCheckbox"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/tcpip" />
+            <RadioButton
+                android:id="@+id/BTCheckbox"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/bluetooth" />
+
+            <RadioButton
+                android:id="@+id/IPCheckbox"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tcpip" />
 
         </RadioGroup>
+   
+        <CheckBox
+            android:id="@+id/Zeroconf"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/zeroconf" />
+            
+   </LinearLayout>
     
    <LinearLayout
         android:id="@+id/btipBtnBar"

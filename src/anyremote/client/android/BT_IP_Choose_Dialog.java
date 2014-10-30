@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2014 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,12 +26,19 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.RadioButton;
 
-public class BT_IP_Choose_Dialog extends Dialog  implements OnClickListener {
+public class BT_IP_Choose_Dialog extends Dialog  
+                                 implements OnClickListener, 
+                                 CompoundButton.OnCheckedChangeListener {
 
 	Button   okButton = null;
 	Button   cancelButton;
+    CheckBox zconfCbox;
+    RadioButton ipSearch;
 	int      opId;
 	
 	public BT_IP_Choose_Dialog(Context context, int ident) {
@@ -58,13 +65,21 @@ public class BT_IP_Choose_Dialog extends Dialog  implements OnClickListener {
 			this.cancel();
 		}
 	}
+    
+    public void onCheckedChanged (CompoundButton buttonView, boolean isChecked) {
+        if (buttonView == (RadioButton) findViewById(R.id.IPCheckbox)) {
+            zconfCbox.setEnabled(isChecked);
+        }
+    }
 	
 	private void setupDialog() {
 		
-	   setTitle(R.string.search_item);
+	    setTitle(R.string.search_item);
 	   
-	    okButton     = (Button) findViewById(R.id.btipDialogButtonOk);
-	    cancelButton = (Button) findViewById(R.id.btipDialogButtonCancel);
+	    okButton     = (Button)      findViewById(R.id.btipDialogButtonOk);
+	    cancelButton = (Button)      findViewById(R.id.btipDialogButtonCancel);
+	    zconfCbox    = (CheckBox)    findViewById(R.id.Zeroconf);
+        ipSearch     = (RadioButton) findViewById(R.id.IPCheckbox);
 	    
 	    if (opId == Dispatcher.CMD_NEW_ADDR_DIALOG) {
 	    	setTitle(R.string.label_addr);
@@ -73,15 +88,27 @@ public class BT_IP_Choose_Dialog extends Dialog  implements OnClickListener {
 	    	setTitle(R.string.search_item);
 	    	okButton.setText(R.string.search_item);
 	    }
+        
+        zconfCbox.setEnabled(ipSearch.isChecked());
 
 	    // setup listener
 	    okButton.setOnClickListener(this);
 	    cancelButton.setOnClickListener(this);
+	    ipSearch.setOnCheckedChangeListener(this);
 	}	
 	
 	public boolean isBluetooth() {
 		RadioButton rb = (RadioButton) findViewById(R.id.BTCheckbox);
 		return rb.isChecked();
+	}
+
+	public boolean isZeroconf() {
+		if (ipSearch.isChecked()) {
+            if (zconfCbox.isChecked()) {
+                return true;
+            }
+        }
+        return false;
 	}
 	
 	public int id() {

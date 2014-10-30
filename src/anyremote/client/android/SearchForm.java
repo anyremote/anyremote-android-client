@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2014 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -56,6 +56,8 @@ import android.content.BroadcastReceiver;
 import anyremote.client.android.util.About;
 import anyremote.client.android.util.Address;
 import anyremote.client.android.util.AddressAdapter;
+import android.net.nsd.NsdServiceInfo;
+import android.net.nsd.NsdManager;
 
 public class SearchForm extends arActivity 
                         implements OnItemClickListener,
@@ -68,6 +70,8 @@ public class SearchForm extends arActivity
 	static final int  BT_USE_CONNECT = 2;
 	
 	static final String  DEFAULT_IP_PORT = "5197";
+    static final String  ZEROCONF_SERVICE_TYPE = "_remote._tcp.";
+    static final String  ZEROCONF_SERVICE_NAME = "anyRemote";
 
 	ListView searchList;
 	AddressAdapter dataSource;
@@ -76,11 +80,14 @@ public class SearchForm extends arActivity
 	// IP search
 	Integer asyncNum = new Integer(-1);
 	ArrayList<String> hosts = new ArrayList<String>();
-	PingTask ipSearchTask = null;;
+	PingTask ipSearchTask = null;
 
-	private BluetoothAdapter mBtAdapter;
+	// Zeroconf search
+    ZeroconfTask zeroconfTask = null;
 
 	// BT stuff
+	private BluetoothAdapter mBtAdapter;
+
 	int btUseFlag = BT_USE_NO;
 	String connectTo   = "";
 	String connectName = "";
@@ -364,7 +371,7 @@ public class SearchForm extends arActivity
 			}
 		}
 	};
-	
+
 	private void stopSearch() { 
 		cancelSearch(false);
 	}
@@ -374,6 +381,7 @@ public class SearchForm extends arActivity
 		
 		stopBluetoothDiscovery();
 		stopTcpDiscovery();
+        stopZeroconfDiscovery();
 		
 		if (!onlyCancel) {
 			setProgressBarIndeterminateVisibility(false);
@@ -402,7 +410,7 @@ public class SearchForm extends arActivity
 		synchronized (asyncNum) {
 			asyncNum = -1;
 		}
-		if (ipSearchTask != null) {
+		if (ipSearchTask != null) { 
 			log("stopTcpDiscovery");
 			ipSearchTask.cancel(true);
 		}
@@ -424,7 +432,7 @@ public class SearchForm extends arActivity
 	
 	class PingTask extends AsyncTask<String, Integer, Void> {
 
-		@Override
+        @Override
 		protected Void doInBackground(String... params) {
 			
 		    for (int i=1; i<254; i++){
@@ -616,13 +624,209 @@ public class SearchForm extends arActivity
         }*/
  	}
 	
+	public void startZeroconfDiscovery() {
+    
+        log("startZeroconfDiscovery");
+	    
+		setProgressBarIndeterminateVisibility(true);
+		setTitle(R.string.searching);
+		
+	    zeroconfTask = new ZeroconfTask();
+	    zeroconfTask.execute();    
+    }
+
+    public void stopZeroconfDiscovery() {
+		if (zeroconfTask != null) { 
+			log("stopZeroconfDiscovery");
+			zeroconfTask.cancel(true);
+            zeroconfTask = null;
+		}
+    }
+
+    private NsdManager                   mNsdManager        = null;
+    private NsdManager.DiscoveryListener mDiscoveryListener = null;
+    private NsdManager.ResolveListener   mResolveListener   = null;
+
+	class ZeroconfTask extends AsyncTask<Void, String, Void> {
+
+        static final String  DISCOVERY_STARTED = "DS";
+        static final String  DISCOVERY_FAILED  = "DF";
+        static final String  DISCOVERY_HOST    = "DH";
+        boolean isRun = false;
+        
+        public void initializeResolveListener() {
+
+            if (mResolveListener == null) {
+                
+                log("initializeResolveListener");
+                
+                mResolveListener = new NsdManager.ResolveListener() {
+
+                    @Override
+                    public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                        log("ResolveListener: Resolve failed" + errorCode);
+                    }
+
+                    @Override
+                    public void onServiceResolved(NsdServiceInfo serviceInfo) {
+                        
+                        log("ResolveListener: Resolve Succeeded. " + serviceInfo);
+
+                        //if (serviceInfo.getServiceName().equals(ZEROCONF_SERVICE_NAME)) {
+                        //    log("ResolveListener: Same IP.");
+                        //    return;
+                        //}
+
+                        String service = serviceInfo.getServiceName();
+                        String host    = serviceInfo.getHost().getHostAddress();
+                        String port    = String.valueOf(serviceInfo.getPort());
+                        
+                        publishProgress(DISCOVERY_HOST, service, host, port);
+                    }
+                };
+            }
+        }
+        
+        public void initializeDiscoveryListener() {
+
+            // Instantiate a new DiscoveryListener
+            if (mDiscoveryListener == null) {
+            
+                log("initializeDiscoveryListener");
+
+                mDiscoveryListener = new NsdManager.DiscoveryListener() {
+
+                    //  Called as soon as service discovery begins.
+                    @Override
+                    public void onDiscoveryStarted(String regType) {
+                        log("DiscoveryListener: Service discovery started");
+                        publishProgress(DISCOVERY_STARTED);
+                   }
+
+                    @Override
+                    public void onServiceFound(NsdServiceInfo service) {
+                        
+                        // A service was found!  Do something with it.
+                        log("DiscoveryListener: Service discovery success" + service);
+                        
+                        if (!service.getServiceType().equals(ZEROCONF_SERVICE_TYPE)) {
+                            
+                            // Service type is the string containing the protocol and transport layer for this service
+                            log("DiscoveryListener: Unknown Service Type: " + service.getServiceType());
+
+                        //} else if (service.getServiceName().equals(ZEROCONF_SERVICE_NAME)) {
+                        //
+                        //    // The name of the service tells the user what they'd be connecting to
+                        //    log("DiscoveryListener: Same machine: " + ZEROCONF_SERVICE_NAME);
+                        //
+                        } else if (service.getServiceName().contains(ZEROCONF_SERVICE_NAME)){
+                            mNsdManager.resolveService(service, mResolveListener);
+                        }
+                    }
+
+                    @Override
+                    public void onServiceLost(NsdServiceInfo service) {
+                        // When the network service is no longer available.
+                        // Internal bookkeeping code goes here.
+                        log("DiscoveryListener: service lost" + service);
+                        publishProgress(DISCOVERY_FAILED);
+                    }
+
+                    @Override
+                    public void onDiscoveryStopped(String serviceType) {
+                        log("DiscoveryListener: Discovery stopped: " + serviceType);
+                        publishProgress(DISCOVERY_FAILED);
+                    }
+
+                    @Override
+                    public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+                        log("DiscoveryListener: Discovery failed: Error code:" + errorCode);
+                        mNsdManager.stopServiceDiscovery(this);
+                        publishProgress(DISCOVERY_FAILED);
+                    }
+
+                    @Override
+                    public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+                        log("DiscoveryListener: Discovery failed: Error code:" + errorCode);
+                        mNsdManager.stopServiceDiscovery(this);
+                        publishProgress(DISCOVERY_FAILED);
+                    }
+                };
+            }
+        }
+
+		@Override
+		protected void onPreExecute () {
+            log("ZeroconfTask.onPreExecute");
+            if (mNsdManager == null) {
+                mNsdManager = (NsdManager) anyRemote.protocol.context.getSystemService(Context.NSD_SERVICE);
+            }
+            initializeResolveListener();
+            initializeDiscoveryListener();
+        }
+
+		@Override
+		protected Void doInBackground(Void... params) {
+            log("ZeroconfTask.doInBackground");
+            
+            mNsdManager.discoverServices(ZEROCONF_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
+            
+            while (zeroconfTask != null) {
+                try {
+				    Thread.sleep(50);
+			    } catch (InterruptedException e) {
+			    }
+            }
+            
+            return null;
+		}
+		
+        @Override
+        protected void onProgressUpdate(String... progress) {
+        	
+        	log("ZeroconfTask.onProgressUpdate "+progress[0]);
+            
+            if (progress[0] == DISCOVERY_STARTED) {
+                setProgressBarIndeterminateVisibility(true);
+                setTitle(R.string.searching);
+            } else if (progress[0] == DISCOVERY_FAILED) {
+                setProgressBarIndeterminateVisibility(false);
+		        setTitle(R.string.searchFormUnconnected);
+                mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+        	} else if (progress[0] == DISCOVERY_HOST) {  // peer data
+                dataSource.addIfNew(progress[1]+"://"+progress[2], "socket://"+progress[2] + ":" + progress[3], "",false);
+            }
+        }
+        
+        @Override
+        protected void onPostExecute(Void unused) {
+        	log("ZeroconfTask.onPostExecute");
+            setProgressBarIndeterminateVisibility(false);
+		    setTitle(R.string.searchFormUnconnected);
+            zeroconfTask = null;
+        }
+        
+        @Override
+        protected void onCancelled() {
+        	log("ZeroconfTask.onCancelled");
+        	setProgressBarIndeterminateVisibility(false);
+		    setTitle(R.string.searchFormUnconnected);
+            mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+		    zeroconfTask = null;
+        }
+	}
+
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) { 
 		menu.clear();
 		MenuInflater mi = getMenuInflater();		
 		mi.inflate(R.menu.search_menu, menu);
 		
-		if (asyncNum >= 0 || ipSearchTask != null ||    // have active search
+        log("onPrepareOptionsMenu: "+(zeroconfTask == null ? "NULL" : "OK"));
+        
+		if (asyncNum >= 0 || 
+            ipSearchTask != null ||    // have active search
+            zeroconfTask != null ||    // have active search
 			btUseFlag == BT_USE_SEARCH) {
 			
 			/*MenuItem bsrch = menu.findItem(R.id.bt_search_item);
@@ -925,7 +1129,12 @@ public class SearchForm extends arActivity
 				if (isBT) {
 					doDiscovery();
 				} else {
-					tcpSearch();
+                    boolean zeroconf = ((BT_IP_Choose_Dialog) dialog).isZeroconf();
+                    if (zeroconf) {
+                        startZeroconfDiscovery();
+                    } else {
+					    tcpSearch();
+                    }
 				}
 			}
 		}
