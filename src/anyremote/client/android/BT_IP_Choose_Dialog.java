@@ -22,6 +22,7 @@ package anyremote.client.android;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -80,16 +81,22 @@ public class BT_IP_Choose_Dialog extends Dialog
 	    cancelButton = (Button)      findViewById(R.id.btipDialogButtonCancel);
 	    zconfCbox    = (CheckBox)    findViewById(R.id.Zeroconf);
         ipSearch     = (RadioButton) findViewById(R.id.IPCheckbox);
-	    
+        
+        zconfCbox.setEnabled(ipSearch.isChecked());
+ 	    
 	    if (opId == Dispatcher.CMD_NEW_ADDR_DIALOG) {
 	    	setTitle(R.string.label_addr);
 	    	okButton.setText(R.string.btnOk);
+            zconfCbox.setVisibility(View.GONE);
 	    } else {
 	    	setTitle(R.string.search_item);
 	    	okButton.setText(R.string.search_item);
+            
+            int apiVersion = Integer.valueOf(android.os.Build.VERSION.SDK);
+            if (apiVersion < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                zconfCbox.setVisibility(View.GONE);
+            }
 	    }
-        
-        zconfCbox.setEnabled(ipSearch.isChecked());
 
 	    // setup listener
 	    okButton.setOnClickListener(this);

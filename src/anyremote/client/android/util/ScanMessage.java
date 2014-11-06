@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011-2014 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2014 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,13 +21,7 @@
 
 package anyremote.client.android.util;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
-public interface ISocket {
-	public void close();
-	// public boolean isConnected(); BluetoothSocket API level 14 or higher
-	public InputStream getInputStream();
-	public OutputStream getOutputStream();
-
+public class ScanMessage {
+	public String name;
+	public String address;
 }

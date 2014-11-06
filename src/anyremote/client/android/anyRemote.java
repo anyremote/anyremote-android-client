@@ -728,13 +728,17 @@ public class anyRemote extends Activity
 	}
 
 	public static void _log(String prefix, String msg) {
-		if (logData.length() > LOG_CAPACITY) {
-			logData.delete(0,LOG_CAPACITY);		
-		}
-	
-		teraz.setTime(java.lang.System.currentTimeMillis());
-		logData.append("\n" + "[" + now_format.format(teraz) + "] ["+prefix+"] "+msg);
-		Log.i(prefix,msg);
+		
+        //synchronized (logData) {
+        
+            if (logData.length() > LOG_CAPACITY) {
+			    logData.delete(0,LOG_CAPACITY);		
+		    }
+
+		    teraz.setTime(java.lang.System.currentTimeMillis());
+		    logData.append("\n" + "[" + now_format.format(teraz) + "] ["+prefix+"] "+msg);
+		    Log.i(prefix,msg);
+        //}
 	}
 	
 	public static int numerator() {

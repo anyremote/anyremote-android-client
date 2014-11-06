@@ -21,11 +21,6 @@
 
 package anyremote.client.android;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnDismissListener;
@@ -34,7 +29,10 @@ import android.content.IntentFilter;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.AdapterView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
@@ -56,8 +54,11 @@ import android.content.BroadcastReceiver;
 import anyremote.client.android.util.About;
 import anyremote.client.android.util.Address;
 import anyremote.client.android.util.AddressAdapter;
-import android.net.nsd.NsdServiceInfo;
-import android.net.nsd.NsdManager;
+import anyremote.client.android.util.BTScanner;
+import anyremote.client.android.util.IPScanner;
+import anyremote.client.android.util.ZCScanner;
+import anyremote.client.android.util.IScanner;
+import anyremote.client.android.util.ScanMessage;
 
 public class SearchForm extends arActivity 
                         implements OnItemClickListener,
@@ -65,30 +66,17 @@ public class SearchForm extends arActivity
                                    //DialogInterface.OnCancelListener,
                                    AdapterView.OnItemSelectedListener {
 
-	static final int  BT_USE_NO      = 0;
-	static final int  BT_USE_SEARCH  = 1;
-	static final int  BT_USE_CONNECT = 2;
-	
-	static final String  DEFAULT_IP_PORT = "5197";
-    static final String  ZEROCONF_SERVICE_TYPE = "_remote._tcp.";
-    static final String  ZEROCONF_SERVICE_NAME = "anyRemote";
-
 	ListView searchList;
 	AddressAdapter dataSource;
 	int selected = 0;
-	
-	// IP search
-	Integer asyncNum = new Integer(-1);
-	ArrayList<String> hosts = new ArrayList<String>();
-	PingTask ipSearchTask = null;
+    
+    Handler handler = null; 
 
-	// Zeroconf search
-    ZeroconfTask zeroconfTask = null;
+    IScanner scanner = null;
 
 	// BT stuff
 	private BluetoothAdapter mBtAdapter;
 
-	int btUseFlag = BT_USE_NO;
 	String connectTo   = "";
 	String connectName = "";
 	String connectPass = "";
@@ -128,14 +116,6 @@ public class SearchForm extends arActivity
 		searchList.setOnItemSelectedListener(this);
 		//searchList.setItemChecked(selected, true); 
 
-		// Register for broadcasts when a device is discovered
-		IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-		this.registerReceiver(mReceiver, filter);
-
-		// Register for broadcasts when discovery has finished
-		filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-		this.registerReceiver(mReceiver, filter);
-
 		// Get the local Bluetooth adapter
 		mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -160,8 +140,47 @@ public class SearchForm extends arActivity
 					}
 				}
 			}
-			
 		}
+        
+        handler = new Handler() {
+            
+            @Override
+            public void handleMessage(Message inputMessage) {
+
+                switch (inputMessage.what) {
+
+                    case IScanner.SCAN_STARTED:   // Indicate scanning in the title
+                        setProgressBarIndeterminateVisibility(true);
+                        setTitle(R.string.searching);
+                        break;
+                    
+                    case IScanner.SCAN_FAILED:
+        	            setProgressBarIndeterminateVisibility(false);
+		                setTitle(R.string.searchFormUnconnected);
+                        break;
+                    
+                    case IScanner.SCAN_FINISHED:
+        	            setProgressBarIndeterminateVisibility(false);
+		                setTitle(R.string.searchFormUnconnected);
+                        break;
+                    
+                    case IScanner.SCAN_PROGRESS:
+                        ScanMessage pmsg = (ScanMessage) inputMessage.obj;
+                        setProgressBarIndeterminateVisibility(true);
+                        setTitle(pmsg.name);
+                        
+                        break;
+                    
+                    case IScanner.SCAN_FOUND:
+                        ScanMessage fmsg = (ScanMessage) inputMessage.obj;
+                        dataSource.addIfNew(fmsg.name, fmsg.address, "",false);
+                        break;
+                    
+                    default:
+                        super.handleMessage(inputMessage);
+                }
+            }
+        };
 	}
 
 	@Override
@@ -185,15 +204,10 @@ public class SearchForm extends arActivity
 	@Override
 	protected void onDestroy() {
 		log("onDestroy "+id);
-
+        
 		// Make sure we're not doing discovery anymore
-		cancelSearch(false);
+		stopSearch();
 
-		// Unregister broadcast listeners
-		unregisterReceiver(mReceiver);
-		if (deregStateRcv) {
-			unregisterReceiver(mBTStateReceiver);
-		}
 		super.onDestroy();
 	}
 
@@ -223,7 +237,7 @@ public class SearchForm extends arActivity
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		
-		stopBluetoothDiscovery();
+		stopSearch();
 		
 		final AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
 		
@@ -254,82 +268,8 @@ public class SearchForm extends arActivity
 
 	@Override
 	public void onBackPressed() {
-		
-		/*cancelSearch(false);
-
-		final Intent intent = new Intent();  
-		intent.putExtra(anyRemote.CONN_ADDR, "");
-
-		setResult(RESULT_OK, intent);*/
-		
 		doExit();
-
-		//super.onBackPressed();
 	}
-
-	private void doDiscovery() {
-		if (mBtAdapter == null) {
-			return;
-		}
-		if (!mBtAdapter.isEnabled()) {
-			btUseFlag = BT_USE_SEARCH;
-			switchBluetoothOn();
-		} else {       
-			doRealDiscovery();
-		}
-	}
-
-	private void doRealDiscovery() {
-		log("doRealDiscovery");
-
-		// Indicate scanning in the title
-		setProgressBarIndeterminateVisibility(true);
-		setTitle(R.string.searching);
-
-		// If we're already discovering, stop it
-		cancelSearch(true);
-
-		// Request discover from BluetoothAdapter
-		mBtAdapter.startDiscovery();
-	}
-
-	// The BroadcastReceiver that listens for discovered devices and
-	// changes the title when discovery is finished
-	private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			log("BroadcastReceiver::onReceive discovery ");
-
-			String action = intent.getAction();
-
-			// When discovery finds a device
-			if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-
-				// Get the BluetoothDevice object from the Intent
-				BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-				log("BroadcastReceiver::onReceive discovery GOT ONE "+device.getName()+" "+device.getAddress());
-
-				// If it's already paired, skip it, because it's been listed already
-				//if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
-					if (dataSource.addIfNew(device.getName(), "btspp://"+device.getAddress(), "",false)) {
-						//addAddress(device.getName(),"btspp://"+device.getAddress(),"");
-					}
-				//}
-
-				// When discovery is finished, change the Activity title
-			} else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-
-				log("BroadcastReceiver::onReceive discovery FINISHED");
-				cancelSearch(false);
-
-				/*if (mNewDevicesArrayAdapter.getCount() == 0) {
-                    String noDevices = getResources().getText(R.string.not_found).toString();
-                    mNewDevicesArrayAdapter.add(noDevices);
-                }*/
-			}
-		}
-	};
-
 
 	// The BroadcastReceiver that handles BT state
 	private final BroadcastReceiver mBTStateReceiver = new BroadcastReceiver() {
@@ -349,12 +289,7 @@ public class SearchForm extends arActivity
 					setTitle(R.string.bt_on);
 					unregisterReceiver(this);
 					deregStateRcv = false;
-	
-					if (btUseFlag == BT_USE_SEARCH) {
-						doRealDiscovery();
-					} else if (btUseFlag == BT_USE_CONNECT) {
-						doRealConnect();
-					}
+					doRealConnect();
 					break;
 				}
 				case (BluetoothAdapter.STATE_TURNING_OFF) : {
@@ -373,461 +308,26 @@ public class SearchForm extends arActivity
 	};
 
 	private void stopSearch() { 
-		cancelSearch(false);
-	}
+		//log("stopSearch");
 
-	private void cancelSearch(boolean onlyCancel) { 
-		//log("cancelSearch");
+        if (scanner != null) {
+            scanner.stopScan();
+            scanner = null;
+        }
 		
-		stopBluetoothDiscovery();
-		stopTcpDiscovery();
-        stopZeroconfDiscovery();
-		
-		if (!onlyCancel) {
-			setProgressBarIndeterminateVisibility(false);
-			setTitle(R.string.searchFormUnconnected);
-		}
+		setProgressBarIndeterminateVisibility(false);
+		setTitle(R.string.searchFormUnconnected);
 	}
 	
-	private void tcpSearch() {
-		
-		if (ipSearchTask != null) {
-			log("tcpSearch: already searching");
-			return;
-		}
-		
-		String ip = anyRemote.getLocalIpAddress();
-		if (ip == null) {
-			return;
-		}
-		log("tcpSearch "+ip);
-	
-		scanSubNet(ip.substring(0,ip.lastIndexOf('.')+1));
-		//scanSubNet("172.16.32.");
-	}
-
-	private void stopTcpDiscovery() {
-		synchronized (asyncNum) {
-			asyncNum = -1;
-		}
-		if (ipSearchTask != null) { 
-			log("stopTcpDiscovery");
-			ipSearchTask.cancel(true);
-		}
-	}
-	
-	private void scanSubNet(String subnet){
-		
-		log("scanSubNet "+subnet);
-				
-	    hosts.clear();
-	    asyncNum = 0; 
-	    
-		setProgressBarIndeterminateVisibility(true);
-		setTitle(R.string.searching);
-		
-	    ipSearchTask = new PingTask();
-	    ipSearchTask.execute(subnet);    
-	}
-	
-	class PingTask extends AsyncTask<String, Integer, Void> {
-
-        @Override
-		protected Void doInBackground(String... params) {
-			
-		    for (int i=1; i<254; i++){
-		        log("Trying: " + params[0] + String.valueOf(i));
-		        
-		        synchronized (asyncNum) {
-		        	if (asyncNum < 0) {
-		        		// cancel search
-		        		log("Search cancelled");
-		        		i = 255;
-		        	} else {
-		        	    asyncNum++;
-		        	}
-		        }
-		        PingHostTask mTask = new PingHostTask();
-		        mTask.execute(params[0] + String.valueOf(i));
-		        
-		        while (asyncNum > 16) {
-		        	log("Waiting to run : " + asyncNum);
-		    		try {
-		    			Thread.sleep(200);
-		    		} catch (InterruptedException e) {
-		    		}
-		        }
-			    
-			    publishProgress(i);
-		    }
-		    
-		    while (asyncNum > 0) {
-	    		try {
-	    			Thread.sleep(300);
-	     		} catch (InterruptedException e) {
-	    		}
-		    }
-
-			return null;
-		}
-		
-        @Override
-        protected void onProgressUpdate(Integer... progress) {
-        	
-        	log("onProgressUpdate "+progress[0]);
-        	
-        	// dynamically add discovered hosts
-		    synchronized (hosts) {
-			    for (int h = 0;h<hosts.size();h++) {
-			        dataSource.addIfNew("socket://"+hosts.get(h), "socket://"+hosts.get(h) + ":" + DEFAULT_IP_PORT, "",false);
-			    }
-			    hosts.clear();
-		    }
-		    
-		    synchronized (asyncNum) {
-		    	if (asyncNum > 0) {
-				    log("onProgressUpdate " + asyncNum);
-			    	setTitle(progress[0]+"/255");
-		    	}
-		    }
-        }
-        
-        @Override
-        protected void onPostExecute(Void unused) {
-        	setProgressBarIndeterminateVisibility(false);
-		    setTitle(R.string.searchFormUnconnected);
-		    asyncNum = -1;
-		    ipSearchTask = null;
-        }
-        
-        @Override
-        protected void onCancelled() {
-        	setProgressBarIndeterminateVisibility(false);
-		    setTitle(R.string.searchFormUnconnected);
-		    asyncNum = -1;
-		    ipSearchTask = null;
-        }
-	}
-	
-	class PingHostTask extends AsyncTask<String, Void, Void> {
-		
-        /*PipedOutputStream mPOut;
-        PipedInputStream mPIn;
-        LineNumberReader mReader;
-        Process mProcess;*/
- 
-		/*
-		@Override
-        protected void onPreExecute() {
-            /*mPOut = new PipedOutputStream();
-            try {
-                mPIn = new PipedInputStream(mPOut);
-                mReader = new LineNumberReader(new InputStreamReader(mPIn));
-            } catch (IOException e) {
-                cancel(true);
-            }
-        }*/
-
-        /*public void stop() {
-			Process p = mProcess;
-			if (p != null) {
-				p.destroy();
-			}
-			cancel(true);
-		}*/
-
-		@Override
-		protected Void doInBackground(String... params) {
-
-			try {
-				InetAddress inetAddress = InetAddress.getByName(params[0]);
-				if (inetAddress.isReachable(1000)) {
-					
-					synchronized (asyncNum) {
-						if (asyncNum < 0) {
-							return null;
-						}
-					}
-
-					log("Up # " + params[0]);
-					String host = inetAddress.getHostName();
-
-					synchronized (hosts) {
-						hosts.add(host);
-					}
-
-					synchronized (asyncNum) {
-						asyncNum--;
-					}
-
-					return null;
-				}
-			} catch (UnknownHostException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			/*try {
-				log("start # " + params[0]);
-				String cmd = "/system/bin/ping -q -n -w 1 -c 1 " + params[0];
-				Process mProcess = new ProcessBuilder()
-						.command(cmd)
-						.redirectErrorStream(true).start();
-				log("started # " + params[0]);
-
-				try {
-					InputStream in = mProcess.getInputStream();
-					OutputStream out = mProcess.getOutputStream();
-					byte[] buffer = new byte[1024];
-					int count;
-					log("AA " + params[0]);
-					
-					// in -> buffer -> mPOut -> mReader -> 1 line of ping
-					// information to parse
-					while ((count = in.read(buffer)) != -1) {
-						mPOut.write(buffer, 0, count);
-						// publishProgress();
-					}
-					log("done for # " + params[0] + " " + buffer);
-					out.close();
-					in.close();
-					mPOut.close();
-					mPIn.close();
-				} finally {
-					mProcess.destroy();
-					mProcess = null;
-				}
-			} catch (IOException e) {
-				log("IOException for # " + params[0] + " " + e.getMessage());
-			}*/
-
-			synchronized (asyncNum) {
-				asyncNum--;
-			}
-
-			log("Down # " + params[0]);
-			return null;
-		}
-		
-		/*
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            try {
-                // Is a line ready to read from the "ping" command?
-                while (mReader.ready()) {
-                    // This just displays the output, you should typically parse it I guess.
-                	log("Got "+mReader.readLine());
-                }
-            } catch (IOException t) {
-            }
-        }*/
- 	}
-	
-	public void startZeroconfDiscovery() {
-    
-        log("startZeroconfDiscovery");
-	    
-		setProgressBarIndeterminateVisibility(true);
-		setTitle(R.string.searching);
-		
-	    zeroconfTask = new ZeroconfTask();
-	    zeroconfTask.execute();    
-    }
-
-    public void stopZeroconfDiscovery() {
-		if (zeroconfTask != null) { 
-			log("stopZeroconfDiscovery");
-			zeroconfTask.cancel(true);
-            zeroconfTask = null;
-		}
-    }
-
-    private NsdManager                   mNsdManager        = null;
-    private NsdManager.DiscoveryListener mDiscoveryListener = null;
-    private NsdManager.ResolveListener   mResolveListener   = null;
-
-	class ZeroconfTask extends AsyncTask<Void, String, Void> {
-
-        static final String  DISCOVERY_STARTED = "DS";
-        static final String  DISCOVERY_FAILED  = "DF";
-        static final String  DISCOVERY_HOST    = "DH";
-        boolean isRun = false;
-        
-        public void initializeResolveListener() {
-
-            if (mResolveListener == null) {
-                
-                log("initializeResolveListener");
-                
-                mResolveListener = new NsdManager.ResolveListener() {
-
-                    @Override
-                    public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                        log("ResolveListener: Resolve failed" + errorCode);
-                    }
-
-                    @Override
-                    public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                        
-                        log("ResolveListener: Resolve Succeeded. " + serviceInfo);
-
-                        //if (serviceInfo.getServiceName().equals(ZEROCONF_SERVICE_NAME)) {
-                        //    log("ResolveListener: Same IP.");
-                        //    return;
-                        //}
-
-                        String service = serviceInfo.getServiceName();
-                        String host    = serviceInfo.getHost().getHostAddress();
-                        String port    = String.valueOf(serviceInfo.getPort());
-                        
-                        publishProgress(DISCOVERY_HOST, service, host, port);
-                    }
-                };
-            }
-        }
-        
-        public void initializeDiscoveryListener() {
-
-            // Instantiate a new DiscoveryListener
-            if (mDiscoveryListener == null) {
-            
-                log("initializeDiscoveryListener");
-
-                mDiscoveryListener = new NsdManager.DiscoveryListener() {
-
-                    //  Called as soon as service discovery begins.
-                    @Override
-                    public void onDiscoveryStarted(String regType) {
-                        log("DiscoveryListener: Service discovery started");
-                        publishProgress(DISCOVERY_STARTED);
-                   }
-
-                    @Override
-                    public void onServiceFound(NsdServiceInfo service) {
-                        
-                        // A service was found!  Do something with it.
-                        log("DiscoveryListener: Service discovery success" + service);
-                        
-                        if (!service.getServiceType().equals(ZEROCONF_SERVICE_TYPE)) {
-                            
-                            // Service type is the string containing the protocol and transport layer for this service
-                            log("DiscoveryListener: Unknown Service Type: " + service.getServiceType());
-
-                        //} else if (service.getServiceName().equals(ZEROCONF_SERVICE_NAME)) {
-                        //
-                        //    // The name of the service tells the user what they'd be connecting to
-                        //    log("DiscoveryListener: Same machine: " + ZEROCONF_SERVICE_NAME);
-                        //
-                        } else if (service.getServiceName().contains(ZEROCONF_SERVICE_NAME)){
-                            mNsdManager.resolveService(service, mResolveListener);
-                        }
-                    }
-
-                    @Override
-                    public void onServiceLost(NsdServiceInfo service) {
-                        // When the network service is no longer available.
-                        // Internal bookkeeping code goes here.
-                        log("DiscoveryListener: service lost" + service);
-                        publishProgress(DISCOVERY_FAILED);
-                    }
-
-                    @Override
-                    public void onDiscoveryStopped(String serviceType) {
-                        log("DiscoveryListener: Discovery stopped: " + serviceType);
-                        publishProgress(DISCOVERY_FAILED);
-                    }
-
-                    @Override
-                    public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                        log("DiscoveryListener: Discovery failed: Error code:" + errorCode);
-                        mNsdManager.stopServiceDiscovery(this);
-                        publishProgress(DISCOVERY_FAILED);
-                    }
-
-                    @Override
-                    public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                        log("DiscoveryListener: Discovery failed: Error code:" + errorCode);
-                        mNsdManager.stopServiceDiscovery(this);
-                        publishProgress(DISCOVERY_FAILED);
-                    }
-                };
-            }
-        }
-
-		@Override
-		protected void onPreExecute () {
-            log("ZeroconfTask.onPreExecute");
-            if (mNsdManager == null) {
-                mNsdManager = (NsdManager) anyRemote.protocol.context.getSystemService(Context.NSD_SERVICE);
-            }
-            initializeResolveListener();
-            initializeDiscoveryListener();
-        }
-
-		@Override
-		protected Void doInBackground(Void... params) {
-            log("ZeroconfTask.doInBackground");
-            
-            mNsdManager.discoverServices(ZEROCONF_SERVICE_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
-            
-            while (zeroconfTask != null) {
-                try {
-				    Thread.sleep(50);
-			    } catch (InterruptedException e) {
-			    }
-            }
-            
-            return null;
-		}
-		
-        @Override
-        protected void onProgressUpdate(String... progress) {
-        	
-        	log("ZeroconfTask.onProgressUpdate "+progress[0]);
-            
-            if (progress[0] == DISCOVERY_STARTED) {
-                setProgressBarIndeterminateVisibility(true);
-                setTitle(R.string.searching);
-            } else if (progress[0] == DISCOVERY_FAILED) {
-                setProgressBarIndeterminateVisibility(false);
-		        setTitle(R.string.searchFormUnconnected);
-                mNsdManager.stopServiceDiscovery(mDiscoveryListener);
-        	} else if (progress[0] == DISCOVERY_HOST) {  // peer data
-                dataSource.addIfNew(progress[1]+"://"+progress[2], "socket://"+progress[2] + ":" + progress[3], "",false);
-            }
-        }
-        
-        @Override
-        protected void onPostExecute(Void unused) {
-        	log("ZeroconfTask.onPostExecute");
-            setProgressBarIndeterminateVisibility(false);
-		    setTitle(R.string.searchFormUnconnected);
-            zeroconfTask = null;
-        }
-        
-        @Override
-        protected void onCancelled() {
-        	log("ZeroconfTask.onCancelled");
-        	setProgressBarIndeterminateVisibility(false);
-		    setTitle(R.string.searchFormUnconnected);
-            mNsdManager.stopServiceDiscovery(mDiscoveryListener);
-		    zeroconfTask = null;
-        }
-	}
-
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) { 
 		menu.clear();
 		MenuInflater mi = getMenuInflater();		
 		mi.inflate(R.menu.search_menu, menu);
 		
-        log("onPrepareOptionsMenu: "+(zeroconfTask == null ? "NULL" : "OK"));
+        log("onPrepareOptionsMenu: "+(scanner == null ? "NULL" : "OK"));
         
-		if (asyncNum >= 0 || 
-            ipSearchTask != null ||    // have active search
-            zeroconfTask != null ||    // have active search
-			btUseFlag == BT_USE_SEARCH) {
+		if (scanner != null) {    // have active search
 			
 			/*MenuItem bsrch = menu.findItem(R.id.bt_search_item);
 			bsrch.setVisible(false);
@@ -867,7 +367,8 @@ public class SearchForm extends arActivity
 				
 			case R.id.search_item:
 				
-				showDialog(Dispatcher.CMD_SEARCH_DIALOG);
+				stopSearch();
+                showDialog(Dispatcher.CMD_SEARCH_DIALOG);
 				break;
 	
 			case R.id.cancel_search_item:
@@ -890,16 +391,7 @@ public class SearchForm extends arActivity
 			case R.id.log_item:
 	
 				stopSearch();
-				
-				//anyRemote.sendGlobal(anyRemote.SHOW_LOG, null);
-				
-				//final Intent intentl = new Intent();
-				//intentl.putExtra(anyRemote.ACTION, "log");
-				//setResult(RESULT_OK, intentl);
-				//finish();
-				
 				showLog();
-				
 				break;	
 				
 		    case R.id.about_item:
@@ -908,7 +400,6 @@ public class SearchForm extends arActivity
 		    	about.setTitle(R.string.about);
 		    	about.show();	    	
 		}
-		
 		return true;
 	}
 	
@@ -918,10 +409,7 @@ public class SearchForm extends arActivity
 		stopSearch();
 		
 		anyRemote.sendGlobal(anyRemote.DO_EXIT, null);	  
-		
-		//final Intent intente = new Intent();
-		//intente.putExtra(anyRemote.ACTION, "exit");
-		//setResult(RESULT_OK, intente);
+
 		finish();
 	}
 	
@@ -965,24 +453,12 @@ public class SearchForm extends arActivity
 		}
 		return false;
 	}
-	
-	public void stopBluetoothDiscovery() {
-		
-		btUseFlag = BT_USE_NO;
-
-		if (mBtAdapter != null && mBtAdapter.isDiscovering()) {
-			log("stopBluetoothDiscovery: cancelDiscovery");
-			mBtAdapter.cancelDiscovery();
-		}
-	}
 
 	public void switchBluetoothOn() {
 		log("switchBluetoothOn");
-		String actionStateChanged = BluetoothAdapter.ACTION_STATE_CHANGED;
-		String actionRequestEnable = BluetoothAdapter.ACTION_REQUEST_ENABLE;
 		deregStateRcv = true;
-		registerReceiver(mBTStateReceiver, new IntentFilter(actionStateChanged));
-		startActivityForResult(new Intent(actionRequestEnable), 0);
+		registerReceiver(mBTStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+		startActivityForResult(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE), 0);
 	}
 
 	public void doConnect(String address) {
@@ -1008,7 +484,6 @@ public class SearchForm extends arActivity
 		connectAuto = a.autoconnect;
 
 		if (connectTo.startsWith("btspp:") && mBtAdapter != null &&  !mBtAdapter.isEnabled()) {
-			btUseFlag = BT_USE_CONNECT;
 			switchBluetoothOn();
 		} else {   
 			doRealConnect();
@@ -1017,7 +492,8 @@ public class SearchForm extends arActivity
 
 	public void doRealConnect() {
 		//log("doRealConnect");
-		cancelSearch(false);
+		
+        stopSearch();
 
 		log("doRealConnect: address is "+connectTo);
 
@@ -1126,16 +602,30 @@ public class SearchForm extends arActivity
 				showDialog(id);
 				
 			} else if (((BT_IP_Choose_Dialog) dialog).id() == Dispatcher.CMD_SEARCH_DIALOG) {
-				if (isBT) {
-					doDiscovery();
+				
+                if (scanner != null) {
+                    log("scanner: already searching");
+                    return;
+                }
+                
+                if (isBT) {
+                    scanner = new BTScanner(handler, this);
 				} else {
                     boolean zeroconf = ((BT_IP_Choose_Dialog) dialog).isZeroconf();
-                    if (zeroconf) {
-                        startZeroconfDiscovery();
+                    int apiVersion = Integer.valueOf(android.os.Build.VERSION.SDK);
+                    
+                    if (zeroconf && apiVersion >= android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                        scanner = new ZCScanner(handler, anyRemote.protocol.context);
                     } else {
-					    tcpSearch();
+					    scanner = new IPScanner(handler);
                     }
 				}
+                
+                if (scanner != null) {
+                    scanner.startScan();
+                    setProgressBarIndeterminateVisibility(true);
+		            setTitle(R.string.searching);
+                }
 			}
 		}
 	}
