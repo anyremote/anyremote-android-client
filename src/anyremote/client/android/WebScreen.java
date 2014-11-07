@@ -168,8 +168,12 @@ public class WebScreen extends arActivity
         log("onOptionsItemSelected " + title);
         
         if (title == anyRemote.protocol.context.getString(R.string.disconnect_item)) {
-           doFinish("");
-           return true; 
+            doFinish("");
+            return true; 
+        } else if (title == anyRemote.protocol.context.getString(R.string.back_item)) {
+            WebView wwwView = (WebView) findViewById(R.id.web_view);
+            wwwView.loadUrl(anyRemote.protocol.webUrl+"/Back.menu");
+            return true; 
         }
         
         commandAction(title);

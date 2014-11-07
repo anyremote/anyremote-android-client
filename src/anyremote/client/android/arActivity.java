@@ -97,6 +97,7 @@ public class arActivity extends Activity
             menu.add(getString(R.string.backspace));
             menu.add(getString(R.string.alt_f4));
     	} else if (privateMenu == anyRemote.WEB_FORM) { // Web screen
+            menu.add(getString(R.string.back_item));
 		    menu.add(getString(R.string.disconnect_item));
      	} else {
     		Vector<String> menuItems = anyRemote.protocol.getMenu();
