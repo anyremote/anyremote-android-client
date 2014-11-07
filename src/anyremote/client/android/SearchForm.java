@@ -493,7 +493,8 @@ public class SearchForm extends arActivity
 			switchBluetoothOn();
 		} else if (connectTo.startsWith("web://")) {
             anyRemote.protocol.webUrl = "http://"+connectTo.substring(6);  // 6 == size("web://")
-			showWeb();
+			addAddress(connectName,connectTo,connectPass,connectAuto);
+            showWeb();
 		} else {   
 			doRealConnect();
 		}
