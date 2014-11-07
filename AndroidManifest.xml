@@ -39,6 +39,8 @@
             android:name="KeyboardScreen"
             android:windowSoftInputMode="stateVisible">
         </activity>
+        <activity android:name="WebScreen" >
+        </activity>
     </application>
 
     <uses-sdk android:minSdkVersion="7" >

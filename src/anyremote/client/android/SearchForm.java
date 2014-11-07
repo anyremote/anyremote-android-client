@@ -453,6 +453,12 @@ public class SearchForm extends arActivity
 		}
 		return false;
 	}
+	
+    protected void showWeb() {
+	    log("showWeb");
+	    final Intent showWeb = new Intent(getBaseContext(), WebScreen.class);
+	    startActivity(showWeb); 
+	}
 
 	public void switchBluetoothOn() {
 		log("switchBluetoothOn");
@@ -485,6 +491,9 @@ public class SearchForm extends arActivity
 
 		if (connectTo.startsWith("btspp:") && mBtAdapter != null &&  !mBtAdapter.isEnabled()) {
 			switchBluetoothOn();
+		} else if (connectTo.startsWith("web://")) {
+            anyRemote.protocol.webUrl = "http://"+connectTo.substring(6);  // 6 == size("web://")
+			showWeb();
 		} else {   
 			doRealConnect();
 		}
@@ -499,13 +508,6 @@ public class SearchForm extends arActivity
 
 		// be sure peer is stored
 		addAddress(connectName,connectTo,connectPass,connectAuto);
-		
-		//final Intent intent = new Intent();  
-
-		//intent.putExtra(anyRemote.CONN_ADDR, connectTo);
-		//intent.putExtra(anyRemote.CONN_NAME, connectName);
-		//intent.putExtra(anyRemote.CONN_PASS, connectPass);
-		//setResult(RESULT_OK, intent);
 
 		Address conn = new Address();
 		conn.name = connectName;

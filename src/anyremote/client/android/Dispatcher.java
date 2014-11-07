@@ -195,10 +195,14 @@ public class Dispatcher {
 	Vector<String> winMenu = new Vector<String>();
  
 	// Mouse Screen stuff
-    Vector<String> mouseMenu = new Vector<String>();
+    //Vector<String> mouseMenu = new Vector<String>();
 
     // Keyboard Screen stuff
-    Vector<String> keyboardMenu = new Vector<String>();
+    //Vector<String> keyboardMenu = new Vector<String>();
+    
+    // Web Screen stuff
+    String webUrl;
+    //Vector<String> webMenu = new Vector<String>();
 
 	// telephony handler
 	PhoneManager phoneManager;
@@ -285,11 +289,12 @@ public class Dispatcher {
 		winMenu.clear();
 		menuAddDefault(anyRemote.WMAN_FORM);
 		
-        mouseMenu.clear();
-        menuAddDefault(anyRemote.MOUSE_FORM);
-
-        keyboardMenu.clear();
-        menuAddDefault(anyRemote.KEYBOARD_FORM);
+        //mouseMenu.clear();
+        //menuAddDefault(anyRemote.MOUSE_FORM);
+        //keyboardMenu.clear();
+        //menuAddDefault(anyRemote.KEYBOARD_FORM);
+        //webMenu.clear();
+        //menuAddDefault(anyRemote.WEB_FORM);
         
 		autoPass  = false;
 	}
@@ -1969,17 +1974,20 @@ public class Dispatcher {
 			case anyRemote.WMAN_FORM:
 				winMenu.add(context.getString(R.string.back_item));
 				break;
-            case anyRemote.MOUSE_FORM:
+            /*case anyRemote.MOUSE_FORM:
                 mouseMenu.add(context.getString(R.string.back_item));
                 break;
             case anyRemote.KEYBOARD_FORM:
                 keyboardMenu.add(context.getString(R.string.back_item));
                 break;
+            case anyRemote.WEB_FORM:
+                webMenu.add(context.getString(R.string.disconnect_item));
+                break;
 			case anyRemote.LOG_FORM:
 				textMenu.add(context.getString(R.string.clear_log_item));
 				textMenu.add(context.getString(R.string.report_bug_item));
 				textMenu.add(context.getString(R.string.back_item));
-				break;
+				break;*/
 		}
 	}
 	
@@ -1991,14 +1999,16 @@ public class Dispatcher {
 			case anyRemote.CONTROL_FORM:
 				return cfMenu;
 			case anyRemote.TEXT_FORM:
-			case anyRemote.LOG_FORM:
+			//case anyRemote.LOG_FORM:
 				return textMenu;
 			case anyRemote.LIST_FORM:
 				return listMenu;
-			case anyRemote.MOUSE_FORM:
+			/*case anyRemote.MOUSE_FORM:
 				return mouseMenu;
             case anyRemote.KEYBOARD_FORM:
                 return keyboardMenu;
+            case anyRemote.WEB_FORM:
+                return webMenu;*/
             case anyRemote.WMAN_FORM:
                 return winMenu;
 		}

@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011-2013 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2014 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -95,9 +95,9 @@ public class KeyboardScreen extends arActivity
         
         anyRemote.protocol.setFullscreen(this);
 
-        synchronized (anyRemote.protocol.keyboardMenu) {
+        //synchronized (anyRemote.protocol.keyboardMenu) {
             setContentView(R.layout.keyboard_form_default);
-        }
+        //}
         
         final EditText text = (EditText) findViewById(R.id.keyboard_view);
 

@@ -63,7 +63,7 @@ public class anyRemote extends Activity
 	public static final int DO_EXIT       = 4;
 	public static final int DO_CONNECT    = 5;
 	public static final int DO_DISCONNECT = 6;
-	public static final int SHOW_LOG      = 7;
+	//public static final int SHOW_LOG      = 7;
 	
 	public static final int SWIPE_MIN_DISTANCE = 120;
 	public static final int SWIPE_THRESHOLD_VELOCITY = 200; 
@@ -79,7 +79,8 @@ public class anyRemote extends Activity
     static final int  LOG_FORM      = 8;
     static final int  MOUSE_FORM    = 9;
     static final int  KEYBOARD_FORM = 10;
-	static final int  DUMMY_FORM    = 11;
+    static final int  WEB_FORM      = 11;
+	static final int  DUMMY_FORM    = 12;
 
 	static final int  LOG_CAPACITY = 16384;
 
@@ -197,8 +198,18 @@ public class anyRemote extends Activity
 
 	public void setCurrentView(int which, String subCommand) {
 		_log("setCurrentView " + getScreenStr(which) + " (was " + getScreenStr(currForm) + ") finish="+finishFlag);
+		
+        if (which == LOG_FORM ||
+	        which == MOUSE_FORM ||
+	        which == KEYBOARD_FORM ||
+	        which == WEB_FORM) {
+            _log("setCurrentView wrong switch option. Skip it.");
+            return; 
+        }
 
-		if (finishFlag == true) return; // on destroy
+		if (finishFlag == true) {
+            return; // on destroy
+        }
 
 		if (currForm == which) {
 			_log("setCurrentView TRY TO SWITCH TO THE SAME FORM ???");
@@ -228,18 +239,20 @@ public class anyRemote extends Activity
 				
 	            break;
 	
-			case LOG_FORM:
-	        case MOUSE_FORM:
-	        case KEYBOARD_FORM:
+			//case LOG_FORM:
+	        //case MOUSE_FORM:
+	        //case KEYBOARD_FORM:
+	        //case WEB_FORM:
 			case DUMMY_FORM:
 				break;
 	
 			}
 		}
 		
-		if (prevForm != LOG_FORM && 
-		    prevForm != MOUSE_FORM &&
-		    prevForm != KEYBOARD_FORM) {
+		if (prevForm != LOG_FORM      && 
+		    prevForm != MOUSE_FORM    &&
+		    prevForm != KEYBOARD_FORM &&
+		    prevForm != WEB_FORM) {
 	     	protocol.menuReplaceDefault(currForm);
 		}
 
@@ -277,7 +290,8 @@ public class anyRemote extends Activity
 			startActivity(showWman); 
 			break;
 
-		case MOUSE_FORM:
+		/* ???
+        case MOUSE_FORM:
             _log("setCurrentView start MouseWin");
             final Intent showMou = new Intent(getBaseContext(), MouseScreen.class);
             startActivity(showMou); 
@@ -295,6 +309,7 @@ public class anyRemote extends Activity
 			showLog.putExtra("SUBID", "__LOG__");
 			startActivity(showLog); 
 			break;
+        */
 		}
 	}
 
@@ -435,11 +450,11 @@ public class anyRemote extends Activity
 			protocol.disconnect(true);
 			break;			
 
-		case anyRemote.SHOW_LOG:
+		/*case anyRemote.SHOW_LOG:
 			
 			anyRemote._log("handleMessage: SHOW_LOG");
 			setCurrentView(LOG_FORM, "");
-			break;			
+			break;*/			
 		}
 		return true;
 	}
@@ -676,6 +691,7 @@ public class anyRemote extends Activity
             case EDIT_FORM:    return "EDIT";
             case WMAN_FORM:    return "WMAN";
             case LOG_FORM:     return "LOG";
+            case WEB_FORM:     return "WEB";
             case DUMMY_FORM:   return "DUMMY";
 		}
 		return "UNKNOWN";

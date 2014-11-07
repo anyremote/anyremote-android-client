@@ -176,9 +176,9 @@ public class MouseScreen
 
         anyRemote.protocol.setFullscreen(this);
 
-        synchronized (anyRemote.protocol.mouseMenu) {
+        //synchronized (anyRemote.protocol.mouseMenu) {
             setContentView(R.layout.mouse_form_default);
-        }
+        //}
         
         Display display = getWindowManager().getDefaultDisplay();
 
