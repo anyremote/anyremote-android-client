@@ -23,6 +23,8 @@
 package anyremote.client.android.util;
 
 // API 16
+import java.util.ArrayList;
+
 import android.net.nsd.NsdServiceInfo;
 import android.net.nsd.NsdManager;
 
@@ -50,18 +52,38 @@ public class ZCScanner implements IScanner {
     
     static final String ZEROCONF_SERVICE_NAME = "anyRemote";
 
-    private NsdManager                   mNsdManager        = null;
-    private NsdManager.DiscoveryListener mDiscoveryListener = null;
-    private NsdManager.ResolveListener   mResolveListener   = null;
-
+    private NsdManager          mNsdManager           = null;
+    private ArDiscoveryListener mDiscoveryListenerTCP = null;
+    private ArDiscoveryListener mDiscoveryListenerWEB = null;
+    private NsdManager.ResolveListener resolver       = null;
+    
+    ArrayList<NsdServiceInfo> toResolve = new ArrayList<NsdServiceInfo>();
     Handler searchFormHandler;
     Context context;
+    
 
 	public ZCScanner(Handler hdl, Context ctx) {
         searchFormHandler = hdl;
         context           = ctx;
     }
-    
+
+    @TargetApi(android.os.Build.VERSION_CODES.JELLY_BEAN)
+    public void resolveNext() {
+        
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+		}
+        
+        synchronized (toResolve) {
+            if (toResolve.size() > 0) {
+                NsdServiceInfo srvInfo = toResolve.remove(0);
+                anyRemote._log("ZCScanner","resolveNext (remains #" + toResolve.size() + ") " + srvInfo);
+                mNsdManager.resolveService(srvInfo, resolver);
+            }
+        }
+    }
+
     @TargetApi(android.os.Build.VERSION_CODES.JELLY_BEAN)
     public void startScan() {
             
@@ -69,38 +91,19 @@ public class ZCScanner implements IScanner {
             mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
         }
         
-        initializeResolveListener();
-        initializeDiscoveryListener(); 
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+		}
         
-        anyRemote._log("ZCScanner", "startScan discoverServices");
+        if (resolver == null) {
         
-        mNsdManager.discoverServices(ZEROCONF_TCP_SERVICE_TYPE, 
-                                     NsdManager.PROTOCOL_DNS_SD, 
-                                     mDiscoveryListener);
-    }
-    
-    @TargetApi(android.os.Build.VERSION_CODES.JELLY_BEAN)
-    public void stopScan () {
-        mNsdManager.stopServiceDiscovery(mDiscoveryListener);
-    }
-    
-    private void informDiscoveryResult(int res) {
-        Message msg = searchFormHandler.obtainMessage(res);
-		msg.sendToTarget();
-    }
-    
-    @TargetApi(android.os.Build.VERSION_CODES.JELLY_BEAN)
-    private void initializeResolveListener() {
-
-        if (mResolveListener == null) {
-            
-            anyRemote._log("ZCScanner", "initializeResolveListener");
-            
-            mResolveListener = new NsdManager.ResolveListener() {
+            resolver = new NsdManager.ResolveListener() {
 
                 @Override
                 public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                    anyRemote._log("ZCScanner", "ResolveListener: Resolve failed" + errorCode);
+                    anyRemote._log("ZCScanner", "resolve failed " + errorCode);
+                    resolveNext(); 
                 }
 
                 @Override
@@ -110,104 +113,142 @@ public class ZCScanner implements IScanner {
                     String type    = serviceInfo.getServiceType();
                     String host    = serviceInfo.getHost().getHostAddress();
                     String port    = String.valueOf(serviceInfo.getPort());
-                    
-                    anyRemote._log("ZCScanner", "ResolveListener: resolve succeeded " + service +"/" + type);
+
+                    anyRemote._log("ZCScanner", "resolve succeeded " + service +"/" + type);
 
                     ScanMessage sm = new ScanMessage();
-                    
+
                     if (type.contains(ZEROCONF_TCP_SERVICE_TYPE) ||
                         type.contains(ZEROCONF_ANR_SERVICE_TYPE)) {
 
                         sm.name    = service + "://" + host;
                         sm.address = "socket://" + host + ":" + port;
-                        
+
                     } else if (type.contains(ZEROCONF_WEB_SERVICE_TYPE)) {
-                        
+
                         sm.name    = "web://" + host;
                         sm.address = "web://" + host + ":" + port;
-                    
+
                     } else {
-                    
-                        anyRemote._log("ZCScanner", "ResolveListener: improper service type " + type);
+
+                        anyRemote._log("ZCScanner", "resolver: improper service type " + type);
                         return;
                     }
-                     
+
                     Message msg = searchFormHandler.obtainMessage(SCAN_FOUND, sm);
 		            msg.sendToTarget();
+
+                    resolveNext(); 
                 }
             };
         }
+        
+        if (mDiscoveryListenerTCP == null) {
+            anyRemote._log("ZCScanner", "startScan TCP");
+            mDiscoveryListenerTCP = new ArDiscoveryListener(ZEROCONF_TCP_SERVICE_TYPE);
+        }
+        
+        if (mDiscoveryListenerWEB == null) {
+            anyRemote._log("ZCScanner", "startScan WEB");
+            mDiscoveryListenerWEB = new ArDiscoveryListener(ZEROCONF_WEB_SERVICE_TYPE);
+        }
+        
+        anyRemote._log("ZCScanner", "startScan discoverServices");
+        
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+		}
+        
+        mNsdManager.discoverServices(ZEROCONF_TCP_SERVICE_TYPE, 
+                                     NsdManager.PROTOCOL_DNS_SD, 
+                                     (NsdManager.DiscoveryListener) mDiscoveryListenerTCP);
+
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+		}
+        
+        mNsdManager.discoverServices(ZEROCONF_WEB_SERVICE_TYPE, 
+                                     NsdManager.PROTOCOL_DNS_SD, 
+                                     (NsdManager.DiscoveryListener) mDiscoveryListenerWEB);
     }
     
     @TargetApi(android.os.Build.VERSION_CODES.JELLY_BEAN)
-    private void initializeDiscoveryListener() {
+    public void stopScan () {
+        mNsdManager.stopServiceDiscovery((NsdManager.DiscoveryListener) mDiscoveryListenerTCP);
+        mNsdManager.stopServiceDiscovery((NsdManager.DiscoveryListener) mDiscoveryListenerWEB);
+    }
+    
+    private void informDiscoveryResult(int res) {
+        Message msg = searchFormHandler.obtainMessage(res);
+		msg.sendToTarget();
+    }
+    
+    @TargetApi(android.os.Build.VERSION_CODES.JELLY_BEAN)
+    public class ArDiscoveryListener implements NsdManager.DiscoveryListener {
 
-        // Instantiate a new DiscoveryListener
-        if (mDiscoveryListener == null) {
+        private String serviceType;
+         
+        public ArDiscoveryListener(String sType) {
+            
+            serviceType = sType; 
+
+            anyRemote._log("ZCScanner", "ArDiscoveryListener "+serviceType);
+        }
         
-            anyRemote._log("ZCScanner", "initializeDiscoveryListener");
+        //  Called as soon as service discovery begins.
+        @Override
+        public void onDiscoveryStarted(String regType) {
+            anyRemote._log("ZCScanner", "service discovery started "+serviceType);
+        }
 
-            mDiscoveryListener = new NsdManager.DiscoveryListener() {
+        @Override
+        public void onServiceFound(NsdServiceInfo service) {
+            
+            anyRemote._log("ZCScanner","service discovery success " + service.getServiceName() + " " + service.getServiceType());
+            if (!service.getServiceName().contains(ZEROCONF_SERVICE_NAME)) {
+                return;
+            }
+            
+            if (service.getServiceType().contains(serviceType)) {
+                 synchronized (toResolve) {
+                     toResolve.add(service);
+                     anyRemote._log("ZCScanner","resolve queue #" + toResolve.size());
+                 }
+                 resolveNext();
+            } else {
+                // Service type is the string containing the protocol and transport layer for this service
+                anyRemote._log("ZCScanner","unknown service type " + service.getServiceType());
+            }
+        }
+        
+        @Override
+        public void onServiceLost(NsdServiceInfo service) {
+            // When the network service is no longer available.
+            // Internal bookkeeping code goes here.
+            anyRemote._log("ZCScanner", "service lost " + service.getServiceName());
+            informDiscoveryResult(SCAN_FAILED);
+        }
 
-                //  Called as soon as service discovery begins.
-                @Override
-                public void onDiscoveryStarted(String regType) {
-                    anyRemote._log("ZCScanner", "DiscoveryListener: Service discovery started");
-                }
+        @Override
+        public void onDiscoveryStopped(String serviceType) {
+            anyRemote._log("ZCScanner","discovery stopped " + serviceType);
+            informDiscoveryResult(SCAN_FINISHED);
+        }
 
-                @Override
-                public void onServiceFound(NsdServiceInfo service) {
-                    
-                    // A service was found!  Do something with it.
-                    anyRemote._log("ZCScanner","DiscoveryListener: Service discovery success " + service);
-                    if (!service.getServiceName().contains(ZEROCONF_SERVICE_NAME)) {
-                        return;
-                    }
-                    
-                    if (service.getServiceType().contains(ZEROCONF_TCP_SERVICE_TYPE) ||
-                        service.getServiceType().contains(ZEROCONF_WEB_SERVICE_TYPE) ||
-                        service.getServiceType().contains(ZEROCONF_ANR_SERVICE_TYPE)) {
-                         mNsdManager.resolveService(service, mResolveListener);
-                    } else {
-                        // Service type is the string containing the protocol and transport layer for this service
-                        anyRemote._log("ZCScanner","DiscoveryListener: Unknown Service Type: " + service.getServiceType());
-                    }
-                }
+        @Override
+        public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+            anyRemote._log("ZCScanner", "discovery failed: error code " + errorCode);
+            mNsdManager.stopServiceDiscovery((NsdManager.DiscoveryListener) this);
+            informDiscoveryResult(SCAN_FAILED);
+        }
 
-                @Override
-                public void onServiceLost(NsdServiceInfo service) {
-                    // When the network service is no longer available.
-                    // Internal bookkeeping code goes here.
-                    anyRemote._log("ZCScanner", "DiscoveryListener: service lost" + service);
-                    informDiscoveryResult(SCAN_FAILED);
-                }
-
-                @Override
-                public void onDiscoveryStopped(String serviceType) {
-                    anyRemote._log("ZCScanner","DiscoveryListener: Discovery stopped: " + serviceType);
-                    /*if (serviceType.contains(ZEROCONF_TCP_SERVICE_TYPE)) {
-                        mNsdManager.discoverServices(ZEROCONF_WEB_SERVICE_TYPE, 
-                                                     NsdManager.PROTOCOL_DNS_SD, 
-                                                     mDiscoveryListener);
-                    } else {*/
-                        informDiscoveryResult(SCAN_FINISHED);
-                    //}
-                }
-
-                @Override
-                public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                    anyRemote._log("ZCScanner", "DiscoveryListener: Discovery failed: Error code:" + errorCode);
-                    mNsdManager.stopServiceDiscovery(this);
-                    informDiscoveryResult(SCAN_FAILED);
-                }
-
-                @Override
-                public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                    anyRemote._log("ZCScanner","DiscoveryListener: Discovery failed: Error code:" + errorCode);
-                    mNsdManager.stopServiceDiscovery(this);
-                    informDiscoveryResult(SCAN_FAILED);
-                }
-            };
+        @Override
+        public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+            anyRemote._log("ZCScanner","discovery failed: error code " + errorCode);
+            mNsdManager.stopServiceDiscovery((NsdManager.DiscoveryListener) this);
+            informDiscoveryResult(SCAN_FAILED);
         }
     }
 }
