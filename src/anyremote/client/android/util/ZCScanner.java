@@ -24,6 +24,7 @@ package anyremote.client.android.util;
 
 // API 16
 import java.util.ArrayList;
+import java.util.TimerTask;
 
 import android.net.nsd.NsdServiceInfo;
 import android.net.nsd.NsdManager;
@@ -34,6 +35,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Build;
 
+import anyremote.client.android.MainLoop;
 import anyremote.client.android.anyRemote;
 import anyremote.client.android.Dispatcher;
 import anyremote.client.android.util.IScanner;
@@ -155,10 +157,17 @@ public class ZCScanner implements IScanner {
         
         anyRemote._log("ZCScanner", "startScan discoverServices");
         
+            			
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {
 		}
+        
+		MainLoop.schedule(new TimerTask() {
+            public void run() {
+                 stopScan();
+            }
+            }, 15000);  // stop discovery after 15 seconds
         
         mNsdManager.discoverServices(ZEROCONF_TCP_SERVICE_TYPE, 
                                      NsdManager.PROTOCOL_DNS_SD, 
