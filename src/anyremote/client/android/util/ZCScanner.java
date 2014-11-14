@@ -48,9 +48,8 @@ import anyremote.client.android.util.ScanMessage;
 @TargetApi(android.os.Build.VERSION_CODES.JELLY_BEAN)  // API 16
 public class ZCScanner implements IScanner {	
 
-    static final String ZEROCONF_TCP_SERVICE_TYPE = "_remote._tcp";
-    static final String ZEROCONF_WEB_SERVICE_TYPE = "_http._tcp";
-    static final String ZEROCONF_ANR_SERVICE_TYPE = "_anyremote._tcp";  // future
+    static final String ZEROCONF_TCP_SERVICE_TYPE = "_anyremote._tcp";
+    static final String ZEROCONF_WEB_SERVICE_TYPE = "_anyremote-http._tcp";
     
     static final String ZEROCONF_SERVICE_NAME = "anyRemote";
 
@@ -120,8 +119,7 @@ public class ZCScanner implements IScanner {
 
                     ScanMessage sm = new ScanMessage();
 
-                    if (type.contains(ZEROCONF_TCP_SERVICE_TYPE) ||
-                        type.contains(ZEROCONF_ANR_SERVICE_TYPE)) {
+                    if (type.contains(ZEROCONF_TCP_SERVICE_TYPE)) {
 
                         sm.name    = service + "://" + host;
                         sm.address = "socket://" + host + ":" + port;
