@@ -165,7 +165,7 @@ public class ZCScanner implements IScanner {
             public void run() {
                  stopScan();
             }
-            }, 15000);  // stop discovery after 15 seconds
+        }, 15000);  // stop discovery after 15 seconds
         
         mNsdManager.discoverServices(ZEROCONF_TCP_SERVICE_TYPE, 
                                      NsdManager.PROTOCOL_DNS_SD, 
