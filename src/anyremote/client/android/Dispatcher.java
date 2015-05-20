@@ -463,6 +463,22 @@ public class Dispatcher {
 		return "UNKNOWN";
 	}
 	
+    public void handleGetCoverSizeCmd() {
+	    Display d = context.getWindowManager().getDefaultDisplay(); 
+        queueCommand("CoverSize("+(d.getWidth()*2)/3+",)");
+    }
+    
+    public void handleGetScreeenSizeCmd() {
+        Display display = context.getWindowManager().getDefaultDisplay(); 
+        boolean rotated = (display.getOrientation() == Surface.ROTATION_90 ||
+                           display.getOrientation() == Surface.ROTATION_270);
+        String ori = (rotated ? "R" : "");
+        
+        queueCommand("SizeX("+display.getWidth() +","+ori+")");
+        queueCommand("SizeY("+display.getHeight()+","+ori+")");
+        handleGetScreeenSizeCmd();
+    }
+    
 	public void handleCommand(ProtocolMessage msg) {
 
 		int id           = msg.id; 
@@ -513,10 +529,10 @@ public class Dispatcher {
 			
 			if (cmdTokens.size() < 4) return;
 			
-			anyRemote.protocol.efCaption = (String) cmdTokens.elementAt(1);
-			anyRemote.protocol.efLabel   = (String) cmdTokens.elementAt(2);
-			anyRemote.protocol.efValue   = (String) cmdTokens.elementAt(3);
-			anyRemote.protocol.efId      = CMD_EFIELD;
+			efCaption = (String) cmdTokens.elementAt(1);
+			efLabel   = (String) cmdTokens.elementAt(2);
+			efValue   = (String) cmdTokens.elementAt(3);
+			efId      = CMD_EFIELD;
 			
 			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
 			// CMD_EFIELD: result will be handled in handleEditFieldResult()
@@ -524,26 +540,26 @@ public class Dispatcher {
 			
 		case CMD_FSCREEN:
 			
-			anyRemote.protocol.setFullscreen((String) cmdTokens.elementAt(1));
+			setFullscreen((String) cmdTokens.elementAt(1));
 			sendToActivity(anyRemote.getCurScreen(),id,ProtocolMessage.FULL);
 			break; 
 
 		case CMD_POPUP:
 			
-			anyRemote.protocol.popupState = false;
-			anyRemote.protocol.popupMsg.delete(0, anyRemote.protocol.popupMsg.length());
+			popupState = false;
+			popupMsg.delete(0, popupMsg.length());
 			
 			String op = (String) cmdTokens.elementAt(1);
 			
 			if (op.equals("show")) { 
 
-				anyRemote.protocol.popupState = true;
+				popupState = true;
 				
 				for (int i=2;i<cmdTokens.size();i++) {
 					if (i != 2) {
-						anyRemote.protocol.popupMsg.append(", ");
+						popupMsg.append(", ");
 					}
-					anyRemote.protocol.popupMsg.append((String) cmdTokens.elementAt(i));
+					popupMsg.append((String) cmdTokens.elementAt(i));
 				}
 			}
 			
@@ -786,19 +802,12 @@ public class Dispatcher {
 
 		case CMD_GETSCRSIZE:
 
-			Display display = context.getWindowManager().getDefaultDisplay(); 
-			boolean rotated = (display.getOrientation() == Surface.ROTATION_90 ||
-	                           display.getOrientation() == Surface.ROTATION_270);
-			String ori = (rotated ? "R" : "");
-	        
-			queueCommand("SizeX("+display.getWidth() +","+ori+")");
-			queueCommand("SizeY("+display.getHeight()+","+ori+")");
+			handleGetScreeenSizeCmd();
 			break;
 
 		case CMD_GETCVRSIZE:
 
-			Display d = context.getWindowManager().getDefaultDisplay(); 
-			queueCommand("CoverSize("+(d.getWidth()*2)/3+",)");
+		    handleGetCoverSizeCmd();
 			break;
 
 		case CMD_GETICSIZE:
@@ -1225,7 +1234,7 @@ public class Dispatcher {
 
 		if (option.startsWith("on")) {
 			if (fullscreen) return;
-			fullscreen = true;			    	
+			fullscreen = true;
 		} else if (option.startsWith("off")) {
 			if (!fullscreen) return;
 			fullscreen = false;
@@ -1234,11 +1243,11 @@ public class Dispatcher {
 		}
 	}
 	
-	public void setFullscreen(String option, arActivity act) {
-		
-		setFullscreen(option);
-		setFullscreen(act);
-	}
+	//public void setFullscreen(String option, arActivity act) {
+	//	
+	//	setFullscreen(option);
+	//	setFullscreen(act);
+	//}
 
 	public void setFullscreen(arActivity act) {
 		if (fullscreen) {
@@ -1251,6 +1260,7 @@ public class Dispatcher {
 			act.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
 	}
+		
 	public void log(String msg) {
 		anyRemote._log("Dispatcher",msg);
 	}
