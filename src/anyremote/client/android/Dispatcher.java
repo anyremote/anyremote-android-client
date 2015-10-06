@@ -60,19 +60,20 @@ public class Dispatcher {
 	static final int CMD_FSCREEN    = 7;
 	static final int CMD_ICONLIST   = 8;
 	static final int CMD_ICONS      = 9;
-	static final int CMD_LIST       = 10;
-	static final int CMD_MENU       = 11;
-	static final int CMD_PARAM      = 12;
-	static final int CMD_REPAINT    = 13;
-	static final int CMD_LAYOUT  	= 14;
-	static final int CMD_STATUS     = 15;
-	static final int CMD_TEXT       = 16;
-	static final int CMD_TITLE      = 17;
-	static final int CMD_IMAGE  	= 18;
-	static final int CMD_VIBRATE    = 19;
-	static final int CMD_VOLUME     = 20;
-	static final int CMD_COVER      = 21;
-	static final int CMD_POPUP      = 22;
+	static final int CMD_HINTS      = 10;
+	static final int CMD_LIST       = 11;
+	static final int CMD_MENU       = 12;
+	static final int CMD_PARAM      = 13;
+	static final int CMD_REPAINT    = 14;
+	static final int CMD_LAYOUT  	= 15;
+	static final int CMD_STATUS     = 16;
+	static final int CMD_TEXT       = 17;
+	static final int CMD_TITLE      = 18;
+	static final int CMD_IMAGE  	= 19;
+	static final int CMD_VIBRATE    = 20;
+	static final int CMD_VOLUME     = 21;
+	static final int CMD_COVER      = 22;
+	static final int CMD_POPUP      = 23;
 
 	static final int CMD_GETSCRSIZE = 51;
 	static final int CMD_GETPLTF    = 52;
@@ -154,6 +155,7 @@ public class Dispatcher {
 	String cfStatus;
 	String cfCaption;
 	String [] cfIcons;
+	String [] cfHints;
 	String cfUpEvent;
 	String cfDownEvent;
 	int    cfInitFocus;
@@ -231,6 +233,7 @@ public class Dispatcher {
 
 		listContent = new ArrayList<ListItem>();
 		cfIcons     = new String[ControlScreen.NUM_ICONS];
+		cfHints     = new String[ControlScreen.NUM_ICONS];
 		listBufferedItem = new StringBuilder();
 		
 		textContent = new StringBuilder();
@@ -247,6 +250,9 @@ public class Dispatcher {
 		for (int i=0;i<ControlScreen.NUM_ICONS;i++) {
 			cfIcons[i] = "none";
 		}
+        for (int i=0;i<ControlScreen.NUM_ICONS;i++) {
+            cfHints[i] = "";
+        }
 		cfSkin = ControlScreen.SK_DEFAULT;
 		cfUpEvent   = "UP";
 		cfDownEvent = "DOWN";
@@ -428,7 +434,8 @@ public class Dispatcher {
 	        case CMD_FONT:     return "Set(font)";
 	        case CMD_FSCREEN:  return "Set(fullscreen)";
 	        case CMD_ICONLIST: return "Set(iconlist)";
-	        case CMD_ICONS:    return "Set(icons)";
+	        case CMD_ICONS:    return "Set(icons)"; 
+	        case CMD_HINTS:    return "Set(hints)";
 	        case CMD_LIST:     return "Set(list)";
 	        case CMD_MENU:     return "Set(menu)";
 	        case CMD_PARAM:    return "Set(param)";
@@ -502,6 +509,7 @@ public class Dispatcher {
 		case CMD_FG:
 		case CMD_FONT:
 		case CMD_ICONS:
+		case CMD_HINTS:
 		case CMD_LAYOUT:
 		case CMD_STATUS:
 		case CMD_TITLE:
@@ -1331,6 +1339,14 @@ public class Dispatcher {
 		    	}
 				controlSetIconLayout(vR);
 				break; 
+           
+		    case CMD_HINTS:
+                
+                if (vR.size() < 2) {
+                    return;
+                }
+                controlSetHints(vR);
+                break; 
 				
   		    case CMD_BG:
   		    	
@@ -1497,7 +1513,25 @@ public class Dispatcher {
 	         } catch (Exception e) { }
         }
     }
-   
+	
+	private void controlSetHints(Vector data) {
+	        
+	        if (data.size() < 2) {
+	            return;
+	        }
+	        
+	        for (int idx=1;idx<data.size()-1;idx+=2) {
+	            try {
+	                int i = btn2int((String) data.elementAt(idx));
+
+	                if (i >= 0 || i < ControlScreen.NUM_ICONS) {    
+	                    cfHints[i] = (String) data.elementAt(idx+1);
+	                    log("controlSetIconLayout "+i+" -> "+cfHints[i]); 
+	                }  
+	             } catch (Exception e) { }
+	        }
+	    }
+  
 	private void controlSetFontParams(Vector defs) {
 		
 		boolean bold   = false;
