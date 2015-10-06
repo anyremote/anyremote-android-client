@@ -483,7 +483,6 @@ public class Dispatcher {
         
         queueCommand("SizeX("+display.getWidth() +","+ori+")");
         queueCommand("SizeY("+display.getHeight()+","+ori+")");
-        handleGetScreeenSizeCmd();
     }
     
 	public void handleCommand(ProtocolMessage msg) {
@@ -1515,22 +1514,22 @@ public class Dispatcher {
     }
 	
 	private void controlSetHints(Vector data) {
-	        
-	        if (data.size() < 2) {
-	            return;
-	        }
-	        
-	        for (int idx=1;idx<data.size()-1;idx+=2) {
-	            try {
-	                int i = btn2int((String) data.elementAt(idx));
+        
+        if (data.size() < 2) {
+            return;
+        }
+        
+        for (int idx=1;idx<data.size()-1;idx+=2) {
+            try {
+                int i = btn2int((String) data.elementAt(idx));
 
-	                if (i >= 0 || i < ControlScreen.NUM_ICONS) {    
-	                    cfHints[i] = (String) data.elementAt(idx+1);
-	                    log("controlSetIconLayout "+i+" -> "+cfHints[i]); 
-	                }  
-	             } catch (Exception e) { }
-	        }
-	    }
+                if (i >= 0 || i < ControlScreen.NUM_ICONS) {    
+                    cfHints[i] = (String) data.elementAt(idx+1);
+                    log("controlSetHints "+i+" -> "+cfHints[i]); 
+                }  
+             } catch (Exception e) { }
+        }
+    }
   
 	private void controlSetFontParams(Vector defs) {
 		

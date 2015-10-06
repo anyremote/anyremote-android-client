@@ -946,8 +946,10 @@ public final class Connection implements Runnable {
 			return Dispatcher.CMD_FSCREEN;
 		} else if (header.equals("Set(iconlist")) {
 			return Dispatcher.CMD_ICONLIST;
-		} else if (header.equals("Set(icons")) {
-			return Dispatcher.CMD_ICONS;
+        } else if (header.equals("Set(icons")) {
+            return Dispatcher.CMD_ICONS;
+        } else if (header.equals("Set(hints")) {
+            return Dispatcher.CMD_HINTS;
 		} else if (header.equals("Set(list")) {
 			return Dispatcher.CMD_LIST;
 		} else if (header.equals("Set(menu")) {
