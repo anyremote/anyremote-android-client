@@ -722,7 +722,6 @@ public final class Connection implements Runnable {
 					// controller.showAlert("Icon does not fit ("+imW+","+imH+")");
 					// }
 
-					// store it in /sdcard/anyRemote/<name>.png
 					synchronized (anyRemote.iconMap) {
 						File dir = Environment.getExternalStorageDirectory();
 						
