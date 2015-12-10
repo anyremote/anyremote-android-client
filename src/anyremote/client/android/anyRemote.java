@@ -64,7 +64,7 @@ public class anyRemote extends Activity
 	public static final int DO_CONNECT    = 5;
 	public static final int DO_DISCONNECT = 6;
 	//public static final int SHOW_LOG      = 7;
-	
+
 	public static final int SWIPE_MIN_DISTANCE = 120;
 	public static final int SWIPE_THRESHOLD_VELOCITY = 200; 
 
@@ -187,8 +187,6 @@ public class anyRemote extends Activity
 		status = DISCONNECTED;
 		protocol.disconnect(true);
 		MainLoop.disable();
-		
-		super.onDestroy();
 	}
 
 	public void setPrevView(int which) {

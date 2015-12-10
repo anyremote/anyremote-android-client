@@ -1,3 +1,6 @@
+* Thu Dec 10 2015 Mikhail Fedotov <anyremote at mail.ru> - 2.2
+- Gyroscope support
+
 * Tue Dec 02 2014 Mikhail Fedotov <anyremote at mail.ru> - 2.1
 - Zeroconf support
 

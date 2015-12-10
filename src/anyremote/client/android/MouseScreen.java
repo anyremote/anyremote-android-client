@@ -69,10 +69,11 @@ public class MouseScreen
     static final int NUM_BUTTONS = 5;
  
     static final float NOISE   = 0.16f;
+    static final float NOISE_GYROSCOPE = 0.04f;
     static final float G_VALUE = 9.81f;
     
     static final float NS2S = 1.0f / 1000000000.0f;
-    static final float EPSILON = 8f;
+    static final float EPSILON = 16f;
     private final float[] deltaRotationVector = new float[4];
     private float[] rotationCurrent = new float[3];
     private float timestamp;
@@ -577,23 +578,22 @@ public class MouseScreen
          
          int mx = 0;
          int my = 0;
+         float noise = (mGyroscope == null ? NOISE : NOISE_GYROSCOPE);
          
-         //if (deltaX != 0) {        
-         if (Math.abs(x) > NOISE) {
+         if (Math.abs(x) > noise) {
              mx = (int) (x*x);
              if (x > 0) {
                  mx = -mx;
              }
          }
          
-         //if (deltaZ != 0) {
-         if (Math.abs(y) > NOISE) {
+         if (Math.abs(y) > noise) {
              my = (int) (y*y);
              if (y > 0) {
                  my = -my;
              }
-        }
-         
+         }
+  
          if (mx != 0 || my != 0) {
              anyRemote.protocol.queueCommand("_MM_("+mx+","+ my +")");
          }
