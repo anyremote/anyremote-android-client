@@ -294,6 +294,9 @@ public class ListScreen extends arActivity
 	@Override
 	public boolean onKeyUp(int keyCode, KeyEvent event) { 
 
+	    boolean lp = longPress;
+	    longPress = false;
+	            
 		switch (keyCode) {
 		
 		    case KeyEvent.KEYCODE_CALL:  
@@ -304,6 +307,18 @@ public class ListScreen extends arActivity
 				return true;
 
 	        case KeyEvent.KEYCODE_BACK:
+	            
+	            if (event.isTracking() && !event.isCanceled() && lp) {
+		            
+	                log("onKeyUp KEYCODE_BACK long press - show menu");
+	                     
+                    new Handler().postDelayed(new Runnable() { 
+                        public void run() { 
+                            openOptionsMenu(); 
+                          } 
+                       }, 1000); 
+	                return true;
+	            }
 	    	  
 				final String itemTextB = (anyRemote.protocol.listSelectPos == -1 ? "" : 
 					                     dataSource.getItem(anyRemote.protocol.listSelectPos).text);
@@ -342,10 +357,14 @@ public class ListScreen extends arActivity
             case KeyEvent.KEYCODE_SEARCH:
 		    case KeyEvent.KEYCODE_VOLUME_UP:  
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-           	return true;
+           	    return true;
+            case KeyEvent.KEYCODE_BACK:
+                event.startTracking();
+                return true;
 		} 
 		return false;
 	}
+	
     public boolean onDown(MotionEvent e) {
         //log("onDown");
         return true;

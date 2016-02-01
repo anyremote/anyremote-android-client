@@ -414,10 +414,24 @@ public class SearchForm extends arActivity
 	public boolean onKeyUp(int keyCode, KeyEvent event) { 
 		
 		log("onKeyUp: "+keyCode);
+		
+        boolean lp = longPress;
+        longPress = false;
+        
 		switch (keyCode) {
 		
 		    case  KeyEvent.KEYCODE_BACK:
-			    doExit();
+	            if (event.isTracking() && !event.isCanceled() && lp) {
+	                log("onKeyUp KEYCODE_BACK long press - show menu");
+	                     
+	                new Handler().postDelayed(new Runnable() { 
+	                    public void run() { 
+	                        openOptionsMenu(); 
+	                      } 
+	                   }, 1000); 
+	            } else {
+	                doExit();
+	            }
 			    return true;
 	        
 		    case KeyEvent.KEYCODE_VOLUME_UP:  
@@ -447,6 +461,9 @@ public class SearchForm extends arActivity
 		    case KeyEvent.KEYCODE_VOLUME_UP:  
             case KeyEvent.KEYCODE_VOLUME_DOWN:
             	return true;
+            case KeyEvent.KEYCODE_BACK:
+                event.startTracking();
+                return true;
 		}
 		return false;
 	}

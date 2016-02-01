@@ -24,11 +24,12 @@ package anyremote.client.android;
 import java.util.Vector;
 
 import android.app.Activity;
-import android.app.Dialog;
+import android.app.Dialog;  
 import android.os.Handler;
 import android.os.Message;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.view.KeyEvent;
 import android.view.Menu;
 import anyremote.client.android.R;
 import anyremote.client.android.util.InfoMessage;
@@ -41,6 +42,7 @@ public class arActivity extends Activity
 	protected String prefix = "";	
 	private boolean skipDismissEditDialog = false;
 	protected boolean exiting = false;
+	protected boolean longPress = false;
 	protected int privateMenu = anyRemote.NO_FORM;
 	
 	public boolean handleMessage(Message msg) {
@@ -218,6 +220,13 @@ public class arActivity extends Activity
 				break;
 		}		
 	}
+    
+    @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        log("onKeyLongPress " + keyCode);
+        longPress = true;
+        return super.onKeyLongPress(keyCode, event);
+    }
 	
 	//
 	// Handle common operations:

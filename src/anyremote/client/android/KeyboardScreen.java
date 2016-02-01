@@ -273,10 +273,24 @@ public class KeyboardScreen extends arActivity
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         log("onKeyUp " + keyCode);
         
+        boolean lp = longPress;
+        longPress = false;
+        
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            log("onKeyUp KEYCODE_BACK");
-            commandAction(anyRemote.protocol.context.getString(R.string.back_item));
-            return true;
+            if (event.isTracking() && !event.isCanceled() && lp) {
+                log("onKeyUp KEYCODE_BACK long press - show menu");
+                     
+                new Handler().postDelayed(new Runnable() { 
+                    public void run() { 
+                        openOptionsMenu(); 
+                      } 
+                   }, 1000); 
+                return true;
+            } else {
+                log("onKeyUp KEYCODE_BACK");
+                commandAction(anyRemote.protocol.context.getString(R.string.back_item));
+                return true;
+            }
         }
         
         String key = key2str(keyCode);
@@ -291,6 +305,11 @@ public class KeyboardScreen extends arActivity
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         log("onKeyDown " + keyCode);
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                event.startTracking();
+                return true;
+        } 
         return false;
     }
     

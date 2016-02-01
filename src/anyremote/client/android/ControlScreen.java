@@ -112,7 +112,7 @@ public class ControlScreen
     static final int[] lbtns7x1 = { R.id.tl_bb1, R.id.tl_bb2, R.id.tl_bb3, R.id.tl_bb4, R.id.tl_bb5, R.id.tl_bb6,
             R.id.tl_bb7 };
 
-    boolean fullscreen = false;
+    boolean fullscreen     = false;
     boolean ignoreOneClick = false;
     boolean switchedToPrivateScreen = false;
     Dispatcher.ArHandler hdlLocalCopy;
@@ -657,10 +657,26 @@ public class ControlScreen
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        log("onKeyUp " + keyCode);
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
-            log("onKeyUp KEYCODE_BACK do disconnect");
-            commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
+        log("onKeyUp " + keyCode + " " + event.isTracking() +" " + event.isCanceled());
+        
+        boolean lp = longPress;
+        longPress = false;
+            
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking() && !event.isCanceled()) {
+            if (lp) {
+                // show menu
+                log("onKeyUp KEYCODE_BACK long press - show menu");
+                 
+                new Handler().postDelayed(new Runnable() { 
+                    public void run() { 
+                        openOptionsMenu(); 
+                      } 
+                   }, 1000); 
+ 
+            } else {
+                log("onKeyUp KEYCODE_BACK do disconnect");
+                commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));
+            }
             return true;
         }
 
@@ -675,7 +691,11 @@ public class ControlScreen
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        log("onKeyDown " + keyCode);
+        log("onKeyDown " + keyCode + " " + event.isTracking() +" " + event.isCanceled());
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            event.startTracking();
+            return true;
+        }
         String key = key2str(keyCode);
         if (key.length() > 0) {
             anyRemote.protocol.queueCommand(key, true);

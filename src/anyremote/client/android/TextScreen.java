@@ -25,12 +25,12 @@ package anyremote.client.android;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-//import android.text.method.ScrollingMovementMethod;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.KeyEvent;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.GestureDetector;
 import android.widget.TextView;
@@ -38,7 +38,9 @@ import anyremote.client.android.util.InfoMessage;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.R;
 
-public class TextScreen extends arActivity implements OnGestureListener {
+public class TextScreen extends arActivity 
+                        implements KeyEvent.Callback,
+                                   OnGestureListener {
 
 	TextView  text;
 	Dispatcher.ArHandler hdlLocalCopy;
@@ -284,6 +286,49 @@ public class TextScreen extends arActivity implements OnGestureListener {
 		ttx.setTextSize (anyRemote.protocol.textFSize);
 	}
 	
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) { 
+
+        log("onKeyUp "+keyCode);
+        
+        boolean lp = longPress;
+        longPress = false;
+                
+        switch (keyCode) {
+            
+            case KeyEvent.KEYCODE_BACK:
+                
+                if (event.isTracking() && !event.isCanceled() && lp) {
+                    
+                    log("onKeyUp KEYCODE_BACK long press - show menu");
+                         
+                    new Handler().postDelayed(new Runnable() { 
+                        public void run() { 
+                            openOptionsMenu(); 
+                          } 
+                       }, 1000); 
+                    return true;
+                } else {
+                    onBackPressed();
+                }
+        }
+        //log("onKeyUp NONPROCESSED"+keyCode);
+        return false;
+    }
+
+    @Override
+    public boolean onKeyDown (int keyCode, KeyEvent event) { 
+
+        log("onKeyDown "+keyCode);
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                event.startTracking();
+                return true;
+        } 
+        return false;
+    }
+
+    
     public boolean onDown(MotionEvent e) {
         //log("onDown");
         return true;

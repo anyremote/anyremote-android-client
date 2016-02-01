@@ -26,6 +26,7 @@ import android.os.Handler;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.MotionEvent;
@@ -185,6 +186,40 @@ public class WinManager extends arActivity
 			redraw();
 		}
 	}	
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        log("onKeyUp " + keyCode);
+        
+        boolean lp = longPress;
+        longPress = false;
+        
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (event.isTracking() && !event.isCanceled() && lp) {
+                log("onKeyUp KEYCODE_BACK long press - show menu");
+                     
+                new Handler().postDelayed(new Runnable() { 
+                    public void run() { 
+                        openOptionsMenu(); 
+                      } 
+                   }, 1000); 
+                return true;
+             } else {
+                 onBackPressed();
+             }
+        }
+        return false;
+    }
+ 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        log("onKeyDown " + keyCode);
+        switch (keyCode) {
+          case KeyEvent.KEYCODE_BACK:
+            event.startTracking();
+            return true;
+        }
+        return false;
+    }
 	
     public boolean onDown(MotionEvent e) {
         log("onDown");
