@@ -1,5 +1,5 @@
-* Thu Dec 10 2015 Mikhail Fedotov <anyremote at mail.ru> - 2.2
-- Gyroscope support
+* Mon Feb 1 2016 Mikhail Fedotov <anyremote at mail.ru> - 2.2
+- Gyroscope support, process long press to Back as Menu
 
 * Tue Dec 02 2014 Mikhail Fedotov <anyremote at mail.ru> - 2.1
 - Zeroconf support
