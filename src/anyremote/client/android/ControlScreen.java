@@ -656,14 +656,31 @@ public class ControlScreen
     }
 
     @Override
+    public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            
+        	new Handler().postDelayed(new Runnable() { 
+                public void run() { 
+                    openOptionsMenu(); 
+                  } 
+               }, 1000);
+        	
+        	longPress = true;
+            return true;
+        }
+        return super.onKeyLongPress(keyCode, event);
+    }
+    
+    @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         log("onKeyUp " + keyCode + " " + event.isTracking() +" " + event.isCanceled());
         
         boolean lp = longPress;
         longPress = false;
             
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.isTracking() && !event.isCanceled()) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) { // && event.isTracking() && !event.isCanceled()) {
             if (lp) {
+            	/* do nothing - jusr skip
                 // show menu
                 log("onKeyUp KEYCODE_BACK long press - show menu");
                  
@@ -672,7 +689,7 @@ public class ControlScreen
                         openOptionsMenu(); 
                       } 
                    }, 1000); 
- 
+                */
             } else {
                 log("onKeyUp KEYCODE_BACK do disconnect");
                 commandAction(anyRemote.protocol.context.getString(R.string.disconnect_item));

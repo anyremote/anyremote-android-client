@@ -183,8 +183,14 @@ public class ZCScanner implements IScanner {
     
     @TargetApi(android.os.Build.VERSION_CODES.JELLY_BEAN)
     public void stopScan () {
-        mNsdManager.stopServiceDiscovery((NsdManager.DiscoveryListener) mDiscoveryListenerTCP);
-        mNsdManager.stopServiceDiscovery((NsdManager.DiscoveryListener) mDiscoveryListenerWEB);
+    	try {
+    		mNsdManager.stopServiceDiscovery((NsdManager.DiscoveryListener) mDiscoveryListenerTCP);
+    	} catch (IllegalArgumentException e) {   
+    	}
+    	try {
+    		mNsdManager.stopServiceDiscovery((NsdManager.DiscoveryListener) mDiscoveryListenerWEB);
+    	} catch (IllegalArgumentException e) {
+    	}
     }
     
     private void informDiscoveryResult(int res) {
