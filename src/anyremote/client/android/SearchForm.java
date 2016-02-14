@@ -95,7 +95,9 @@ public class SearchForm extends arActivity
 		
 		log("onCreate " + id);
 
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		//requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		requestWindowFeature(Window.FEATURE_ACTION_BAR);
+		
 		setContentView(R.layout.search_dialog);
 		setResult(Activity.RESULT_CANCELED);
 
@@ -233,11 +235,12 @@ public class SearchForm extends arActivity
 	// Handle context menu, opened by long-click
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		
+
 		stopSearch();
-		
-		final AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
-		
+
+		final AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
+
 		Address a = dataSource.getItem(info.position);
 
 		switch (item.getItemId()) {
@@ -246,14 +249,14 @@ public class SearchForm extends arActivity
 
 			doConnect(a);
 			break;
-						
+
 		case R.id.enter_item_addr:
 
 			changeAddress(a);
 			break;
 
 		case R.id.clean_item:
-			
+
 			final String address = a.name;
 			cleanAddress(address);
 			dataSource.remove(address);
@@ -399,7 +402,7 @@ public class SearchForm extends arActivity
 		}
 		return true;
 	}
-	
+
 	public void doExit() { 
 
 		log("doExit");

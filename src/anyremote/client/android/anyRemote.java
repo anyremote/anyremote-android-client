@@ -52,7 +52,7 @@ import android.widget.Toast;
 import anyremote.client.android.util.Address;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.R;
-
+ 
 public class anyRemote extends Activity 
                        implements Handler.Callback {
 
@@ -361,7 +361,7 @@ public class anyRemote extends Activity
 		//cScreen.commandAction(item.getTitle().toString());
 		return true;
 	}
-	
+
 	public static void sendGlobal(int id, Object obj) {
 		anyRemote._log("sendGlobal: "+id);
 		if (globalHandler != null) {

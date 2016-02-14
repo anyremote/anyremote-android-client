@@ -78,7 +78,7 @@ public class ControlScreen
     static final String STR_POUND = "#";
     static final String STR_COVER = "COVER";
     static final String STR_UNKNOWN = "";
-
+ 
     static final int SK_DEFAULT = 0;
     static final int SK_BOTTOMLINE = 1;
 
@@ -130,7 +130,7 @@ public class ControlScreen
 
         buttons = new ImageButton[NUM_ICONS];
         buttonsLayout = new LinearLayout[NUM_ICONS];
-
+ 
         gestureScanner = new GestureDetector(this);
 
         hdlLocalCopy = new Dispatcher.ArHandler(anyRemote.CONTROL_FORM, new Handler(this));

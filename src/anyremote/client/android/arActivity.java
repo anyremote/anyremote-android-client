@@ -23,7 +23,8 @@ package anyremote.client.android;
 
 import java.util.Vector;
 
-import android.app.Activity;
+//import android.support.v7.app.AppCompatActivity;
+import android.app.Activity; 
 import android.app.Dialog;  
 import android.os.Handler;
 import android.os.Message;
@@ -34,11 +35,11 @@ import android.view.Menu;
 import anyremote.client.android.R;
 import anyremote.client.android.util.InfoMessage;
 
-public class arActivity extends Activity 
+public class arActivity extends Activity
 		implements DialogInterface.OnDismissListener,
 				   DialogInterface.OnCancelListener,
 				   Handler.Callback {
-
+	
 	protected String prefix = "";	
 	private boolean skipDismissEditDialog = false;
 	protected boolean exiting = false;

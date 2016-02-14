@@ -28,7 +28,6 @@
     <string name="report_bug_item">"Zgłoś problem"</string>
     <string name="connect_to">Połącz z</string>
     <string name="autoconnect_to">Połącz automatycznie z</string>
-    <string name="remove_address">Wyczyść adres</string>
     <string name="connection_successful">Połączony</string>
     <string name="connection_failed">Rozłączony</string>
     <string name="not_found">Nie znaleziono serwerów anyRemote</string>
