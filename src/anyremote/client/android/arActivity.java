@@ -2,11 +2,11 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011-2014 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2016 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
+// the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -16,14 +16,13 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 package anyremote.client.android;
 
 import java.util.Vector;
 
-//import android.support.v7.app.AppCompatActivity;
 import android.app.Activity; 
 import android.app.Dialog;  
 import android.os.Handler;
@@ -32,7 +31,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.KeyEvent;
 import android.view.Menu;
-import anyremote.client.android.R;
 import anyremote.client.android.util.InfoMessage;
 
 public class arActivity extends Activity
@@ -92,7 +90,8 @@ public class arActivity extends Activity
 			menu.add(getString(R.string.report_bug_item));
 			menu.add(getString(R.string.back_item));
     	} else if (privateMenu == anyRemote.MOUSE_FORM) { // Mouse screen
-		    menu.add(getString(R.string.back_item));
+		    menu.add(getString(R.string.sensor));
+            menu.add(getString(R.string.back_item));
         } else if (privateMenu == anyRemote.KEYBOARD_FORM) { // Mouse screen
             menu.add(getString(R.string.back_item));
             menu.add(getString(R.string.escape));

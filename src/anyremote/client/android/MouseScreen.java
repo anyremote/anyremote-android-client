@@ -2,11 +2,11 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011-2015 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2016 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
+// the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 package anyremote.client.android;
@@ -26,8 +26,11 @@ import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Context;
+import android.content.DialogInterface.OnDismissListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.ImageButton;
@@ -41,8 +44,11 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.KeyEvent;
+import anyremote.client.android.util.BTScanner;
+import anyremote.client.android.util.IPScanner;
 import anyremote.client.android.util.InfoMessage;
 import anyremote.client.android.util.ProtocolMessage;
+import anyremote.client.android.util.ZCScanner;
 
 public class MouseScreen 
        extends arActivity 
@@ -53,6 +59,7 @@ public class MouseScreen
     // private static final int SWIPE_MAX_OFF_PATH = 250;
 
     boolean fullscreen = false;
+    boolean skipDismissDialog = false;
     Dispatcher.ArHandler hdlLocalCopy;
 
     ImageButton[] buttons;
@@ -64,7 +71,7 @@ public class MouseScreen
     private Sensor mGyroscope     = null;
    
     float mLastX, mLastY, mLastZ;
-    boolean mInitialized;
+    //boolean mInitialized;
 
     static final int NUM_BUTTONS = 5;
  
@@ -96,11 +103,14 @@ public class MouseScreen
         
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         
-        mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE); 
+        if (anyRemote.protocol.sensorGyroscope()) {
+            mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE); 
+        }
         if (mGyroscope == null) {
             mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            anyRemote.protocol.setSensorType(false);
         }
-        mInitialized = false;
+        //mInitialized = false;
     }
 
     /*
@@ -121,18 +131,8 @@ public class MouseScreen
 
         super.onResume();
         
-        try {
-            if (mGyroscope != null) { 
-                mSensorManager.registerListener(this, mGyroscope, SensorManager.SENSOR_DELAY_GAME);
-            } else if (mAccelerometer != null) {
-                mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
-            }
-        } catch (Exception e) {
-            //TextView tx = (TextView) findViewById(R.id.xval);
-            //if (tx != null) {
-            //    tx.setText("Exception:"+e.getMessage());
-            //}
-        }
+        registerSensorListener();
+ 
         if (anyRemote.status == anyRemote.DISCONNECTED) {
             log("onResume no connection");
             doFinish("");
@@ -385,7 +385,13 @@ public class MouseScreen
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        commandAction(item.getTitle().toString());
+        
+        
+        if (item.getTitle().toString() == getResources().getString(R.string.sensor)) {
+             showDialog(Dispatcher.CMD_SENSOR_DIALOG);
+        } else {  
+             commandAction(item.getTitle().toString());
+        }
         return true;
     }
 
@@ -617,4 +623,85 @@ public class MouseScreen
              anyRemote.protocol.queueCommand("_MM_("+mx+","+ my +")");
          }
     }
+    
+ // Got result from SearchDialog dialog ("Ok"/"Cancel" was pressed)
+    public void onDismissSensorDialog (DialogInterface dialog) {
+    
+        if (skipDismissDialog) {
+            skipDismissDialog = false;
+        } else {
+            boolean useGyro = ((SensorDialog) dialog).useGyroscope();
+            
+            if (useGyro) {
+                if (mGyroscope == null) {
+                    mGyroscope = mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE); 
+                }
+                if (mGyroscope != null) {
+                    mAccelerometer = null;
+                } else {
+                    Toast.makeText(this, "Gyroscope unavailable ...", Toast.LENGTH_SHORT).show();
+                }
+            } else {                     // Accelerometer
+                if (mAccelerometer == null) {
+                    mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                }
+                if (mAccelerometer != null) {
+                    mGyroscope = null;
+                } else {
+                    Toast.makeText(this, "Accelerometer unavailable ...", Toast.LENGTH_SHORT).show();
+                }
+            }
+            
+            anyRemote.protocol.setSensorType(mGyroscope != null);
+            
+            mSensorManager.unregisterListener(this);
+            registerSensorListener();
+         }
+    }
+
+    private void registerSensorListener() {
+        try {
+            if (mGyroscope != null) {
+                mSensorManager.registerListener(this, mGyroscope, SensorManager.SENSOR_DELAY_GAME);
+            } else if (mAccelerometer != null) {
+                mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+            }
+        } catch (Exception e) {
+        }
+    }
+    
+    // Handle "Cancel" press in EditFieldDialog/SearchDialog
+    public void onCancel(DialogInterface dialog) { 
+        skipDismissDialog = true;
+    }
+    
+    @Override
+    protected Dialog onCreateDialog(int id) {       
+        switch(id){
+             case Dispatcher.CMD_SENSOR_DIALOG:
+                return new SensorDialog(this);
+        }
+        return null;
+    }
+    
+    @Override
+    protected void onPrepareDialog(int id, Dialog d) {
+    
+        if (d == null) return;
+        
+        skipDismissDialog = false;
+         
+        switch(id){
+ 
+            case Dispatcher.CMD_SENSOR_DIALOG:
+                d.setOnDismissListener(new OnDismissListener() {
+                    public void onDismiss(DialogInterface dialog) {
+                        onDismissSensorDialog(dialog);
+                    }
+                }); 
+                
+        }
+        d.setOnCancelListener (this);
+    }
+
 }

@@ -2,11 +2,11 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011-2015 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2016 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
+// the Free Software Foundation; either version 3 of the License, or
 // (at your option) any later version.
 //
 // This program is distributed in the hope that it will be useful,
@@ -16,7 +16,7 @@
 // 
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
+// Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 //
 
 package anyremote.client.android;
@@ -94,6 +94,7 @@ public class Dispatcher {
 	static final int  CMD_EDIT_FORM_ADDR  = 105;
 	static final int  CMD_SEARCH_DIALOG   = 106;
 	static final int  CMD_NEW_ADDR_DIALOG = 107;
+	static final int  CMD_SENSOR_DIALOG   = 108;
 
 	static final int  CMD_LIST_UPDATE     = 110;
 
@@ -109,6 +110,8 @@ public class Dispatcher {
 	static final int NOTUPDATE_SWITCH    = 2;
 	static final int UPDATE_SWITCH       = 3;
 	static final int UPDATE_NOTSWITCH    = 4;
+	
+	static final String M_SENSOR = "_mouse_sensor_";
 	
     public static class ArHandler {
     	
@@ -198,6 +201,7 @@ public class Dispatcher {
  
 	// Mouse Screen stuff
     //Vector<String> mouseMenu = new Vector<String>();
+	private boolean useGyroscope = true;
 
     // Keyboard Screen stuff
     //Vector<String> keyboardMenu = new Vector<String>();
@@ -465,6 +469,7 @@ public class Dispatcher {
 	        case CMD_EDIT_FORM_BT:   return "CMD_EDIT_FORM_BT";
 	        case CMD_LIST_UPDATE:    return "CMD_LIST_UPDATE";
 	        case CMD_SEARCH_DIALOG:  return "CMD_SEARCH_DIALOG";
+            case CMD_SENSOR_DIALOG:  return "CMD_SENSOR_DIALOG";
 	        case CMD_CLOSE:          return "CMD_CLOSE";
 		}
 		return "UNKNOWN";
@@ -1056,8 +1061,6 @@ public class Dispatcher {
             });			
 		}
 	}
-	
-	
 
 	private synchronized void scheduleKeepaliveTask() {
 		MainLoop.schedule(
@@ -1115,34 +1118,60 @@ public class Dispatcher {
 			
 			while (it.hasNext()) {
 				Map.Entry<String, String> pairs = (Map.Entry<String, String>) it.next();
-
-				// format a|c+:+address+\n+pass
-				// old format is address+\n+pass
+				
+				String key         = (String) pairs.getKey();
 				String cf_url_pass = (String)  pairs.getValue();
 				
-				boolean autoconnect = cf_url_pass.startsWith("a");
+				if (key == M_SENSOR) {  // special cases
+				    
+				    useGyroscope = (cf_url_pass.compareTo("g") == 0);
+				        
+				} else {
 				
-				String url_pass = (cf_url_pass.charAt(1) == ':' ?  
-						           cf_url_pass.substring(2) : 
-						           cf_url_pass);
-				
-				int p = url_pass.lastIndexOf('\n');
-				if (p > 0) {
-					Address a = new Address();
-
-					a.name  = (String) pairs.getKey();
-					a.URL =  url_pass.substring(0, p).trim();
-					a.pass = url_pass.substring(p+1);
-					a.autoconnect = autoconnect;
-					
-					log("loadPrefs "+cf_url_pass.charAt(0)+":"+a.name+":"+a.URL+":"+a.pass);
-					
-					addresses.add(a);
+    				// format a|c+:+address+\n+pass
+    				// old format is address+\n+pass
+    				
+    				boolean autoconnect = cf_url_pass.startsWith("a");
+    				
+    				String url_pass = (cf_url_pass.charAt(1) == ':' ?  
+    						           cf_url_pass.substring(2) : 
+    						           cf_url_pass);
+    				
+    				int p = url_pass.lastIndexOf('\n');
+    				if (p > 0) {
+    					Address a = new Address();
+    
+    					a.name = key;
+    					a.URL  =  url_pass.substring(0, p).trim();
+    					a.pass = url_pass.substring(p+1);
+    					a.autoconnect = autoconnect;
+    					
+    					log("loadPrefs "+cf_url_pass.charAt(0)+":"+a.name+":"+a.URL+":"+a.pass);
+    					
+    					addresses.add(a);
+    				}
 				}
 			}		    
 		} catch(Exception z) { }
 		
 		return addresses;
+	}
+	
+	boolean sensorGyroscope() {
+	    return useGyroscope;
+	}
+	
+	public void setSensorType(boolean useG) {
+	    
+	    if (useGyroscope != useG) {
+	        useGyroscope = useG;
+	        
+	        SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
+	        SharedPreferences.Editor editor = preference.edit();
+	        
+	        editor.putString(M_SENSOR, (useG ? "g" : "a"));
+	        editor.commit();
+	    }
 	}
 	
 	public void cleanAddress(String name) {

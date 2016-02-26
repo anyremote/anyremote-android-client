@@ -1,5 +1,8 @@
+* Fri Feb 26 2016 Mikhail Fedotov <anyremote at mail.ru> - 2.3
+- Use ActionBar. Allow to choose sensor type for mouse emulation.
+
 * Mon Feb 1 2016 Mikhail Fedotov <anyremote at mail.ru> - 2.2
-- Gyroscope support, process long press to Back as Menu
+- Gyroscope support, process long press to Back button as Menu
 
 * Tue Dec 02 2014 Mikhail Fedotov <anyremote at mail.ru> - 2.1
 - Zeroconf support

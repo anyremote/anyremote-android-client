@@ -42,6 +42,9 @@
     <string name="bluetooth">"Bluetooth"</string>
     <string name="tcpip">"TCP/IP"</string>
     <string name="zeroconf">"Use zeroconf"</string>
+    <string name="sensor">"Sensor Type"</string>
+    <string name="gyroscope">"Gyroscope"</string>
+    <string name="accelerometer">"Accelerometer"</string>
     
     <string name="b1">"1"</string>
     <string name="b2">"2"</string>
