@@ -570,6 +570,7 @@ public class SearchForm extends arActivity
 
 	// save new address in preferences
 	public void addAddress(String name, String URL, String pass,boolean autoconnect) {		        
+		log("addAddress "+name+" >"+URL+"<");
 		anyRemote.protocol.addAddress(name, URL, pass, autoconnect);
 	}
 
@@ -600,10 +601,9 @@ public class SearchForm extends arActivity
 				cleanAddress(connectName);
 				dataSource.remove(connectName);
 			}
-			
-			if (dataSource.addIfNew(n,a,p,ac)) {
-			    addAddress(n,a,p,ac);
-			}
+		
+			dataSource.addIfNew(n,a,p,ac);
+			addAddress(n,a,p,ac);
 		}
 	}
 	
@@ -757,14 +757,15 @@ public class SearchForm extends arActivity
 				.replace('c', 'C').replace('d', 'D')
 				.replace('e', 'E').replace('f', 'F'));
 
-		int i = 8;
-		while (i < baddr.length() - 3) {
-			if (baddr.charAt(i) == ':') {
-				baddr.deleteCharAt(i);
-			} else {
-				i++;
-			}
-		}
+		//int i = 8;
+		//while (i < baddr.length() - 3) {
+		//	if (baddr.charAt(i) == ':') {
+		//		baddr.deleteCharAt(i);
+		//	} else {
+		//		i++;
+		//	}
+		//}
+		log("formatBTAddr: "+baddr);
 		return new String(baddr);
 	}
 

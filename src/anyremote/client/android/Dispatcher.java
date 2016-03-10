@@ -1146,7 +1146,7 @@ public class Dispatcher {
     					a.pass = url_pass.substring(p+1);
     					a.autoconnect = autoconnect;
     					
-    					log("loadPrefs "+cf_url_pass.charAt(0)+":"+a.name+":"+a.URL+":"+a.pass);
+    					log("loadPrefs >"+cf_url_pass.charAt(0)+"< >"+a.name+"< >"+a.URL+"< >"+a.pass+"<");
     					
     					addresses.add(a);
     				}
@@ -1175,7 +1175,7 @@ public class Dispatcher {
 	}
 	
 	public void cleanAddress(String name) {
-		//log("cleanAddress "+name);
+		log("cleanAddress "+name);
 
 		SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = preference.edit();
