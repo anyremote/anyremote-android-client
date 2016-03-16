@@ -56,6 +56,7 @@ public class ZCScanner implements IScanner {
     private ArDiscoveryListener mDiscoveryListenerTCP = null;
     private ArDiscoveryListener mDiscoveryListenerWEB = null;
     private NsdManager.ResolveListener resolver       = null;
+    boolean                            resolving      = false; 
     
     ArrayList<NsdServiceInfo> toResolve = new ArrayList<NsdServiceInfo>();
     Handler searchFormHandler;
@@ -76,9 +77,10 @@ public class ZCScanner implements IScanner {
 		}
         
         synchronized (toResolve) {
-            if (toResolve.size() > 0) {
+            if (toResolve.size() > 0 && !resolving) {
                 NsdServiceInfo srvInfo = toResolve.remove(0);
                 anyRemote._log("ZCScanner","resolveNext (remains #" + toResolve.size() + ") " + srvInfo);
+                resolving = true;
                 mNsdManager.resolveService(srvInfo, resolver);
             }
         }
@@ -103,6 +105,9 @@ public class ZCScanner implements IScanner {
                 @Override
                 public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
                     anyRemote._log("ZCScanner", "resolve failed " + errorCode);
+                    synchronized (toResolve) {
+                        resolving = false;
+                    }
                     resolveNext(); 
                 }
 
@@ -136,7 +141,10 @@ public class ZCScanner implements IScanner {
 
                     Message msg = searchFormHandler.obtainMessage(SCAN_FOUND, sm);
 		            msg.sendToTarget();
-
+		            
+		            synchronized (toResolve) {
+                        resolving = false;
+                    }
                     resolveNext(); 
                 }
             };

@@ -602,8 +602,9 @@ public class SearchForm extends arActivity
 				dataSource.remove(connectName);
 			}
 		
-			dataSource.addIfNew(n,a,p,ac);
-			addAddress(n,a,p,ac);
+			if (dataSource.addIfNew(n,a,p,ac)) {
+			    addAddress(n,a,p,ac);
+			}
 		}
 	}
 	

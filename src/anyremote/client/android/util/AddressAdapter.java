@@ -31,6 +31,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.view.LayoutInflater;
 import anyremote.client.android.R;
+import anyremote.client.android.anyRemote;
 
 public class AddressAdapter extends ArrayAdapter<Address> {
 
@@ -41,6 +42,7 @@ public class AddressAdapter extends ArrayAdapter<Address> {
 		super(context, textViewResourceId, items);
 		this.context = context;
 		this.items   = items;
+		anyRemote._log("AddressAdapter", "got # "+this.items.size());
 	}
 
 	@Override

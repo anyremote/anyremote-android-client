@@ -1107,13 +1107,15 @@ public class Dispatcher {
 	}
 	
 	public Vector<Address> loadPrefs() {
-		
+	    log("loadPrefs");
+	    
 		SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
 		Vector<Address>  addresses = new Vector<Address>();
 
 		try {
 			Map<String, String> datam = (Map<String, String>) preference.getAll();    
-
+			log("loadPrefs got #"+datam.size());
+			
 			Iterator<Map.Entry<String, String>> it = datam.entrySet().iterator();
 			
 			while (it.hasNext()) {
@@ -1122,7 +1124,10 @@ public class Dispatcher {
 				String key         = (String) pairs.getKey();
 				String cf_url_pass = (String)  pairs.getValue();
 				
-				if (key == M_SENSOR) {  // special cases
+				
+				log("loadPrefs k/v >"+key+"< >"+cf_url_pass+"<");
+				
+				if (key.equals(M_SENSOR)) {  // special cases
 				    
 				    useGyroscope = (cf_url_pass.compareTo("g") == 0);
 				        
@@ -1214,7 +1219,7 @@ public class Dispatcher {
 		}
 
 		String UP = (autoConnect ? "a:" : "c:") + URL.trim() + "\n" + pass;
-
+		log("addAddress commit "+name+"/"+UP);
 		editor.putString(name, UP);
 		editor.commit();
 	}
