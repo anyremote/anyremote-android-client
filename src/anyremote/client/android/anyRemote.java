@@ -211,10 +211,10 @@ public class anyRemote extends Activity
 
 		if (currForm == which) {
 			_log("setCurrentView TRY TO SWITCH TO THE SAME FORM ???");
-			//if (currForm != SEARCH_FORM) {
+			if (currForm != SEARCH_FORM) {
 				_log("setCurrentView SKIP SWITCH TO THE SAME FORM ???");
 				return;
-			//}
+			}
 		}
 		
 		prevForm = currForm;

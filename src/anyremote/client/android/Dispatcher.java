@@ -1125,7 +1125,7 @@ public class Dispatcher {
 				String cf_url_pass = (String)  pairs.getValue();
 				
 				
-				log("loadPrefs k/v >"+key+"< >"+cf_url_pass+"<");
+				//log("loadPrefs k/v >"+key+"< >"+cf_url_pass+"<");
 				
 				if (key.equals(M_SENSOR)) {  // special cases
 				    
@@ -1151,7 +1151,7 @@ public class Dispatcher {
     					a.pass = url_pass.substring(p+1);
     					a.autoconnect = autoconnect;
     					
-    					log("loadPrefs >"+cf_url_pass.charAt(0)+"< >"+a.name+"< >"+a.URL+"< >"+a.pass+"<");
+    					//log("loadPrefs >"+cf_url_pass.charAt(0)+"< >"+a.name+"< >"+a.URL+"< >"+a.pass+"<");
     					
     					addresses.add(a);
     				}
