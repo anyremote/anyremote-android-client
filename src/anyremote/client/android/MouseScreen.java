@@ -83,7 +83,7 @@ public class MouseScreen
     static final float EPSILON = 16f;
     private final float[] deltaRotationVector = new float[4];
     private float[] rotationCurrent = new float[3];
-    private float timestamp;
+    private long timestamp = 0;
      
     static final int[] mBtns = {R.id.mouseButton1, R.id.mouseButton2, R.id.mouseButton3, R.id.mouseButton4, R.id.mouseButton5};
     
@@ -108,7 +108,9 @@ public class MouseScreen
         }
         if (mGyroscope == null) {
             mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-            anyRemote.protocol.setSensorType(false);
+            if (anyRemote.protocol.sensorGyroscope()) {
+                anyRemote.protocol.setSensorType(false);
+             }
         }
         //mInitialized = false;
     }
@@ -130,7 +132,6 @@ public class MouseScreen
         log("onResume");
 
         super.onResume();
-        
         registerSensorListener();
  
         if (anyRemote.status == anyRemote.DISCONNECTED) {
@@ -140,7 +141,6 @@ public class MouseScreen
         }
 
         redraw();
-
         exiting = false;
     }
 
@@ -481,155 +481,184 @@ public class MouseScreen
     
     @Override
     public final void onSensorChanged(SensorEvent event) {
-       
-        if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE)  {  
-            return;  
-        }  
-       
+
+        if (event.accuracy == SensorManager.SENSOR_STATUS_UNRELIABLE) {
+            return;
+        }
+
         // Many sensors return 3 values, one for each axis.
         float x = event.values[0];
         float y = event.values[1];
         float z = event.values[2];
-         
-        if (mGyroscope != null) {
-             
-            if (timestamp != 0) {
-                
-                 final float dT = (event.timestamp - timestamp) * NS2S;
-                 
-                 // Axis of the rotation sample, not normalized yet.
-                 float axisX = event.values[0];
-                 float axisY = event.values[2];
-                 float axisZ = event.values[1];
-    
-                 // Calculate the angular speed of the sample
-                 float omegaMagnitude = (float) Math.sqrt(axisX*axisX + axisY*axisY + axisZ*axisZ);
-    
-                 // Normalize the rotation vector if it's big enough to get the axis
-                 // (that is, EPSILON should represent your maximum allowable margin of error)
-                 if (omegaMagnitude > EPSILON) {
-                     axisX /= omegaMagnitude;
-                     axisY /= omegaMagnitude;
-                     axisZ /= omegaMagnitude;
-                 }
-    
-                 // Integrate around this axis with the angular speed by the timestep
-                 // in order to get a delta rotation from this sample over the timestep
-                 // We will convert this axis-angle representation of the delta rotation
-                 // into a quaternion before turning it into the rotation matrix.
-                 float thetaOverTwo = omegaMagnitude * dT / 2.0f;
-                 float sinThetaOverTwo = (float) Math.sin(thetaOverTwo);
-                 float cosThetaOverTwo = (float) Math.cos(thetaOverTwo);
-                 deltaRotationVector[0] = sinThetaOverTwo * axisX;
-                 deltaRotationVector[1] = sinThetaOverTwo * axisY;
-                 deltaRotationVector[2] = sinThetaOverTwo * axisZ;
-                 deltaRotationVector[3] = cosThetaOverTwo;
-                 
-            
-            } else {  
-                
-                 // Axis of the rotation sample, not normalized yet.
-                 float axisX = event.values[0];
-                 float axisY = event.values[2];
-                 float axisZ = event.values[1];
-                
-                 mLastX = axisX;
-                 mLastY = axisY;
-                 mLastZ = axisZ;
-           }
 
-           timestamp = event.timestamp;
-           float[] deltaRotationMatrix = new float[9];
-           SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
-             
-           // User code should concatenate the delta rotation we computed with the current rotation
-           // in order to get the updated rotation.
-           //rotationCurrent = rotationCurrent * deltaRotationMatrix;
-           
-           //SensorManager.remapCoordinateSystem(deltaRotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, deltaRotationMatrix);
-           SensorManager.getOrientation(deltaRotationMatrix, rotationCurrent);
-           
-           mLastZ = (float) Math.toDegrees(rotationCurrent[0]);
-           mLastY = (float) Math.toDegrees(rotationCurrent[1]);
-           mLastX = (float) Math.toDegrees(rotationCurrent[2]);
-           
-           x = mLastX;
-           y = -mLastY;
-           z = mLastZ;
-           
-         
-        } else { // Accelerometer
-                          
-             //float deltaX = 0;
-             //float deltaY = 0;
-             //float deltaZ = 0;
-             
-             //if (!mInitialized) {
-                 
-                 mLastX = x;
-                 mLastY = y;
-                 mLastZ = z;
-                 
-                // mInitialized = true;
-                 
-              //} else {
-                  
-                 //deltaX = mLastX - x;
-                 //deltaY = mLastY - y;
-                 //deltaZ = mLastZ - z;
-                 
-                 //if (Math.abs(deltaX) < NOISE) deltaX = 0.0f;
-                 //if (Math.abs(deltaY) < NOISE) deltaY = 0.0f;
-                 //if (Math.abs(deltaZ) < NOISE) deltaZ = 0.0f;
-                 
-             //    mLastX = x;
-             //    mLastY = y;
-             //    mLastZ = z;
-             //}
-         }
-         
-         /*TextView tx = (TextView) findViewById(R.id.xval);
-         if (tx != null) {
-             tx.setText("X axis" +"\t\t"+mLastX);
-         }
-         TextView ty = (TextView) findViewById(R.id.yval);
-         if (ty != null) {
-             ty.setText("Y axis" + "\t\t" +mLastY);
-         }
-         TextView tz = (TextView) findViewById(R.id.zval);
-         if (tz != null) {
-             tz.setText("Z axis" +"\t\t" +mLastZ);
-         }*/
-         
-         int mx = 0;
-         int my = 0;
-         float noise = (mGyroscope == null ? NOISE : NOISE_GYROSCOPE);
-         
-         if (Math.abs(x) > noise) {
-             mx = (int) (x*x);
-             if (x > 0) {
-                 mx = -mx;
-             }
-         }
-         
-         if (Math.abs(y) > noise) {
-             my = (int) (y*y);
-             if (y > 0) {
-                 my = -my;
-             }
-         }
-  
-         if (mx != 0 || my != 0) {
-             anyRemote.protocol.queueCommand("_MM_("+mx+","+ my +")");
-         }
+        if (mGyroscope != null && event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
+
+            if (timestamp != 0) {
+
+                final float dT = (event.timestamp - timestamp) * NS2S;
+
+                // Axis of the rotation sample, not normalized yet.
+                float axisX = event.values[0];
+                float axisY = event.values[2];
+                float axisZ = event.values[1];
+
+                // Calculate the angular speed of the sample
+                float omegaMagnitude = (float) Math.sqrt(axisX * axisX + axisY * axisY + axisZ * axisZ);
+
+                // Normalize the rotation vector if it's big enough to get the
+                // axis
+                // (that is, EPSILON should represent your maximum allowable
+                // margin of error)
+                if (omegaMagnitude > EPSILON) {
+                    axisX /= omegaMagnitude;
+                    axisY /= omegaMagnitude;
+                    axisZ /= omegaMagnitude;
+                }
+
+                // Integrate around this axis with the angular speed by the
+                // timestep
+                // in order to get a delta rotation from this sample over the
+                // timestep
+                // We will convert this axis-angle representation of the delta
+                // rotation
+                // into a quaternion before turning it into the rotation matrix.
+                float thetaOverTwo = omegaMagnitude * dT / 2.0f;
+                float sinThetaOverTwo = (float) Math.sin(thetaOverTwo);
+                float cosThetaOverTwo = (float) Math.cos(thetaOverTwo);
+                deltaRotationVector[0] = sinThetaOverTwo * axisX;
+                deltaRotationVector[1] = sinThetaOverTwo * axisY;
+                deltaRotationVector[2] = sinThetaOverTwo * axisZ;
+                deltaRotationVector[3] = cosThetaOverTwo;
+
+            } else {
+
+                // Axis of the rotation sample, not normalized yet.
+                float axisX = event.values[0];
+                float axisY = event.values[2];
+                float axisZ = event.values[1];
+
+                mLastX = axisX;
+                mLastY = axisY;
+                mLastZ = axisZ;
+            }
+
+            timestamp = event.timestamp;
+            float[] deltaRotationMatrix = new float[9];
+            SensorManager.getRotationMatrixFromVector(deltaRotationMatrix, deltaRotationVector);
+
+            // User code should concatenate the delta rotation we computed with
+            // the current rotation
+            // in order to get the updated rotation.
+            // rotationCurrent = rotationCurrent * deltaRotationMatrix;
+
+            // SensorManager.remapCoordinateSystem(deltaRotationMatrix,
+            // SensorManager.AXIS_X, SensorManager.AXIS_Z, deltaRotationMatrix);
+            SensorManager.getOrientation(deltaRotationMatrix, rotationCurrent);
+
+            mLastZ = (float) Math.toDegrees(rotationCurrent[0]);
+            mLastY = (float) Math.toDegrees(rotationCurrent[1]);
+            mLastX = (float) Math.toDegrees(rotationCurrent[2]);
+
+            x = mLastX;
+            y = -mLastY;
+            z = mLastZ;
+
+        } else if (mAccelerometer != null && event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) { // Accelerometer
+
+            long actualTime = event.timestamp;
+            if (actualTime - timestamp < 50000000) {  // 20 per second
+                return;
+            }
+            timestamp = actualTime;
+
+            if (z < 0) {
+                z = -z;
+            }
+            float dy = z - G_VALUE;
+            if (dy < 0) {
+                dy = -dy;
+            }
+            if (dy < 0.2) { // threshold
+                return;
+            }
+
+            // float deltaX = 0;
+            // float deltaY = 0;
+            // float deltaZ = 0;
+
+            // if (!mInitialized) {
+
+            mLastX = x;
+            mLastY = y;
+            mLastZ = z;
+
+            // mInitialized = true;
+
+            // } else {
+
+            // deltaX = mLastX - x;
+            // deltaY = mLastY - y;
+            // deltaZ = mLastZ - z;
+
+            // if (Math.abs(deltaX) < NOISE) deltaX = 0.0f;
+            // if (Math.abs(deltaY) < NOISE) deltaY = 0.0f;
+            // if (Math.abs(deltaZ) < NOISE) deltaZ = 0.0f;
+
+            // mLastX = x;
+            // mLastY = y;
+            // mLastZ = z;
+            // }
+
+        } else {
+            return;
+        }
+
+        /*TextView tx = (TextView) findViewById(R.id.xval);
+        if (tx != null) {
+            tx.setText((mGyroscope == null ? "N" : "G") + (mAccelerometer == null ? "N" : "A") + "X axis" + "\t\t"
+                    + mLastX);
+        }
+        TextView ty = (TextView) findViewById(R.id.yval);
+        if (ty != null) {
+            ty.setText("Y axis" + "\t\t" + mLastY);
+        }
+        TextView tz = (TextView) findViewById(R.id.zval);
+        if (tz != null) {
+            tz.setText("Z axis" + "\t\t" + mLastZ);
+        }*/
+
+        int mx = 0;
+        int my = 0;
+        float noise = (mGyroscope == null ? NOISE : NOISE_GYROSCOPE);
+
+        if (Math.abs(x) > noise) {
+            mx = (int) (x * x);
+            if (x > 0) {
+                mx = -mx;
+            }
+        }
+
+        if (Math.abs(y) > noise) {
+            my = (int) (y * y);
+            if (y > 0) {
+                my = -my;
+            }
+        }
+
+        if (mx != 0 || my != 0) {
+            anyRemote.protocol.queueCommand("_MM_(" + mx + "," + my + ")");
+        }
     }
     
- // Got result from SearchDialog dialog ("Ok"/"Cancel" was pressed)
+    // Got result from SearchDialog dialog ("Ok"/"Cancel" was pressed)
     public void onDismissSensorDialog (DialogInterface dialog) {
     
         if (skipDismissDialog) {
             skipDismissDialog = false;
         } else {
+            
+            mSensorManager.unregisterListener(this);
+            
             boolean useGyro = ((SensorDialog) dialog).useGyroscope();
             
             if (useGyro) {
@@ -654,7 +683,6 @@ public class MouseScreen
             
             anyRemote.protocol.setSensorType(mGyroscope != null);
             
-            mSensorManager.unregisterListener(this);
             registerSensorListener();
          }
     }
@@ -664,7 +692,7 @@ public class MouseScreen
             if (mGyroscope != null) {
                 mSensorManager.registerListener(this, mGyroscope, SensorManager.SENSOR_DELAY_GAME);
             } else if (mAccelerometer != null) {
-                mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+                mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
             }
         } catch (Exception e) {
         }
