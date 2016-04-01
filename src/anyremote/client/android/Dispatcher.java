@@ -308,14 +308,12 @@ public class Dispatcher {
         
 		autoPass  = false;
 	}
-	
 	public void doConnect(String name, String host, String pass) {
 
 		log("doConnect " + (host!=null?host:"NULL")+" P=>"+pass+"<");
 		if (connection != null && !connection.isClosed()) {
 			log("doConnect already connected to " + currentConnection);
 		    anyRemote.sendGlobal(anyRemote.CONNECTED, "");
-
 			return;
 		}
 
@@ -325,19 +323,18 @@ public class Dispatcher {
 			currentConnPass = pass;
 
 			if (host.startsWith("socket://")) {	
-				currentConnection = host;	    	
+                currentConnection = host;	    	
 				connectWifi(host);
 				return;
 			} else if (host.startsWith("btspp://")) {
-				currentConnection = host;	    	
+                currentConnection = host;	    	
 				connectBluetooth(host);
 				return;
 			} 
 		}
 
-		//log("doConnect: cannot establish");
+		log("doConnect: cannot establish");
 	    anyRemote.sendGlobal(anyRemote.DISCONNECTED, "");
-
 	}
 
 	/**
@@ -371,7 +368,7 @@ public class Dispatcher {
 
 		log("disconnect "+full);
 		boolean isConn = (connection != null && !connection.isClosed());
-		
+	
 		disconnected(full);
 		
 		if (isConn) {  
@@ -496,11 +493,12 @@ public class Dispatcher {
 		Vector cmdTokens = msg.tokens; 
 		int stage        = msg.stage;
 		
-		//log("handleCommand got:" + cmdStr(id) + " " + cmdTokens+"(cur screen is "+anyRemote.getScreenStr(anyRemote.getCurScreen())+")");
+		log("handleCommand got:" + cmdStr(id) + " " + cmdTokens+"(cur screen is "+anyRemote.getScreenStr(anyRemote.getCurScreen())+")");
 
 		switch (id) {
 
 		case CMD_CLOSECONN:
+		    log("handleCommand got: CMD_CLOSECONN");
 			disconnect(true); 
 			break;
 

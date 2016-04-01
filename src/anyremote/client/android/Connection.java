@@ -908,6 +908,7 @@ public final class Connection implements Runnable {
 		}
 		dos.write(bts);
 		dos.flush();
+		anyRemote._log("Connection", "send OK");
 	}
 
 /*	private void skip(int num) throws IOException {

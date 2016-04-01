@@ -55,15 +55,15 @@ import anyremote.client.android.R;
  
 public class anyRemote extends Activity 
                        implements Handler.Callback {
-
 	public static final int DISCONNECTED  = 0;
-	public static final int CONNECTED     = 1;
-	public static final int LOSTFOCUS     = 2;
-	public static final int COMMAND       = 3;
-	public static final int DO_EXIT       = 4;
-	public static final int DO_CONNECT    = 5;
-	public static final int DO_DISCONNECT = 6;
-	//public static final int SHOW_LOG      = 7;
+	public static final int CONNECTING    = 1;
+    public static final int CONNECTED     = 2;
+	public static final int LOSTFOCUS     = 4;
+	public static final int COMMAND       = 5;
+	public static final int DO_EXIT       = 6;
+	public static final int DO_CONNECT    = 7;
+	public static final int DO_DISCONNECT = 8;
+	//public static final int SHOW_LOG      = 8;
 
 	public static final int SWIPE_MIN_DISTANCE = 120;
 	public static final int SWIPE_THRESHOLD_VELOCITY = 200; 
@@ -166,10 +166,11 @@ public class anyRemote extends Activity
 		}
 
 		if (currForm != LOG_FORM && status == DISCONNECTED) {
+		    currForm = NO_FORM;
 		    setCurrentView(SEARCH_FORM,"");
 		}
 	}
-	
+
 	@Override
 	protected void onStop() {
 		_log("onStop");		
@@ -211,10 +212,10 @@ public class anyRemote extends Activity
 
 		if (currForm == which) {
 			_log("setCurrentView TRY TO SWITCH TO THE SAME FORM ???");
-			if (currForm != SEARCH_FORM) {
+			//if (currForm != SEARCH_FORM) {
 				_log("setCurrentView SKIP SWITCH TO THE SAME FORM ???");
 				return;
-			}
+			//}
 		}
 		
 		prevForm = currForm;
@@ -343,6 +344,7 @@ public class anyRemote extends Activity
 			return true;
 
 		case R.id.disconnect_main:
+		    _log("onOptionsItemSelected disconnect_main");
 			protocol.disconnect(true);
 			return true;
 
@@ -383,10 +385,17 @@ public class anyRemote extends Activity
 			try {
 			    protocol.connected((Connection) msg.obj);
 			} catch (Exception e) {  // once got ClassCastException here
-				protocol.disconnect(true);
+			    anyRemote._log("handleMessage: CONNECTED got exception ");
+			    protocol.disconnect(true);
 				return true;
 			}
 			handleEvent(CONNECTED);
+			break;
+		
+        case CONNECTING:
+			
+			anyRemote._log("handleMessage: CONNECTING");
+			handleEvent(CONNECTING);
 			break;
 			
 		case DISCONNECTED:
@@ -417,7 +426,7 @@ public class anyRemote extends Activity
 			
 		case anyRemote.COMMAND:
 			
-			//anyRemote._log("handleMessage: COMMAND");
+			anyRemote._log("handleMessage: COMMAND");
 			protocol.handleCommand((ProtocolMessage) msg.obj);
 			break;			
 
@@ -427,6 +436,7 @@ public class anyRemote extends Activity
 			if (msg.obj != null ) {
 				Address conn = (Address) msg.obj;
 				setProgressBarIndeterminateVisibility(true);
+                status = CONNECTING;
 				protocol.doConnect(conn.name, conn.URL, conn.pass);
 			} else {
 				setCurrentView(DUMMY_FORM, "");
@@ -462,7 +472,7 @@ public class anyRemote extends Activity
 		_log("handleEvent");
 		switch (what) {
 			case CONNECTED:
-				
+			
 				_log("handleEvent: Connection established");
 		
 				status = CONNECTED;
@@ -473,6 +483,10 @@ public class anyRemote extends Activity
 				    setCurrentView(CONTROL_FORM,"");
 				}
 				break;
+
+			case CONNECTING:   // should not happens (did not send such messages)
+				
+			    status = CONNECTING;
 
 			case DISCONNECTED:
 			case LOSTFOCUS:
