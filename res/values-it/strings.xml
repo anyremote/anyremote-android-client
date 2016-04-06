@@ -2,7 +2,6 @@
 <resources>
     
     <string name="about">Informazioni</string>
-    <string name="app_name">anyRemote</string>
     <string name="btnCancel">Annulla</string>
     <string name="btnOk">Ok</string>
     <string name="searchFormUnconnected">Non connesso</string>
@@ -35,20 +34,13 @@
     <string name="bt_turning_off">"Spegnimento Bluetooth"</string>
     <string name="bt_off">"Bluetooth spento"</string>
     <string name="bt_on">"Bluetooth acceso"</string>
-    
-    <string name="b1">"1"</string>
-    <string name="b2">"2"</string>
-    <string name="b3">"3"</string>
-    <string name="b4">"4"</string>
-    <string name="b5">"5"</string>
-    <string name="b6">"6"</string>
-    <string name="b7">"7"</string>
-    <string name="b8">"8"</string>
-    <string name="b9">"9"</string>
-    <string name="b10">"*"</string>
-    <string name="b11">"0"</string>
-    <string name="b12">"#"</string>
-    
+
+    <string name="mouse_item">Mouse</string>
+    <string name="keyboard_item">Keyboard</string>
+    <string name="zeroconf">"Use zeroconf"</string>
+    <string name="sensor">"Sensor Type"</string>
+    <string name="gyroscope">"Gyroscope"</string>
+    <string name="accelerometer">"Accelerometer"</string>
     <string name="cover_description">"Immagine di copertina"</string>
     
 </resources>

@@ -2,7 +2,7 @@
 <resources>
 
     <string name="about">About</string>
-    <string name="app_name">anyRemote</string>
+    <string name="app_name" translatable="false">anyRemote</string>
     <string name="btnCancel">Cancel</string>
     <string name="btnOk">Ok</string>
     <string name="searchFormUnconnected">Unconnected</string>
@@ -28,8 +28,8 @@
     <string name="keyboard_item">Keyboard</string>
     <string name="back_item">Back</string>
     <string name="report_bug_item">"Report Bug"</string>
-    <string name="default_bt">btspp://0008F4163049</string>
-    <string name="default_ip">socket://192.168.1.1:5197</string>
+    <string name="default_bt" translatable="false">btspp://0008F4163049</string>
+    <string name="default_ip" translatable="false">socket://192.168.1.1:5197</string>
     <string name="connect_to">Connect To</string>
     <string name="autoconnect_to">Auto-Connect To</string>
     <string name="connection_successful">Connected</string>
@@ -39,32 +39,33 @@
     <string name="bt_turning_off">"Bluetooth turning off"</string>
     <string name="bt_off">"Bluetooth off"</string>
     <string name="bt_on">"Bluetooth on"</string>
-    <string name="bluetooth">"Bluetooth"</string>
-    <string name="tcpip">"TCP/IP"</string>
+    <string name="bluetooth" translatable="false">"Bluetooth"</string>
+    <string name="tcpip" translatable="false">"TCP/IP"</string>
     <string name="zeroconf">"Use zeroconf"</string>
     <string name="sensor">"Sensor Type"</string>
     <string name="gyroscope">"Gyroscope"</string>
     <string name="accelerometer">"Accelerometer"</string>
     
-    <string name="b1">"1"</string>
-    <string name="b2">"2"</string>
-    <string name="b3">"3"</string>
-    <string name="b4">"4"</string>
-    <string name="b5">"5"</string>
-    <string name="b6">"6"</string>
-    <string name="b7">"7"</string>
-    <string name="b8">"8"</string>
-    <string name="b9">"9"</string>
-    <string name="b10">"*"</string>
-    <string name="b11">"0"</string>
-    <string name="b12">"#"</string>
+    <string name="b1" translatable="false">"1"</string>
+    <string name="b2" translatable="false">"2"</string>
+    <string name="b3" translatable="false">"3"</string>
+    <string name="b4" translatable="false">"4"</string>
+    <string name="b5" translatable="false">"5"</string>
+    <string name="b6" translatable="false">"6"</string>
+    <string name="b7" translatable="false">"7"</string>
+    <string name="b8" translatable="false">"8"</string>
+    <string name="b9" translatable="false">"9"</string>
+    <string name="b10" translatable="false">"*"</string>
+    <string name="b11" translatable="false">"0"</string>
+    <string name="b12" translatable="false">"#"</string>
 
-    <string name="alt_f4">AltF4</string>
-    <string name="escape">Escape</string>
-    <string name="enter">Enter</string>
-    <string name="backspace">Backspace</string>
+    <string name="alt_f4" translatable="false">AltF4</string>
+    <string name="escape" translatable="false">Escape</string>
+    <string name="enter" translatable="false">Enter</string>
+    <string name="backspace" translatable="false">Backspace</string>
     
     <string name="cover_description">"Cover Image"</string>
-    <string name="dummy">""</string>
+
+    <string name="dummy" translatable="false">""</string>
     
 </resources>

@@ -2,7 +2,6 @@
 <resources>
 
     <string name="about">О программе</string>
-    <string name="app_name">anyRemote</string>
     <string name="btnCancel">Отменить</string>
     <string name="btnOk">Ok</string>
     <string name="searchFormUnconnected">Неподсоединено</string>
@@ -37,23 +36,9 @@
     <string name="bt_turning_off">"Выключается Bluetooth"</string>
     <string name="bt_off">"Bluetooth выключен"</string>
     <string name="bt_on">"Bluetooth включен"</string>
+    <string name="zeroconf">"Использовать zeroconf"</string>
     <string name="sensor">"Тип Сенсора"</string>
     <string name="gyroscope">"Гироскоп"</string>
     <string name="accelerometer">"Акселерометр"</string>
-    
-    <string name="b1">"1"</string>
-    <string name="b2">"2"</string>
-    <string name="b3">"3"</string>
-    <string name="b4">"4"</string>
-    <string name="b5">"5"</string>
-    <string name="b6">"6"</string>
-    <string name="b7">"7"</string>
-    <string name="b8">"8"</string>
-    <string name="b9">"9"</string>
-    <string name="b10">"*"</string>
-    <string name="b11">"0"</string>
-    <string name="b12">"#"</string>
-    
-    <string name="cover_description">"Cover Image"</string>
-    
+     <string name="cover_description">"Картинка Обложки"</string>
 </resources>
