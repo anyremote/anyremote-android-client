@@ -107,7 +107,7 @@ public class anyRemote extends Activity
 	private static Date teraz = new Date();
 	
 	// Logging stuff
-	public static StringBuilder logData;
+	public static StringBuilder logData = null;
 	
 	// Wait indicator stuff
 	private static ProgressDialog waiting = null;
@@ -758,13 +758,18 @@ public class anyRemote extends Activity
 	public static void _log(String prefix, String msg) {
 		
         //synchronized (logData) {
+		//if (logData == null) {
+		//	return;
+		//}
         
-            if (logData.length() > LOG_CAPACITY) {
+            if (logData != null && logData.length() > LOG_CAPACITY) {
 			    logData.delete(0,LOG_CAPACITY);		
 		    }
 
 		    teraz.setTime(java.lang.System.currentTimeMillis());
-		    logData.append("\n" + "[" + now_format.format(teraz) + "] ["+prefix+"] "+msg);
+		    if (logData != null) {
+		    	logData.append("\n" + "[" + now_format.format(teraz) + "] ["+prefix+"] "+msg);
+			}
 		    Log.i(prefix,msg);
         //}
 	}

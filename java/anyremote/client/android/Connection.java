@@ -184,6 +184,10 @@ public final class Connection implements Runnable {
 			} catch (IOException e) {
 				downPrivate();
 				notifyDisconnected("Connection broken", "IO Error while sending data", e);
+			} catch (Exception e) {
+				downPrivate();
+				anyRemote._log("Connection", " Exception " + e.toString());
+				notifyDisconnected("Connection broken", "Exception", e);
 			}
 		}
 	}

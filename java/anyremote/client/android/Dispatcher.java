@@ -37,6 +37,7 @@ import android.graphics.Typeface;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.os.Vibrator;
 import android.view.Display;
 import android.view.Surface;
@@ -229,7 +230,11 @@ public class Dispatcher {
 
 	public Dispatcher(anyRemote ctx) {
 
-		log("Dispatcher::Dispatcher"); 
+		log("Dispatcher::Dispatcher");
+
+		// TODO: avoid
+		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		StrictMode.setThreadPolicy(policy);
 
 		handlers = new ArrayList<Handler>();
 		
@@ -1224,7 +1229,7 @@ public class Dispatcher {
 
 	private void sendMessage(String command) {
 		if (connection != null && !connection.isClosed()) {
-			//log("sendMessage " + command);
+			log("sendMessage " + command);
 		    connection.send(command+";\r");
 		}
 	}

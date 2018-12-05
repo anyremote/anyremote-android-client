@@ -50,11 +50,14 @@ public class ConnectTask extends TimerTask {
 	public void run() {
 
 		ISocket s = null;
+		anyRemote._log("ConnectTask", "run");
 
 		if (type == WIFI) {
 
 			// Create a socket. The socket creation should be done in an extra thread 
 			// to not block the UI.
+
+			anyRemote._log("ConnectTask", "run WIFI");
 
 			try {
 
@@ -76,6 +79,7 @@ public class ConnectTask extends TimerTask {
 
 				anyRemote._log("ConnectTask", "connect IP to "+hostname+" : " + port);
 				s = new IPSocket(hostname, port);
+				anyRemote._log("ConnectTask", "IPSocket OK");
 
 			} catch (UserException e) {
 
