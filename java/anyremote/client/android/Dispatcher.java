@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011-2016 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2018 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,10 +34,10 @@ import android.content.pm.PackageInfo;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
-import android.os.StrictMode;
 import android.os.Vibrator;
 import android.view.Display;
 import android.view.Surface;
@@ -101,18 +101,20 @@ public class Dispatcher {
 
 	static final int  CMD_CLOSE  = 120;
 
-	static final int SIZE_SMALL    = 12;
-	static final int SIZE_MEDIUM   = 22;
-	static final int SIZE_LARGE    = 36;
+	private static final int SIZE_SMALL    = 12;
+    private static final int SIZE_MEDIUM   = 22;
+    private static final int SIZE_LARGE    = 36;
 
-	static final int MAX_ATTEMPTS  = 100;
-	
-	static final int NOTUPDATE_NOTSWITCH = 1;
-	static final int NOTUPDATE_SWITCH    = 2;
-	static final int UPDATE_SWITCH       = 3;
-	static final int UPDATE_NOTSWITCH    = 4;
-	
-	static final String M_SENSOR = "_mouse_sensor_";
+    private static final int MAX_ATTEMPTS  = 100;
+
+    private static final int NOTUPDATE_NOTSWITCH = 1;
+    private static final int NOTUPDATE_SWITCH    = 2;
+    private static final int UPDATE_SWITCH       = 3;
+    private static final int UPDATE_NOTSWITCH    = 4;
+
+    private static final String M_SENSOR = "_mouse_sensor_";
+
+    private final Object syncObj;
 	
     public static class ArHandler {
     	
@@ -120,46 +122,42 @@ public class Dispatcher {
     		actId  = a;
     		hdl    = h;
     	}
-    	
-        public int actId   = anyRemote.NO_FORM;
-        public Handler hdl = null;
+
+        private int actId   = anyRemote.NO_FORM;
+        private Handler hdl = null;
     }
     
     public static class QueueMessage {
     	
-    	public int activity;
-       	public int id;
-    	public int stage;
-    	public int attemptsToSend;
+    	public  int activity;
+       	public  int id;
+    	public  int stage;
+    	private int attemptsToSend;
     }
 
-	private ArrayList<Handler> handlers;
-	
-	ArrayList<ArHandler> actHandlers = new ArrayList<ArHandler>();
-	
-	ArrayList<QueueMessage> msgQueue = new ArrayList<QueueMessage>();
-	
-	ArrayList<String> autoUploadedI = new ArrayList<String>();
-	ArrayList<String> autoUploadedC = new ArrayList<String>();
+    private ArrayList<ArHandler> actHandlers = new ArrayList<ArHandler>();
+    private ArrayList<QueueMessage> msgQueue = new ArrayList<QueueMessage>();
+    private ArrayList<String> autoUploadedI = new ArrayList<String>();
+    private ArrayList<String> autoUploadedC = new ArrayList<String>();
 	
 	Connection   connection = null;
 	anyRemote    context    = null;
-	boolean      autoPass   = false;
+    private boolean      autoPass   = false;
 
-	String      currentConnection = "";
-	String      currentConnName   = "";
-	String      currentConnPass   = "";
+    private String      currentConnection = "";
+    public String      currentConnName   = "";
+    private String      currentConnPass   = "";
 	boolean     fullscreen = false;
 
 	// Control Screen stuff
-	Vector<String> cfMenu = new Vector<String>();	
+    private Vector<String> cfMenu = new Vector<String>();
 	int    cfSkin;
 	boolean cfUseJoystick;
 	String cfTitle;
 	String cfStatus;
 	String cfCaption;
 	String [] cfIcons;
-	String [] cfHints;
+    private String [] cfHints;
 	String cfUpEvent;
 	String cfDownEvent;
 	int    cfInitFocus;
@@ -177,7 +175,7 @@ public class Dispatcher {
 	// List Screen stuff
 	String listTitle;
 	int    listSelectPos = -1;
-	Vector<String> listMenu = new Vector<String>();
+    private Vector<String> listMenu = new Vector<String>();
 	ArrayList<ListItem> listContent = null;
 	boolean listCustomBackColor = false;
 	boolean listCustomTextColor = false;
@@ -185,11 +183,11 @@ public class Dispatcher {
 	int     listBkgr;
 	float   listFSize;
 	String  listIcon;
-	StringBuilder  listBufferedItem;
+    private StringBuilder  listBufferedItem;
 
 	// Text Screen stuff
 	String textTitle;
-	Vector<String> textMenu = new Vector<String>();
+    private Vector<String> textMenu = new Vector<String>();
 	StringBuilder textContent;
 	int         textFrgr;
 	int         textBkgr;
@@ -198,7 +196,7 @@ public class Dispatcher {
 	
 	// Image Screen stuff
 	Bitmap      imScreen;
-	Vector<String> winMenu = new Vector<String>();
+    private Vector<String> winMenu = new Vector<String>();
  
 	// Mouse Screen stuff
     //Vector<String> mouseMenu = new Vector<String>();
@@ -209,10 +207,6 @@ public class Dispatcher {
     
     // Web Screen stuff
     String webUrl;
-    //Vector<String> webMenu = new Vector<String>();
-
-	// telephony handler
-	PhoneManager phoneManager;
 	
 	// Popup stuff
 	boolean popupState     = false;
@@ -222,21 +216,21 @@ public class Dispatcher {
 	String efCaption = "";
 	String efLabel   = "";
 	String efValue   = "";
-	int efId; 
-	
-	boolean connectBT = false;
-	int     keepaliveTimeout = -1;
-	int     keepaliveCounter = 0;
+	int efId;
+
+    private boolean connectBT = false;
+    private int     keepaliveTimeout = -1;
+    private int     keepaliveCounter = 0;
 
 	public Dispatcher(anyRemote ctx) {
 
 		log("Dispatcher::Dispatcher");
 
 		// TODO: avoid
-		StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-		StrictMode.setThreadPolicy(policy);
+		//StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+		//StrictMode.setThreadPolicy(policy);
 
-		handlers = new ArrayList<Handler>();
+        syncObj = new Object();
 		
 		context = ctx;
 
@@ -249,12 +243,14 @@ public class Dispatcher {
 		
 		setDefValues();
 		
-		TelephonyManager telephonyManager = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);		
-		phoneManager = new PhoneManager(ctx, this);
+		TelephonyManager telephonyManager = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
+
+		// telephony handler
+        PhoneManager phoneManager = new PhoneManager(ctx, this);
 		telephonyManager.listen(phoneManager, PhoneStateListener.LISTEN_CALL_STATE);
 	}
 	
-	public void setDefValues() {
+	private void setDefValues() {
 		
 		for (int i=0;i<ControlScreen.NUM_ICONS;i++) {
 			cfIcons[i] = "none";
@@ -313,6 +309,7 @@ public class Dispatcher {
         
 		autoPass  = false;
 	}
+
 	public void doConnect(String name, String host, String pass) {
 
 		log("doConnect " + (host!=null?host:"NULL")+" P=>"+pass+"<");
@@ -344,22 +341,24 @@ public class Dispatcher {
 
 	/**
 	 * connects to a wifi remote anyRemote server
-	 * @param hostname the host to connect to
-	 * @param port the port to connect to
-	 * @param clientInfo client info describing this client
 	 */
-	public void connectWifi(String host){
+	private void connectWifi(String host){
 		log("connectWifi");
 		connectBT = false;
 		MainLoop.schedule(new ConnectTask(ConnectTask.WIFI, host, this));
 	}
 
-	/**
+    /**
 	 * connects to a bluetooth remote anyRemote server
-	 * @param hostname the host to connect to
-	 * @param clientInfo client info describing this client
 	 */
-	public void connectBluetooth(String host){
+	//private void connectBluetooth() {
+    //    connectBluetooth();
+    //}
+
+    /**
+	 * connects to a bluetooth remote anyRemote server
+	 */
+	private void connectBluetooth(String host){
 		log("connectBluetooth");
 		connectBT = true;
 		MainLoop.schedule(new ConnectTask(ConnectTask.BLUETOOTH, host, this));
@@ -383,7 +382,7 @@ public class Dispatcher {
 				anyRemote.sendGlobal(anyRemote.LOSTFOCUS, "");	
 			}
 		} else{
-			log("disconnect: alredy disconnected");
+			log("disconnect: already disconnected");
 		}
 	}
 
@@ -412,7 +411,7 @@ public class Dispatcher {
 		disconnect(false);
 	}
 
-	public void connected(Connection conn) { 
+	public void connected(Connection conn) {
 		log("connected");
 
 		// check BT connection
@@ -477,12 +476,12 @@ public class Dispatcher {
 		return "UNKNOWN";
 	}
 	
-    public void handleGetCoverSizeCmd() {
+    private void handleGetCoverSizeCmd() {
 	    Display d = context.getWindowManager().getDefaultDisplay(); 
         queueCommand("CoverSize("+(d.getWidth()*2)/3+",)");
     }
-    
-    public void handleGetScreeenSizeCmd() {
+
+    private void handleGetScreeenSizeCmd() {
         Display display = context.getWindowManager().getDefaultDisplay(); 
         boolean rotated = (display.getOrientation() == Surface.ROTATION_90 ||
                            display.getOrientation() == Surface.ROTATION_270);
@@ -491,8 +490,8 @@ public class Dispatcher {
         queueCommand("SizeX("+display.getWidth() +","+ori+")");
         queueCommand("SizeY("+display.getHeight()+","+ori+")");
     }
-    
-	public void handleCommand(ProtocolMessage msg) {
+
+    public void handleCommand(ProtocolMessage msg) {
 
 		int id           = msg.id; 
 		Vector cmdTokens = msg.tokens; 
@@ -827,14 +826,14 @@ public class Dispatcher {
 
 		case CMD_GETICSIZE:
 			
-			synchronized (cfTitle) {
+			synchronized (syncObj) {
 			    queueCommand("IconSize("+(cfIconSizeOverride >= 0 ? cfIconSizeOverride : cfIconSize)+",)");
 			}
 			break; 
 			
 		case CMD_GETPADDING:
 			
-			synchronized (cfTitle) {
+			synchronized (syncObj) {
 			    queueCommand("IconPadding("+cfPadding+",)");
 			}			
 			break;
@@ -975,14 +974,14 @@ public class Dispatcher {
 		pm.stage          = stage;
 		pm.attemptsToSend = 0;
 		
-		synchronized (msgQueue) {
+		synchronized (syncObj) {
 		    msgQueue.add(0,pm);
 		}
 		processMessageQueue();
 	}
 	
 	public int messageQueueSize() {
-		synchronized (msgQueue) {
+		synchronized (syncObj) {
 		    return msgQueue.size();
 		}
 	}
@@ -997,7 +996,7 @@ public class Dispatcher {
 			
 			boolean sent = false;
 			
-			synchronized (actHandlers) {
+			synchronized (syncObj) {
 				
 			    final Iterator<ArHandler> itr = actHandlers.iterator();
 				log("processMessageQueue MSG " + cmdStr(pm.id) + " handlers #" + actHandlers.size());
@@ -1030,7 +1029,7 @@ public class Dispatcher {
 
 			if (sent) {
 				// just drop it from queue
-				synchronized (msgQueue) {
+				synchronized (syncObj) {
 					msgItr.remove();
 				}
 				break;
@@ -1044,7 +1043,7 @@ public class Dispatcher {
 				    pm.attemptsToSend > MAX_ATTEMPTS) {
 					// just drop it from queue
 					log("processMessageQueue MSG " + cmdStr(pm.id) + " to " + anyRemote.getScreenStr(pm.activity) + " DROP");					
-					synchronized (msgQueue) {
+					synchronized (syncObj) {
 						msgItr.remove();
 					}
 					break;
@@ -1098,7 +1097,7 @@ public class Dispatcher {
 		}
 	}
 
-	public void setPassForConnection(String pass) {
+	private void setPassForConnection(String pass) {
 
 		SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = preference.edit();
@@ -1178,7 +1177,7 @@ public class Dispatcher {
 	        SharedPreferences.Editor editor = preference.edit();
 	        
 	        editor.putString(M_SENSOR, (useG ? "g" : "a"));
-	        editor.commit();
+	        editor.apply();
 	    }
 	}
 	
@@ -1188,11 +1187,11 @@ public class Dispatcher {
 		SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
 		SharedPreferences.Editor editor = preference.edit();
 		editor.remove(name);
-		editor.commit();
+		editor.apply();
 	}
 
 	// save new address in preferences
-	public void addAddress(String name, String URL, String pass, boolean autoConnect) {		        
+	public void addAddress(String name, String URL, String pass, boolean autoConnect) {
 		//log("addAddress "+name+"/"+URL+"/"+pass);
 
 		SharedPreferences preference = context.getPreferences(Context.MODE_PRIVATE);
@@ -1224,17 +1223,33 @@ public class Dispatcher {
 		String UP = (autoConnect ? "a:" : "c:") + URL.trim() + "\n" + pass;
 		log("addAddress commit "+name+"/"+UP);
 		editor.putString(name, UP);
-		editor.commit();
+		editor.apply();
 	}
 
-	private void sendMessage(String command) {
+    private class SendMsgTask extends AsyncTask<String, Integer, Void> {
+
+        @Override
+        protected Void doInBackground(String... arr) {
+            if( arr.length > 0 ) {
+                log("SendMsgTask:sendMessage " + arr[0]);
+                connection.send(arr[0] + ";\r");
+            }
+            return null;
+        }
+    }
+
+    private void sendMessage(String command) {
 		if (connection != null && !connection.isClosed()) {
+
 			log("sendMessage " + command);
-		    connection.send(command+";\r");
+		    //connection.send(command+";\r");
+
+			SendMsgTask sendMsgTask = new SendMsgTask();
+			sendMsgTask.execute(command);
 		}
 	}
 
-	public void queueCommand(int keycode, boolean pressed) {
+	/*private void queueCommand(int keycode, boolean pressed) {
 
 		log("queueCommand "+keycode +" " + pressed);
 
@@ -1259,7 +1274,7 @@ public class Dispatcher {
 		if (key.length() > 0) {
 			sendMessage("+CKEV: " + key + "," + (pressed ? "1" : "0"));
 		}
-	}
+	}*/
 
 	public void queueCommand(String key, boolean pressed) {
 
@@ -1311,7 +1326,7 @@ public class Dispatcher {
 	
 	public synchronized void addMessageHandler(ArHandler h) {
 		log("addMessageHandler");
-		synchronized (actHandlers) {
+		synchronized (syncObj) {
 			if (!actHandlers.contains(h)) {
 			    log("addMessageHandler DONE");
 			    actHandlers.add(h);
@@ -1320,7 +1335,7 @@ public class Dispatcher {
 	}
 	
   	public synchronized void removeMessageHandler(ArHandler h) {
-  		synchronized (actHandlers) {
+  		synchronized (syncObj) {
   			actHandlers.remove(h);
   		}
 	}
@@ -1542,7 +1557,7 @@ public class Dispatcher {
          	try {
         		int i = btn2int((String) data.elementAt(idx));
 
-        		if (i >= 0 || i < maxIcon) {    
+        		if (i >= 0 && i < maxIcon) {
         			cfIcons[i] = (String) data.elementAt(idx+1);
         			log("controlSetIconLayout "+i+" -> "+cfIcons[i]); 
        		    }  
@@ -1560,7 +1575,7 @@ public class Dispatcher {
             try {
                 int i = btn2int((String) data.elementAt(idx));
 
-                if (i >= 0 || i < ControlScreen.NUM_ICONS) {    
+                if (i >= 0 && i < ControlScreen.NUM_ICONS) {
                     cfHints[i] = (String) data.elementAt(idx+1);
                     log("controlSetHints "+i+" -> "+cfHints[i]); 
                 }  
@@ -1791,7 +1806,7 @@ public class Dispatcher {
 			item.icon = null;
 			item.text = content;
 		}
-		synchronized (listContent) {
+		synchronized (syncObj) {
 		    listContent.add(item);
 		}
 	}	
@@ -1800,7 +1815,7 @@ public class Dispatcher {
 		log("listClean");
 		
 		listSelectPos = -1;
-		synchronized (listContent) {
+		synchronized (syncObj) {
 		    listContent.clear();
 		}
 		listBufferedItem.delete(0, listBufferedItem.length());
@@ -1965,7 +1980,7 @@ public class Dispatcher {
 	//
 	// Menu data handling
 	//
-	public void menuProcess(Vector vR, int screen) {
+	private void menuProcess(Vector vR, int screen) {
 		anyRemote._log("Dispatcher", "menuProcess "+screen+" "+vR);
 		
 		String oper  = (String) vR.elementAt(1); 
@@ -1985,7 +2000,7 @@ public class Dispatcher {
 		}
 	}
 	
-	void menuClean(int screen) {
+	private void menuClean(int screen) {
 		
 		switch(screen) {
 			case anyRemote.CONTROL_FORM:
@@ -2004,7 +2019,7 @@ public class Dispatcher {
 		}
 	}
 	
-	void menuAdd(Vector from, int screen) { 
+	private void menuAdd(Vector from, int screen) {
 		
 		anyRemote._log("Dispatcher", "menuAdd "+screen+" "+from); 
 		
@@ -2096,7 +2111,7 @@ public class Dispatcher {
 	}
 	
 	public void autoUploadIcon(String name) {
-		synchronized (autoUploadedI) {
+		synchronized (syncObj) {
 			if (!autoUploadedI.contains(name)) {
 				anyRemote._log("Dispatcher", "autoUploadIcon request for "+name);
 				autoUploadedI.add(name);
@@ -2106,7 +2121,7 @@ public class Dispatcher {
 	}
 
 	public void autoUploadCover(String name) {
-		synchronized (autoUploadedC) {
+		synchronized (syncObj) {
 			if (!autoUploadedC.contains(name)) {
 				anyRemote._log("Dispatcher", "autoUploadCover request for "+name);
 				autoUploadedC.add(name);
@@ -2118,11 +2133,11 @@ public class Dispatcher {
 		}
 	}  
 	
-	public void clearRequested() {
-		synchronized (autoUploadedI) {
+	private void clearRequested() {
+		synchronized (syncObj) {
 			autoUploadedI.clear();
 		}
-		synchronized (autoUploadedC) {
+		synchronized (syncObj) {
 			autoUploadedC.clear();
 		}
 	}

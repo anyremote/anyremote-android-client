@@ -101,8 +101,8 @@ public class anyRemote extends Activity
 	static TreeMap<String,Bitmap> iconMap = new TreeMap<String,Bitmap>();
 	static TreeMap<String,Bitmap> coverMap = new TreeMap<String,Bitmap>();
 
-	private static Handler globalHandler = null;
-	
+	private static Handler globalHandler     = null;
+
 	private static DateFormat now_format = new SimpleDateFormat("HH:mm:ss");
 	private static Date teraz = new Date();
 	
@@ -113,6 +113,8 @@ public class anyRemote extends Activity
 	private static ProgressDialog waiting = null;
 
 	private static int numeratorVar = 0;
+
+    private static final Object syncObj = new Object();
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -140,7 +142,6 @@ public class anyRemote extends Activity
 
 		MainLoop.enable();
 	}
-	
 
 	@Override
 	protected void onStart() {
@@ -206,7 +207,7 @@ public class anyRemote extends Activity
             return; 
         }
 
-		if (finishFlag == true) {
+		if (finishFlag) {
             return; // on destroy
         }
 
@@ -558,7 +559,7 @@ public class anyRemote extends Activity
 			return null;
 		}
 		
-		synchronized (iconMap) {	
+		synchronized (syncObj) {
 		
 			if (iconMap.containsKey(icon)) {
 				return (Bitmap) iconMap.get(icon);
@@ -603,7 +604,7 @@ public class anyRemote extends Activity
 			return null;
 		}
 		
-		synchronized (coverMap) {	
+		synchronized (syncObj) {
 		
 			if (coverMap.containsKey(name)) {
 				return (Bitmap) coverMap.get(name);
@@ -633,10 +634,10 @@ public class anyRemote extends Activity
 
 	public static void clearCache() {
 		
-		synchronized (iconMap) {
+		synchronized (syncObj) {
 			iconMap.clear();
 		}	
-		synchronized (coverMap) {
+		synchronized (syncObj) {
 			coverMap.clear();	
 		}
 	}
@@ -768,7 +769,7 @@ public class anyRemote extends Activity
 
 		    teraz.setTime(java.lang.System.currentTimeMillis());
 		    if (logData != null) {
-		    	logData.append("\n" + "[" + now_format.format(teraz) + "] ["+prefix+"] "+msg);
+		    	logData.append("\n").append("[").append(now_format.format(teraz)).append("] [").append(prefix).append("] ").append(msg);
 			}
 		    Log.i(prefix,msg);
         //}

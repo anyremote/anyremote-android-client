@@ -2,7 +2,7 @@
 // anyRemote android client
 // a bluetooth/wi-fi remote control for Linux.
 //
-// Copyright (C) 2011-2016 Mikhail Fedotov <anyremote@mail.ru>
+// Copyright (C) 2011-2018 Mikhail Fedotov <anyremote@mail.ru>
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,7 +34,6 @@ import java.util.Vector;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
-import android.os.Message;
 import anyremote.client.android.util.ISocket;
 import anyremote.client.android.util.ProtocolMessage;
 import anyremote.client.android.util.UserException;
