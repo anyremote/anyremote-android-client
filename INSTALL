@@ -3,13 +3,12 @@ INSTALL
 
 Install prerequsites:
 
-    Eclipse (http://www.eclipse.org/downloads/)
-    ADT Plugin (http://developer.android.com/sdk/eclipse-adt.html)
+    Android Studio
     
-    See details at http://developer.android.com/sdk/requirements.html
+    See details at https://developer.android.com/studio/intro/?utm_source=android-studio
     
-To compile anyRemote Android client create new Android project
-in Eclipse using content of this tarball.
+    Retrieve content of the package to <ANDROID_STUDIO_HOME>/AnyRemote/app/src/main
+    (where <ANDROID_STUDIO_HOME> generally is $HOME/AndroidStudioProjects)
 
 After compilation, resulting *apk file can be uploaded to the Android device.
 
